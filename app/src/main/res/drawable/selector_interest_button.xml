@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#D3D3D3"/> <!-- 회색 -->
+            <corners android:radius="16dp"/> <!-- 둥근 모서리 -->
+        </shape>
+    </item>
+
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#D3D3D3"/> <!-- 회색 -->
+            <corners android:radius="16dp"/>
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFFFF"/> <!-- 기본 흰색 -->
+            <corners android:radius="16dp"/>
+        </shape>
+    </item>
+</selector>
