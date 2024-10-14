@@ -17,12 +17,17 @@
         android:layout_gravity="center"
         android:paddingBottom="16dp"/>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+    <GridLayout
+        android:id="@+id/gridLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical"/>
+        android:rowCount="5"
+        android:columnCount="3"
+        android:padding="16dp"
+        android:layout_gravity="center">
+        <!-- 버튼은 동적으로 추가됨 -->
+    </GridLayout>
 
     <Button
         android:id="@+id/btn_confirm"
