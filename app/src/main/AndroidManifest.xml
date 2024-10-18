@@ -22,6 +22,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".NextActivity"></activity>
+        <activity android:name=".FavoritesActivity"></activity>
+        <activity android:name=".fieldActivity"></activity>
+        <activity android:name=".happguyActivity"></activity>
     </application>
 
 </manifest>
