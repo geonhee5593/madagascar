@@ -8,7 +8,7 @@ import android.widget.GridLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
-class MainActivity : AppCompatActivity() {
+class hobby : AppCompatActivity() {
 
     private val selectedInterests = mutableListOf<String>()
     private val interests = listOf(
@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.hobby_main)
 
         val gridLayout = findViewById<GridLayout>(R.id.gridLayout)
 
