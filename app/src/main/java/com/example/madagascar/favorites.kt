@@ -14,9 +14,9 @@ class favorites : AppCompatActivity() {
 
         /* 즐겨찾기 뒤로가기 코드 */
 
-        val arrowBtn3 = findViewById<ImageView>(R.id.btn_arrow3)
+        val arrowBtn102 = findViewById<ImageView>(R.id.btn_arrow102)
 
-        arrowBtn3.setOnClickListener {
+        arrowBtn102.setOnClickListener {
             val intent = Intent(this, MypageActivity::class.java)
             startActivity(intent)
         }

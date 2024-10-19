@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".mypagesetting.Human">
+    tools:context="Human">
 
     <!--개인정보 텍스트-->
 
@@ -44,7 +44,7 @@
     <!--뒤로 가기 이미지-->
 
     <ImageView
-        android:id="@+id/btn_arrow4"
+        android:id="@+id/btn_arrow101"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:src="@drawable/arrow" />

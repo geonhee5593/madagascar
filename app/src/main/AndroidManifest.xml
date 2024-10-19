@@ -25,6 +25,11 @@
         <activity android:name=".FavoritesActivity"></activity>
         <activity android:name=".fieldActivity"></activity>
         <activity android:name=".happguyActivity"></activity>
+        <activity android:name=".MypageActivity"></activity>
+        <activity android:name=".Notice"></activity>
+        <activity android:name=".favorites"></activity>
+        <activity android:name=".Human"></activity>
+        <activity android:name=".MainActivity"></activity>
     </application>
 
 </manifest>

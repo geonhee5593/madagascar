@@ -1,10 +1,14 @@
 package com.example.madagascar
+
+import android.content.Intent
 import android.os.Bundle
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.example.madagascar.MainActivity
 
 class NextActivity : AppCompatActivity() {
 
@@ -14,6 +18,13 @@ class NextActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_next)
+
+        val arrowBtn5 = findViewById<ImageView>(R.id.btn_arrow5)
+
+        arrowBtn5.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
 
         // 선택된 관심 분야를 받아옴
         val selectedInterests = intent.getStringArrayListExtra("selectedInterests")

@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".mypagesetting.favorites">
+    tools:context=".favorites">
 
     <!--상단 즐겨찾기 텍스트-->
 
@@ -24,7 +24,7 @@
     <!--뒤로가기 이미지-->
 
     <ImageView
-        android:id="@+id/btn_arrow3"
+        android:id="@+id/btn_arrow102"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:src="@drawable/arrow" />

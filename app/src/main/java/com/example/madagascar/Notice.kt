@@ -14,9 +14,9 @@ class Notice : AppCompatActivity() {
 
         /* 공지사항 뒤로가기 코드 */
 
-        val arrowBtn2 = findViewById<ImageView>(R.id.btn_arrow2)
+        val arrowBtn100 = findViewById<ImageView>(R.id.btn_arrow100)
 
-        arrowBtn2.setOnClickListener {
+        arrowBtn100.setOnClickListener {
             val intent = Intent(this, MypageActivity::class.java)
             startActivity(intent)
         }

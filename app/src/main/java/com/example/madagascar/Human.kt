@@ -14,9 +14,9 @@ class Human : AppCompatActivity() {
 
         /* 개인정보 뒤로가기 코드 */
 
-        val arrowBtn4 = findViewById<ImageView>(R.id.btn_arrow4)
+        val arrowBtn101 = findViewById<ImageView>(R.id.btn_arrow101)
 
-        arrowBtn4.setOnClickListener {
+        arrowBtn101.setOnClickListener {
             val intent = Intent(this, MypageActivity::class.java)
             startActivity(intent)
         }

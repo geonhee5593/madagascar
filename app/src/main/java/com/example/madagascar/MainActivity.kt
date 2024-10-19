@@ -4,7 +4,6 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.widget.ImageView
-import android.widget.TableLayout
 import com.google.android.material.tabs.TabLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -26,24 +25,20 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
                 }
 
-        val fieldBtn = findViewById<ImageView>(R.id.btn_field)
-
-        fieldBtn.setOnClickListener {
-            val intent = Intent(this, fieldActivity::class.java)
-            startActivity(intent)
-                }
         val happguyBtn = findViewById<ImageView>(R.id.btn_happguy)
 
         happguyBtn.setOnClickListener {
             val intent = Intent(this, happguyActivity::class.java)
             startActivity(intent)
         }
-                var a = adapter(this)
-                var pager = findViewById<ViewPager>(R.id.viewPager2)
-                pager.setAdapter(a)
 
-                var tabLayout = findViewById<TableLayout>(R.id.tablayout)
-                tabLayout.setupWithViewPager(pager, true)
+        val fieldBtn = findViewById<ImageView>(R.id.btn_field)
+
+        fieldBtn.setOnClickListener {
+            val intent = Intent(this, NextActivity::class.java)
+            startActivity(intent)
+        }
+
             }
                 }
 

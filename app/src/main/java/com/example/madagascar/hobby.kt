@@ -3,10 +3,16 @@ package com.example.madagascar
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.GridLayout
+import android.widget.ListView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 
 class hobby : AppCompatActivity() {
 
@@ -19,7 +25,7 @@ class hobby : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.hobby_main)
+        setContentView(R.layout.hobby_screen)
 
         val gridLayout = findViewById<GridLayout>(R.id.gridLayout)
 
