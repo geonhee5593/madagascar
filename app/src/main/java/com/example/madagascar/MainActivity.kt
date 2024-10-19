@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.widget.ImageView
+import android.widget.TableLayout
 import com.google.android.material.tabs.TabLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -23,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         favoritesBtn.setOnClickListener {
             val intent = Intent(this, FavoritesActivity::class.java)
             startActivity(intent)
-                }
+        }
 
         val happguyBtn = findViewById<ImageView>(R.id.btn_happguy)
 
@@ -32,15 +33,15 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        val fieldBtn = findViewById<ImageView>(R.id.btn_field)
+        val mypageBtn = findViewById<ImageView>(R.id.btn_mypage1)
 
-        fieldBtn.setOnClickListener {
-            val intent = Intent(this, NextActivity::class.java)
+        mypageBtn.setOnClickListener {
+            val intent = Intent(this, MypageActivity::class.java)
             startActivity(intent)
         }
 
-            }
-                }
+    }
+}
 
 
 

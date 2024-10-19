@@ -39,5 +39,12 @@ class MypageActivity : AppCompatActivity() {
             val intent = Intent(this, Human::class.java)
             startActivity(intent)
         }
+
+        val arrowbtn103 = findViewById<ImageView>(R.id.btn_arrow103)
+
+        arrowbtn103.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
