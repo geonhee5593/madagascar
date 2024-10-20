@@ -21,7 +21,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".NextActivity"></activity>
+        <activity android:name=".hobby_Activity"></activity>
         <activity android:name=".FavoritesActivity"></activity>
         <activity android:name=".happguyActivity"></activity>
         <activity android:name=".MypageActivity"></activity>

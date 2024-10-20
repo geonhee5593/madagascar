@@ -4,13 +4,7 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.widget.ImageView
-import android.widget.TableLayout
-import com.google.android.material.tabs.TabLayout
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.viewpager.widget.ViewPager
 
 class MainActivity : AppCompatActivity() {
     lateinit var  temp : ArrayList<Drawable>
@@ -39,7 +33,12 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, MypageActivity::class.java)
             startActivity(intent)
         }
+        val fieldBtn = findViewById<ImageView>(R.id.btn_field)
 
+        fieldBtn.setOnClickListener {
+            val intent = Intent(this, hobby_Activity::class.java)
+            startActivity(intent)
+        }
     }
 }
 

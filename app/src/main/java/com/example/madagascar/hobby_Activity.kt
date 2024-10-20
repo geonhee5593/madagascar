@@ -8,9 +8,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import com.example.madagascar.MainActivity
 
-class NextActivity : AppCompatActivity() {
+class hobby_Activity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var chipGroup: ChipGroup

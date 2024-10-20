@@ -3,16 +3,10 @@ package com.example.madagascar
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.GridLayout
-import android.widget.ListView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 
 class hobby : AppCompatActivity() {
 
@@ -51,7 +45,7 @@ class hobby : AppCompatActivity() {
         // 확인 버튼 클릭 시 선택한 항목을 전달
         val confirmButton = findViewById<Button>(R.id.btn_confirm)
         confirmButton.setOnClickListener {
-            val intent = Intent(this, NextActivity::class.java)
+            val intent = Intent(this, hobby_Activity::class.java)
             intent.putStringArrayListExtra("selectedInterests", ArrayList(selectedInterests))
             startActivity(intent)
         }
@@ -59,7 +53,7 @@ class hobby : AppCompatActivity() {
         // 건너뛰기 클릭 시 다음 화면으로 이동
         val skipText = findViewById<TextView>(R.id.tv_skip)
         skipText.setOnClickListener {
-            startActivity(Intent(this, NextActivity::class.java))
+            startActivity(Intent(this, hobby_Activity::class.java))
         }
     }
 }
