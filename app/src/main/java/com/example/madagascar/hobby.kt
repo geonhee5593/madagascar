@@ -1,5 +1,6 @@
 package com.example.madagascar
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -20,6 +21,9 @@ class hobby : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.hobby_screen)
+
+        val sharedPreferences = getSharedPreferences("interests", Context.MODE_PRIVATE)
+        val savedInterests = sharedPreferences.getStringSet("selectedInterests", setOf())?.toMutableSet()
 
         val gridLayout = findViewById<GridLayout>(R.id.gridLayout)
 
@@ -44,10 +48,8 @@ class hobby : AppCompatActivity() {
         // 확인 버튼 클릭 시 선택한 항목과 전체 관심사 리스트를 전달
         val confirmButton = findViewById<Button>(R.id.btn_confirm)
         confirmButton.setOnClickListener {
-            val intent = Intent(this, hobby_Activity::class.java)
-            // 선택된 관심사와 전체 관심사 리스트 전달
-            intent.putStringArrayListExtra("selectedInterests", ArrayList(selectedInterests))
-            intent.putStringArrayListExtra("interests", ArrayList(interests))
+            sharedPreferences.edit().putStringSet("selectedInterests", selectedInterests.toSet()).apply()
+            val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
 

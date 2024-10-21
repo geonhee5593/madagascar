@@ -1,8 +1,10 @@
 package com.example.madagascar
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,23 +27,20 @@ class hobby_Activity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // 선택된 관심 분야를 받아옴
-        val selectedInterests = intent.getStringArrayListExtra("selectedInterests")
-        // 전체 관심사 리스트 받기
-        val interests = intent.getStringArrayListExtra("interests")
+        // SharedPreferences에서 선택된 관심사들을 불러옵니다.
+        val sharedPreferences = getSharedPreferences("interests", Context.MODE_PRIVATE)
+        val selectedInterests = sharedPreferences.getStringSet("selectedInterests", setOf()) ?: setOf()
 
-        // ChipGroup에 선택된 관심 분야 태그 추가
-        chipGroup = findViewById(R.id.chipGroup)
-        selectedInterests?.forEach { interest ->
-            val chip = Chip(this)
-            chip.text = "#$interest"
-            chip.isClickable = false
-            chipGroup.addView(chip)
-        }
+        // 선택된 관심사들을 해시태그로 표시합니다.
+        val hashtagText = selectedInterests.joinToString(" ") { "#$it" }
+        findViewById<TextView>(R.id.tv_selected_interests).text = hashtagText
+
 
         // 리사이클러뷰 설정
         recyclerView = findViewById(R.id.recyclerViewContent)
         recyclerView.layoutManager = GridLayoutManager(this, 2) // 2열로 그리드 레이아웃 설정
+
+
 
        /* // 예시 콘텐츠 데이터 (선택한 관심사에 따라 다르게 설정 가능)
         val contentList = getContentByInterest(selectedInterests)

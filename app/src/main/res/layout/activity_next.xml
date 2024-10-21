@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+
     <TextView
         android:id="@+id/tv_title"
         android:layout_width="wrap_content"
@@ -17,6 +18,14 @@
         android:layout_gravity="center"
         android:paddingBottom="8dp"/>
 
+    <!-- 선택된 관심사들을 표시할 TextView -->
+    <TextView
+        android:id="@+id/tv_selected_interests"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_marginBottom="16dp"
+        android:textColor="@android:color/black" />
 
 
     <com.google.android.material.chip.ChipGroup

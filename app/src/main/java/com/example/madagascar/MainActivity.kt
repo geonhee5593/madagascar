@@ -1,9 +1,11 @@
 package com.example.madagascar
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 /* 축모아 메인 화면 클래스 */
@@ -15,6 +17,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
 
         /* btn_star1 버튼 클릭 시 즐겨찾기 화면으로 이동 */
         val favoritesBtn = findViewById<ImageView>(R.id.star1)
