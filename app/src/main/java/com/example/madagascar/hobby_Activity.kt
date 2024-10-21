@@ -27,6 +27,8 @@ class hobby_Activity : AppCompatActivity() {
 
         // 선택된 관심 분야를 받아옴
         val selectedInterests = intent.getStringArrayListExtra("selectedInterests")
+        // 전체 관심사 리스트 받기
+        val interests = intent.getStringArrayListExtra("interests")
 
         // ChipGroup에 선택된 관심 분야 태그 추가
         chipGroup = findViewById(R.id.chipGroup)
