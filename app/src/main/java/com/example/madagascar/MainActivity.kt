@@ -1,5 +1,6 @@
 package com.example.madagascar
 
+import FestivalImageAdapter
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
@@ -7,12 +8,17 @@ import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 
 /* 축모아 메인 화면 클래스 */
 class MainActivity : AppCompatActivity() {
     /* Drawable 객체를 저장할 ArrayList 선언 */
     lateinit var temp: ArrayList<Drawable>
-
+    private lateinit var viewPager2: ViewPager2
+    private lateinit var tabLayout: TabLayout
+    private val imageList = listOf(R.drawable.image1, R.drawable.image2, R.drawable.image3, R.drawable.image4) // 이미지 리소스
      /* onCreate 메서드, 액티비티가 생성될 때 호출됨 */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,5 +52,14 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, hobby_Activity::class.java)
             startActivity(intent)
         }
+         viewPager2 = findViewById(R.id.viewPager2)
+         tabLayout = findViewById(R.id.Tablayout)
+
+         // ViewPager2와 어댑터 연결
+         val adapter = FestivalImageAdapter(imageList)
+         viewPager2.adapter = adapter
+
+         // TabLayout과 ViewPager2 연결
+         TabLayoutMediator(tabLayout, viewPager2) { _, _ -> }.attach()
     }
 }
