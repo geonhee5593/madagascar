@@ -1,22 +1,21 @@
-package com.example.madagascar
+package com.example.madagascar.Mypage
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.madagascar.MypageActivity
 import com.example.madagascar.R
 
-class favorites : AppCompatActivity() {
+class Human : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_favorites)
+        setContentView(R.layout.activity_human)
 
-        /* 즐겨찾기 뒤로가기 코드 */
+        /* 개인정보 뒤로가기 코드 */
 
-        val arrowBtn102 = findViewById<ImageView>(R.id.btn_arrow102)
+        val arrowBtn101 = findViewById<ImageView>(R.id.btn_arrow101)
 
-        arrowBtn102.setOnClickListener {
+        arrowBtn101.setOnClickListener {
             val intent = Intent(this, MypageActivity::class.java)
             startActivity(intent)
         }

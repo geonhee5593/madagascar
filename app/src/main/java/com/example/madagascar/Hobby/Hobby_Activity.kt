@@ -1,4 +1,4 @@
-package com.example.madagascar
+package com.example.madagascar.Hobby
 
 import android.content.Context
 import android.content.Intent
@@ -8,7 +8,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.chip.Chip
+import com.example.madagascar.Main.MainActivity
+import com.example.madagascar.R
 import com.google.android.material.chip.ChipGroup
 
 class hobby_Activity : AppCompatActivity() {

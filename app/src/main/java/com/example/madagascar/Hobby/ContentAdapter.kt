@@ -1,10 +1,11 @@
-package com.example.madagascar
+package com.example.madagascar.Hobby
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.madagascar.R
 
 class ContentAdapter(private val contentList: List<Content>) :
     RecyclerView.Adapter<ContentAdapter.ViewHolder>() {

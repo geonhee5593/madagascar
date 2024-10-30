@@ -1,12 +1,11 @@
-package com.example.madagascar
+package com.example.madagascar.Mypage
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.madagascar.Human
-import com.example.madagascar.Notice
-import com.example.madagascar.favorites
+import com.example.madagascar.Main.MainActivity
+import com.example.madagascar.R
 
 class MypageActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

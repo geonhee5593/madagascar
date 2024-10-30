@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Notice"
+    tools:context=".Mypage.Notice"
     android:padding="16dp">
 
     <!--상단 공지사항 텍스트-->

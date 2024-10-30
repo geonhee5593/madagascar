@@ -13,7 +13,7 @@
         android:theme="@style/Theme.Madagascar"
         tools:targetApi="31">
         <activity
-            android:name=".hobby"
+            android:name=".Hobby.hobby"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,14 +21,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".hobby_Activity"></activity>
+        <activity android:name=".Hobby.hobby_Activity"></activity>
         <activity android:name=".FavoritesActivity"></activity>
         <activity android:name=".happguyActivity"></activity>
-        <activity android:name=".MypageActivity"></activity>
-        <activity android:name=".Notice"></activity>
-        <activity android:name=".favorites"></activity>
-        <activity android:name=".Human"></activity>
-        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".Mypage.MypageActivity"></activity>
+        <activity android:name=".Mypage.Notice"></activity>
+        <activity android:name=".Mypage.favorites"></activity>
+        <activity android:name=".Mypage.Human"></activity>
+        <activity android:name=".Main.MainActivity"></activity>
+        <activity android:name=".Mylocation.fragmentActivity"></activity>
+        <meta-data
+            android:name="com.naver.maps.map.CLIENT_ID"
+            android:value= "${NAVERMAP_CLIENT_ID}" />
     </application>
 
 </manifest>

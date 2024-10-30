@@ -1,14 +1,18 @@
-package com.example.madagascar
+package com.example.madagascar.Main
 
-import FestivalImageAdapter
-import android.content.Context
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
+import com.example.madagascar.FavoritesActivity
+import com.example.madagascar.Mylocation.fragmentActivity
+import com.example.madagascar.Mypage.MypageActivity
+import com.example.madagascar.R
+import com.example.madagascar.happguyActivity
+import com.example.madagascar.Hobby.hobby_Activity
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
@@ -18,8 +22,14 @@ class MainActivity : AppCompatActivity() {
     lateinit var temp: ArrayList<Drawable>
     private lateinit var viewPager2: ViewPager2
     private lateinit var tabLayout: TabLayout
-    private val imageList = listOf(R.drawable.image1, R.drawable.image2, R.drawable.image3, R.drawable.image4) // 이미지 리소스
+    private val imageList = listOf(
+        R.drawable.image1,
+        R.drawable.image2,
+        R.drawable.image3,
+        R.drawable.image4
+    ) // 이미지 리소스
      /* onCreate 메서드, 액티비티가 생성될 때 호출됨 */
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -38,6 +48,14 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, happguyActivity::class.java)
             startActivity(intent)
         }
+
+         /* btn_imageView4 버튼 클릭 시 내 위치 기반 축제 화면으로 이동 */
+         val MylocationBtn = findViewById<ImageView>(R.id.btn_imageView4)
+         MylocationBtn.setOnClickListener {
+             val intent = Intent(this, fragmentActivity::class.java)
+             startActivity(intent)
+         }
+
 
         /* btn_mypage1 버튼 클릭 시 마이페이지 화면으로 이동 */
         val mypageBtn = findViewById<ImageView>(R.id.btn_mypage1)

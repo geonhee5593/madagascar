@@ -1,4 +1,4 @@
-package com.example.madagascar
+package com.example.madagascar.Hobby
 
 import android.content.Context
 import android.content.Intent
@@ -8,6 +8,8 @@ import android.widget.Button
 import android.widget.GridLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.madagascar.Main.MainActivity
+import com.example.madagascar.R
 
 class hobby : AppCompatActivity() {
 

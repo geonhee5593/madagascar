@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -7,6 +10,11 @@ android {
     namespace = "com.example.madagascar"
     compileSdk = 34
 
+    // Properties 파일 로드
+    val properties = Properties().apply {
+        load(FileInputStream(rootProject.file("local.properties")))
+    }
+
     defaultConfig {
         applicationId = "com.example.madagascar"
         minSdk = 34
@@ -15,7 +23,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // NAVER MAP CLIENT ID를 AndroidManifest.xml에 전달
+        addManifestPlaceholders(mapOf("NAVERMAP_CLIENT_ID" to properties.getProperty("NAVERMAP_CLIENT_ID")))
+
     }
+
 
     buildTypes {
         release {
@@ -32,6 +45,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 
@@ -52,4 +68,6 @@ dependencies {
 
     // Material Components 라이브러리 (TabLayout 포함)
     implementation ("com.google.android.material:material:1.4.0")
+    // 네이버 SDK 추가
+    implementation("com.naver.maps:map-sdk:3.19.1")
 }
