@@ -6,15 +6,12 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.madagascar.Main.MainActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class Register : AppCompatActivity() {
+class RegisterActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth //Firebase를 사용하는 권한
     private lateinit var firestore: FirebaseFirestore
@@ -60,7 +57,8 @@ class Register : AppCompatActivity() {
             "username" to username,
             "email" to email
         )
-// 생성된 ID로 새 문서 추가
+
+        // 생성된 ID로 새 문서 추가
         firestore.collection("users") //여기서! 컬렉션 이름과 같아야합니다
             .add(user)
             .addOnSuccessListener { documentReference ->
@@ -72,7 +70,7 @@ class Register : AppCompatActivity() {
     }
 
     private fun navigateToMainActivity() {
-        val intent = Intent(this, MainActivity::class.java) //로그인 화면으로 돌아가게 하는 intent 이용!
+        val intent = Intent(this, Login::class.java) //로그인 화면으로 돌아가게 하는 intent 이용!
         startActivity(intent)
         finish()  // 현재 액티비티를 종료하여 뒤로가기 버튼으로 다시 돌아오지 않도록 한다.
     }

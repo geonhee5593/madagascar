@@ -5,10 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.madagascar.Hobby.hobby
 import com.google.firebase.auth.FirebaseAuth
 
@@ -20,6 +17,12 @@ class Login : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        val registerButton: Button = findViewById(R.id.registerbutton) // 여기서부터 추가됨
+
+        registerButton.setOnClickListener {  //버튼을 클릭시 이벤트
+            val intent = Intent(this, RegisterActivity::class.java)
+            startActivity(intent)
+        }
         auth = FirebaseAuth.getInstance() //firebase에서 인스턴스를 가져온다.
 
         val loginButton: Button = findViewById(R.id.loginbutton) //로그인 버튼 객체 생성
@@ -42,18 +45,10 @@ class Login : AppCompatActivity() {
                     // Add your logic to navigate to another activity or perform other actions
                     val intent = Intent(this, hobby::class.java)
                     startActivity(intent)
-
                 } else {
                     // 로그인 실패 시
                     Toast.makeText(this, "로그인 실패: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                 }
             }
-
-        val registerButton: Button = findViewById(R.id.registerbutton) // 여기서부터 추가됨
-
-        registerButton.setOnClickListener {  //버튼을 클릭시 이벤트
-            val intent = Intent(this, Register::class.java)
-            startActivity(intent)
-        }
     }
 }

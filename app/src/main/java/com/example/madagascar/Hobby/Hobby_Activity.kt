@@ -5,12 +5,15 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.madagascar.Main.MainActivity
 import com.example.madagascar.R
 import com.google.android.material.chip.ChipGroup
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class hobby_Activity : AppCompatActivity() {
 
@@ -28,13 +31,26 @@ class hobby_Activity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // SharedPreferences에서 선택된 관심사들을 불러옵니다.
-        val sharedPreferences = getSharedPreferences("interests", Context.MODE_PRIVATE)
-        val selectedInterests = sharedPreferences.getStringSet("selectedInterests", setOf()) ?: setOf()
+        // Firebase Firestore에서 관심 분야 불러오기
+        val user = FirebaseAuth.getInstance().currentUser
+        user?.let {
+            val db = FirebaseFirestore.getInstance()
+            db.collection("users").document(it.uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        // Firestore에서 저장된 관심 분야 불러오기
+                        val interests = document.get("interests") as? List<String> ?: listOf()
 
-        // 선택된 관심사들을 해시태그로 표시합니다.
-        val hashtagText = selectedInterests.joinToString(" ") { "#$it" }
-        findViewById<TextView>(R.id.tv_selected_interests).text = hashtagText
+                        // 관심 분야를 해시태그 형식으로 TextView에 표시
+                        val hashtagText = interests.joinToString(" ") { "#$it" }
+                        findViewById<TextView>(R.id.tv_selected_interests).text = hashtagText
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "관심사 불러오기 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
 
 
         // 리사이클러뷰 설정

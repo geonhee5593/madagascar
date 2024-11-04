@@ -31,7 +31,7 @@
         <activity android:name=".Mypage.Human" />
         <activity android:name=".Main.MainActivity" />
         <activity android:name=".Mylocation.fragmentActivity" />
-        <activity android:name=".Register" />
+        <activity android:name=".RegisterActivity" />
         <activity android:name=".Hobby.hobby" />
 
         <meta-data
