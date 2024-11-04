@@ -18,14 +18,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 class hobby_Activity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var chipGroup: ChipGroup
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_next)
 
         val arrowBtn5 = findViewById<ImageView>(R.id.btn_arrow5)
-
         arrowBtn5.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)

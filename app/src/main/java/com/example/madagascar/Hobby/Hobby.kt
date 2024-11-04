@@ -25,18 +25,41 @@ class hobby : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.hobby_screen)
 
-        val sharedPreferences = getSharedPreferences("interests", Context.MODE_PRIVATE)
-        val isFirstLogin = sharedPreferences.getBoolean("isFirstLogin", true)
-        if (!isFirstLogin) {
-            // 첫 로그인이 아니면 관심 분야 선택 화면을 건너뛰고 바로 `MainActivity`로 이동
-            startActivity(Intent(this, MainActivity::class.java))
-            finish() // 현재 액티비티 종료
-            return
+        val user = FirebaseAuth.getInstance().currentUser
+        val db = FirebaseFirestore.getInstance()
+
+        user?.let {
+            db.collection("users").document(it.uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        // Firestore에 저장된 `isFirstLogin` 확인
+                        val isFirstLogin = document.getBoolean("isFirstLogin") ?: true
+                        if (!isFirstLogin) {
+                            // 첫 로그인이 아니므로 `hobby_Activity`로 이동
+                            startActivity(Intent(this, MainActivity::class.java))
+                            finish() // 현재 액티비티 종료
+                            return@addOnSuccessListener
+                        } else {
+                            // 첫 로그인인 경우에만 관심 분야 선택 화면 표시
+                            setContentView(R.layout.hobby_screen)
+                            setupInterestSelection()
+                        }
+                    } else {
+                        // 사용자 문서가 없으면 기본 값으로 초기화
+                        setContentView(R.layout.hobby_screen)
+                        setupInterestSelection()
+                    }
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "데이터 로드 실패", Toast.LENGTH_SHORT).show()
+                }
         }
-
-        val gridLayout = findViewById<GridLayout>(R.id.gridLayout)
+    }
+        private fun setupInterestSelection() {
+            val sharedPreferences = getSharedPreferences("appPreferences", Context.MODE_PRIVATE)
+            val gridLayout = findViewById<GridLayout>(R.id.gridLayout)
 
         // 동적으로 버튼을 생성하고 GridLayout에 추가
         interests.forEach { interest ->
@@ -69,7 +92,8 @@ class hobby : AppCompatActivity() {
 
                 val interestsData = hashMapOf(
                     "userId" to uid,
-                    "interests" to selectedInterests
+                    "interests" to selectedInterests,
+                    "isFirstLogin" to false // 첫 로그인을 완료로 표시
                 )
 
                 db.collection("users").document(uid)
@@ -77,11 +101,8 @@ class hobby : AppCompatActivity() {
                     .addOnSuccessListener {
                         Toast.makeText(this, "관심사가 저장되었습니다", Toast.LENGTH_SHORT).show()
 
-                        // 첫 로그인 이후 이 화면을 다시 표시하지 않도록 설정
-                        sharedPreferences.edit().putBoolean("isFirstLogin", false).apply()
-
-                        val intent = Intent(this, MainActivity::class.java)
-                        startActivity(intent)
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
                     }
                     .addOnFailureListener { e ->
                         Toast.makeText(this, "저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
