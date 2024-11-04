@@ -11,7 +11,7 @@ import com.example.madagascar.FavoritesActivity
 import com.example.madagascar.Mylocation.fragmentActivity
 import com.example.madagascar.Mypage.MypageActivity
 import com.example.madagascar.R
-import com.example.madagascar.happguyActivity
+import com.example.madagascar.happyguy.HappguyActivity
 import com.example.madagascar.Hobby.hobby_Activity
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         /* btn_happhuy 버튼 클릭 시 월별 축제 화면으로 이동 */
         val happguyBtn = findViewById<ImageView>(R.id.btn_happguy)
         happguyBtn.setOnClickListener {
-            val intent = Intent(this, happguyActivity::class.java)
+            val intent = Intent(this, HappguyActivity::class.java)
             startActivity(intent)
         }
 

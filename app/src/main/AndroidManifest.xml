@@ -24,10 +24,10 @@
         </activity>
         <activity android:name=".Hobby.hobby_Activity" />
         <activity android:name=".FavoritesActivity" />
-        <activity android:name=".happguyActivity" />
+        <activity android:name=".happyguy.HappguyActivity" />
         <activity android:name=".Mypage.MypageActivity" />
         <activity android:name=".Mypage.Notice" />
-        <activity android:name=".Mypage.favorites" />
+        <activity android:name=".Mypage.Favorites" />
         <activity android:name=".Mypage.Human" />
         <activity android:name=".Main.MainActivity" />
         <activity android:name=".Mylocation.fragmentActivity" />
