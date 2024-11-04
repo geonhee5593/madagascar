@@ -13,26 +13,30 @@
         android:theme="@style/Theme.Madagascar"
         tools:targetApi="31">
         <activity
-            android:name=".Hobby.hobby"
-            android:exported="true">
+            android:name=".Login"
+            android:exported="true" >
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Hobby.hobby_Activity"></activity>
-        <activity android:name=".FavoritesActivity"></activity>
-        <activity android:name=".happguyActivity"></activity>
-        <activity android:name=".Mypage.MypageActivity"></activity>
-        <activity android:name=".Mypage.Notice"></activity>
-        <activity android:name=".Mypage.favorites"></activity>
-        <activity android:name=".Mypage.Human"></activity>
-        <activity android:name=".Main.MainActivity"></activity>
-        <activity android:name=".Mylocation.fragmentActivity"></activity>
+        <activity android:name=".Hobby.hobby_Activity" />
+        <activity android:name=".FavoritesActivity" />
+        <activity android:name=".happguyActivity" />
+        <activity android:name=".Mypage.MypageActivity" />
+        <activity android:name=".Mypage.Notice" />
+        <activity android:name=".Mypage.favorites" />
+        <activity android:name=".Mypage.Human" />
+        <activity android:name=".Main.MainActivity" />
+        <activity android:name=".Mylocation.fragmentActivity" />
+        <activity android:name=".Register" />
+        <activity android:name=".Hobby.hobby" />
+
         <meta-data
             android:name="com.naver.maps.map.CLIENT_ID"
-            android:value= "${NAVERMAP_CLIENT_ID}" />
+            android:value="${NAVERMAP_CLIENT_ID}" />
     </application>
 
 </manifest>
