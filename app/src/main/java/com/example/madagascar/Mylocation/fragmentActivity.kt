@@ -48,6 +48,9 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
         // 위치 권한 요청
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        } else {
+            // 권한이 이미 허용된 경우
+            setupMapWithLocation()
         }
     }
 
@@ -58,42 +61,42 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
         // 위치 소스를 NaverMap에 설정
         naverMap.locationSource = locationSource
 
-        // 현재 위치 오버레이 활성화
-        val locationOverlay = naverMap.locationOverlay
-        locationOverlay.isVisible = true  // 현재 위치 오버레이 보이기
-
         // 지도 타입과 테마 설정
         naverMap.mapType = NaverMap.MapType.Navi
 
-        // 권한이 허용되었으면 현재 위치로 카메라 이동
+        // 권한이 허용되면 위치를 설정
+        setupMapWithLocation()
+    }
+
+    private fun setupMapWithLocation() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // 기본 위치를 부천으로 설정
+            val bucheonLocation = LatLng(37.5035, 126.7660)
+            val cameraUpdate = CameraUpdate.scrollTo(bucheonLocation)
+            naverMap.moveCamera(cameraUpdate)
+
+            // 현재 위치로 카메라 이동
             val currentLocation = locationSource.lastLocation
             if (currentLocation != null) {
-                val cameraUpdate = CameraUpdate.scrollTo(LatLng(currentLocation.latitude, currentLocation.longitude))
-                naverMap.moveCamera(cameraUpdate)
+                val currentLocationUpdate = CameraUpdate.scrollTo(LatLng(currentLocation.latitude, currentLocation.longitude))
+                naverMap.moveCamera(currentLocationUpdate)
             }
-        }
 
-        // 마커 추가 (임의 위치)
-        val marker = Marker()
-        marker.position = LatLng(37.576, 126.976)
-        marker.map = naverMap
-        marker.captionText = "별빛 여행"
+            // 현재 위치 오버레이 활성화
+            val locationOverlay = naverMap.locationOverlay
+            locationOverlay.isVisible = true
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)  // 부모 메서드 호출
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                locationSource.onRequestPermissionsResult(requestCode, permissions, grantResults)
-                naverMap.locationOverlay.isVisible = true // 현재 위치 오버레이 보이기
-
-                // 권한이 허용되면 현재 위치로 카메라 이동
-                val currentLocation = locationSource.lastLocation
-                if (currentLocation != null) {
-                    val cameraUpdate = CameraUpdate.scrollTo(LatLng(currentLocation.latitude, currentLocation.longitude))
-                    naverMap.moveCamera(cameraUpdate)
-                }
+                // 권한이 허용되면 현재 위치와 기본 위치 설정
+                setupMapWithLocation()
+            } else {
+                // 권한이 거부되면 앱 종료
+                finish()
             }
         }
     }
