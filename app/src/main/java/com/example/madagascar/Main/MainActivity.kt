@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
+import com.example.madagascar.API.Festival
 import com.example.madagascar.FavoritesActivity
 import com.example.madagascar.Mylocation.fragmentActivity
 import com.example.madagascar.Mypage.MypageActivity
@@ -79,5 +80,11 @@ class MainActivity : AppCompatActivity() {
 
          // TabLayout과 ViewPager2 연결
          TabLayoutMediator(tabLayout, viewPager2) { _, _ -> }.attach()
+
+         val festivalbtn = findViewById<ImageView>(R.id.Festival)
+         festivalbtn.setOnClickListener {
+             val intent = Intent(this, Festival::class.java)
+             startActivity(intent)
+         }
     }
 }

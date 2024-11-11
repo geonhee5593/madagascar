@@ -6,6 +6,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.madagascar.API.Festival
 import com.example.madagascar.Hobby.hobby
 import com.google.firebase.auth.FirebaseAuth
 

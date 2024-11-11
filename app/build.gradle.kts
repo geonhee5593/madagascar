@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.example.madagascar"
-    compileSdk = 34
+    compileSdk = 35
 
     // Properties 파일 로드
     val properties = Properties().apply {
@@ -19,7 +19,7 @@ android {
     defaultConfig {
         applicationId = "com.example.madagascar"
         minSdk = 34
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -54,6 +54,12 @@ android {
 
 dependencies {
 
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.google.code.gson:gson:2.8.9")
+    implementation ("com.github.bumptech.glide:glide:4.13.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.13.0")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -64,8 +70,12 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+
+    // 위치 서비스를 위한 의존성 추가
     implementation ("com.google.android.gms:play-services-maps:18.1.0")
-    implementation ("com.google.android.gms:play-services-location:19.0.1") // 위치 서비스를 위한 의존성 추가
+    implementation ("com.google.android.gms:play-services-location:19.0.1")
+
     // ViewPager2 라이브러리
     implementation ("androidx.viewpager2:viewpager2:1.0.0")
 
@@ -73,4 +83,8 @@ dependencies {
     implementation ("com.google.android.material:material:1.4.0")
     // 네이버 SDK 추가
     implementation("com.naver.maps:map-sdk:3.19.1")
+
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
+
 }
