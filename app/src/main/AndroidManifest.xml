@@ -30,7 +30,7 @@
         <activity android:name=".Mypage.Favorites" />
         <activity android:name=".Mypage.Human" />
         <activity android:name=".Main.MainActivity" />
-        <activity android:name=".Mylocation.fragmentActivity" />
+        <activity android:name=".Mylocation.fragmentActivity"/>
         <activity android:name=".RegisterActivity" />
         <activity android:name=".Hobby.hobby" />
 
@@ -38,5 +38,8 @@
             android:name="com.naver.maps.map.CLIENT_ID"
             android:value="${NAVERMAP_CLIENT_ID}" />
     </application>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
 
 </manifest>
