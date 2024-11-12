@@ -8,12 +8,12 @@
     tools:context=".Login">
 
     <EditText
-        android:id="@+id/EmailAddress"
+        android:id="@+id/Email_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="220dp"
         android:ems="10"
-        android:inputType="textEmailAddress"
+        android:inputType="text"
         android:hint="아이디"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
@@ -31,7 +31,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/EmailAddress" />
+        app:layout_constraintTop_toBottomOf="@+id/Email_id" />
 
     <Button
         android:id="@+id/loginbutton"

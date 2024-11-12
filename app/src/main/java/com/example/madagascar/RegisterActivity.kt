@@ -7,71 +7,220 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.madagascar.Main.MainActivity
-import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.FirebaseException
+import com.google.firebase.auth.*
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.concurrent.TimeUnit
 
 class RegisterActivity : AppCompatActivity() {
 
-    private lateinit var auth: FirebaseAuth //Firebase를 사용하는 권한
+    private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
+    private var verificationId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
-        auth = FirebaseAuth.getInstance() //Firebase에서 인스턴스를 가져올 것이다!
+        auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
 
-        val registerButton: Button = findViewById(R.id.buttonRegister) //회원가입 버튼 객체 생성
+        val registerButton: Button = findViewById(R.id.buttonRegister)
+        registerButton.isEnabled = false // 처음에는 회원가입 버튼 비활성화
 
-        registerButton.setOnClickListener { // 눌렀을 때 registerUser 함수를 쓸 것이다!
-            registerUser()
+        val checkUsernameButton: Button = findViewById(R.id.buttonCheckUsername)
+        val checkIdButton: Button = findViewById(R.id.buttonCheckId)
+        val sendCodeButton: Button = findViewById(R.id.buttonSendCode)
+        val verifyCodeButton: Button = findViewById(R.id.buttonVerifyCode)
+
+        checkUsernameButton.setOnClickListener {
+            val username = findViewById<EditText>(R.id.editTextUsername).text.toString()
+            if (isValidUsername(username)) {
+                checkUsernameAvailability(username)
+            } else {
+                Toast.makeText(this, "사용자 이름은 2글자 이상 한글, 영어, 숫자만 입력 가능합니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        checkIdButton.setOnClickListener {
+            val id = findViewById<EditText>(R.id.editTextId).text.toString()
+            checkIdAvailability(id)
+        }
+
+        sendCodeButton.setOnClickListener {
+            val phoneNumber = findViewById<EditText>(R.id.editTextPhone).text.toString()
+            val formattedPhoneNumber = formatPhoneNumber(phoneNumber)  // 국제 형식으로 변환
+            Log.d("RegisterActivity", "Formatted phone number: $formattedPhoneNumber")
+            sendVerificationCode(formattedPhoneNumber)
+        }
+
+        verifyCodeButton.setOnClickListener {
+            val code = findViewById<EditText>(R.id.editTextVerificationCode).text.toString()
+            verifyCode(code)
+        }
+
+        registerButton.setOnClickListener {
+            validateAndRegisterUser()
         }
     }
 
-    private fun registerUser() { //xml에 있는 id의 이름을 가져와서 객체로 생성
-        val username = findViewById<EditText>(R.id.editTextUsername).text.toString()
-        val email = findViewById<EditText>(R.id.editTextEmail).text.toString()
-        val password = findViewById<EditText>(R.id.editTextPassword).text.toString()
+    private fun isValidUsername(username: String): Boolean {
+        // 한글, 영어, 숫자만 허용하는 정규식 (최소 2글자 이상)
+        val usernamePattern = "^[가-힣a-zA-Z0-9]{2,}$"
+        return username.matches(usernamePattern.toRegex())
+    }
 
-        auth.createUserWithEmailAndPassword(email, password) //firebase 권한으로 email, password를 만든다.
+    private fun checkUsernameAvailability(username: String) {
+        firestore.collection("users")
+            .whereEqualTo("username", username)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    Toast.makeText(this, "사용 가능한 이름입니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "이미 사용중인 이름입니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("RegisterActivity", "사용자 이름 확인 오류", e)
+            }
+    }
+
+    private fun checkIdAvailability(id: String) {
+        firestore.collection("users")
+            .whereEqualTo("id", id)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    Toast.makeText(this, "사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "이미 사용중인 아이디입니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("RegisterActivity", "아이디 확인 오류", e)
+            }
+    }
+
+    private fun formatPhoneNumber(phoneNumber: String): String {
+        return if (phoneNumber.startsWith("0")) {
+            "+82" + phoneNumber.substring(1)
+        } else {
+            phoneNumber
+        }
+    }
+
+    private fun sendVerificationCode(phoneNumber: String) {
+        val options = PhoneAuthOptions.newBuilder(auth)
+            .setPhoneNumber(phoneNumber)
+            .setTimeout(60L, TimeUnit.SECONDS)
+            .setActivity(this)
+            .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                override fun onVerificationCompleted(credential: PhoneAuthCredential) {
+                    Toast.makeText(this@RegisterActivity, "전화번호 인증 성공", Toast.LENGTH_SHORT).show()
+                    enableRegistration()
+                }
+
+                override fun onVerificationFailed(e: FirebaseException) {
+                    Toast.makeText(this@RegisterActivity, "인증 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Log.e("RegisterActivity", "onVerificationFailed", e)
+                }
+
+                override fun onCodeSent(verificationId: String, token: PhoneAuthProvider.ForceResendingToken) {
+                    this@RegisterActivity.verificationId = verificationId
+                    Toast.makeText(this@RegisterActivity, "인증 코드가 전송되었습니다.", Toast.LENGTH_SHORT).show()
+                }
+            })
+            .build()
+        PhoneAuthProvider.verifyPhoneNumber(options)
+        auth.setLanguageCode("kr")
+    }
+
+    private fun verifyCode(code: String) {
+        if (verificationId != null) {
+            val credential = PhoneAuthProvider.getCredential(verificationId!!, code)
+            signInWithCredential(credential)
+        } else {
+            Toast.makeText(this, "인증 코드를 전송받아야 합니다.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun signInWithCredential(credential: PhoneAuthCredential) {
+        auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    val user = auth.currentUser
-                    // Firestore에 사용자 세부 정보 저장
-                    saveUserData(username, email)
-                    // 회원가입 성공 메시지 표시
-                    Toast.makeText(this, "회원가입 성공", Toast.LENGTH_SHORT).show() //Toast는 아래에 메세지를 띄워줍니다.
-                    // 메인 액티비티로 이동
-                    navigateToMainActivity()
+                    Toast.makeText(this, "전화번호 인증 성공", Toast.LENGTH_SHORT).show()
+                    enableRegistration()
                 } else {
-                    // 회원가입 실패 시 사용자에게 메시지 표시
-                    Toast.makeText(this, "회원가입 실패: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "전화번호 인증 실패", Toast.LENGTH_SHORT).show()
                 }
             }
     }
 
-    private fun saveUserData(username: String, email: String) { //firebase에 저장
-        val user = hashMapOf( //해시맵으로 username, email 필드에 저장
-            "username" to username,
-            "email" to email
-        )
+    private fun enableRegistration() {
+        val registerButton: Button = findViewById(R.id.buttonRegister)
+        registerButton.isEnabled = true
+    }
 
-        // 생성된 ID로 새 문서 추가
-        firestore.collection("users") //여기서! 컬렉션 이름과 같아야합니다
-            .add(user)
-            .addOnSuccessListener { documentReference ->
-                Log.d("RegisterActivity", "DocumentSnapshot added with ID: ${documentReference.id}")
+    private fun validateAndRegisterUser() {
+        val username = findViewById<EditText>(R.id.editTextUsername).text.toString()
+        val id = findViewById<EditText>(R.id.editTextId).text.toString()
+        val password = findViewById<EditText>(R.id.editTextPassword).text.toString()
+        val confirmPassword = findViewById<EditText>(R.id.editTextConfirmPassword).text.toString()
+
+        if (password != confirmPassword) {
+            Toast.makeText(this, "비밀번호와 비밀번호 재확인이 다릅니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        firestore.collection("users").whereEqualTo("username", username).get()
+            .addOnSuccessListener { usernameDocs ->
+                if (!usernameDocs.isEmpty) {
+                    Toast.makeText(this, "이미 사용중인 이름입니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    firestore.collection("users").whereEqualTo("id", id).get()
+                        .addOnSuccessListener { idDocs ->
+                            if (!idDocs.isEmpty) {
+                                Toast.makeText(this, "이미 사용중인 아이디입니다.", Toast.LENGTH_SHORT).show()
+                            } else {
+                                registerUser()
+                            }
+                        }
+                }
             }
             .addOnFailureListener { e ->
-                Log.e("RegisterActivity", "문서 추가 오류", e)
+                Log.e("RegisterActivity", "회원가입 조건 확인 오류", e)
             }
     }
 
-    private fun navigateToMainActivity() {
-        val intent = Intent(this, Login::class.java) //로그인 화면으로 돌아가게 하는 intent 이용!
+    private fun registerUser() {
+        val username = findViewById<EditText>(R.id.editTextUsername).text.toString()
+        val id = findViewById<EditText>(R.id.editTextId).text.toString()
+        val phoneNumber = findViewById<EditText>(R.id.editTextPhone).text.toString()
+        val password = findViewById<EditText>(R.id.editTextPassword).text.toString()
+
+        val user = hashMapOf(
+            "username" to username,
+            "id" to id,
+            "phoneNumber" to phoneNumber,
+            "password" to password
+        )
+
+        firestore.collection("users").add(user)
+            .addOnSuccessListener {
+                Toast.makeText(this, "회원가입 성공", Toast.LENGTH_SHORT).show()
+                Log.d("RegisterActivity", "회원가입 정보 Firestore에 저장됨: $username, $id, $phoneNumber")
+                navigateToLogin()
+            }
+            .addOnFailureListener { e ->
+                Log.e("RegisterActivity", "회원가입 오류", e)
+                Toast.makeText(this, "회원가입 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun navigateToLogin() {
+        val intent = Intent(this, Login::class.java)
         startActivity(intent)
-        finish()  // 현재 액티비티를 종료하여 뒤로가기 버튼으로 다시 돌아오지 않도록 한다.
+        finish()
     }
 }
