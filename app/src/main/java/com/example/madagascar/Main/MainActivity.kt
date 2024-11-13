@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.example.madagascar.API.Festival
 import com.example.madagascar.FavoritesActivity
+import com.example.madagascar.FreeBoradActivity
 import com.example.madagascar.Mylocation.fragmentActivity
 import com.example.madagascar.Mypage.MypageActivity
 import com.example.madagascar.R
@@ -84,6 +85,11 @@ class MainActivity : AppCompatActivity() {
          val festivalbtn = findViewById<ImageView>(R.id.Festival)
          festivalbtn.setOnClickListener {
              val intent = Intent(this, Festival::class.java)
+             startActivity(intent)
+         }
+         val freeBoradbtn = findViewById<ImageView>(R.id.imageView)
+         freeBoradbtn.setOnClickListener {
+             val intent = Intent(this, FreeBoradActivity::class.java)
              startActivity(intent)
          }
     }
