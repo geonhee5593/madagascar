@@ -40,7 +40,8 @@
         <activity android:name=".Mylocation.fragmentActivity"/>
         <activity android:name=".RegisterActivity" />
         <activity android:name=".Hobby.hobby" />
-
+        <activity android:name=".listtextmadeActivity"/>
+        <activity android:name=".FreeBoradActivity"/>
         <meta-data
             android:name="com.naver.maps.map.CLIENT_ID"
             android:value="${NAVERMAP_CLIENT_ID}" />
