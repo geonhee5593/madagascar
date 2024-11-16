@@ -11,15 +11,10 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.example.madagascar.R
 
-class FestivalAdapter : RecyclerView.Adapter<FestivalAdapter.ViewHolder>() {
-
-    private val festivals = mutableListOf<FestivalItem>()
-
-    fun setFestivals(festivalList: List<FestivalItem>) {
-        festivals.clear()
-        festivals.addAll(festivalList)
-        notifyDataSetChanged()
-    }
+class FestivalAdapter(
+    private var festivals: List<FestivalItem>,
+    private val onItemClick: (FestivalItem) -> Unit
+) : RecyclerView.Adapter<FestivalAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.title)
@@ -37,19 +32,27 @@ class FestivalAdapter : RecyclerView.Adapter<FestivalAdapter.ViewHolder>() {
         holder.title.text = festival.title
         holder.address.text = festival.addr1
 
-        val imageUrl = festival.firstimage
+        // 이미지 로드
+        val imageUrl = festival.firstImage
         if (!imageUrl.isNullOrEmpty()) {
             Glide.with(holder.itemView.context)
                 .load(imageUrl)
-                .apply(RequestOptions()
-                    .placeholder(android.R.drawable.progress_indeterminate_horizontal)
-                    .error(android.R.drawable.stat_notify_error)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL))
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(holder.image)
         } else {
-            holder.image.setImageResource(android.R.drawable.stat_notify_error)
+            holder.image.setImageResource(android.R.drawable.ic_menu_gallery)
+        }
+
+        // 클릭 이벤트
+        holder.itemView.setOnClickListener {
+            onItemClick(festival)
         }
     }
 
     override fun getItemCount(): Int = festivals.size
+
+    fun setFestivals(newFestivals: List<FestivalItem>) {
+        festivals = newFestivals
+        notifyDataSetChanged()
+    }
 }

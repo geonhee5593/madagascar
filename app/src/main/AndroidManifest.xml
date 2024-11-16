@@ -44,6 +44,7 @@
         <activity android:name=".Hobby.hobby" />
         <activity android:name=".listtextmadeActivity"/>
         <activity android:name=".FreeBoradActivity"/>
+        <activity android:name=".API.DetailActivity" />
         <meta-data
             android:name="com.naver.maps.map.CLIENT_ID"
             android:value="${NAVERMAP_CLIENT_ID}" />
