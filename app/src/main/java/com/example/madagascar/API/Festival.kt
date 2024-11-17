@@ -30,7 +30,8 @@ class Festival : AppCompatActivity() {
             Category("음식", R.drawable.food),
             Category("음악", R.drawable.music),
             Category("영화", R.drawable.movie),
-            Category("예술", R.drawable.art)
+            Category("예술", R.drawable.art),
+            Category("스포츠", R.drawable.sports)
         )
 
         categoryAdapter = CategoryAdapter(categories) { category ->

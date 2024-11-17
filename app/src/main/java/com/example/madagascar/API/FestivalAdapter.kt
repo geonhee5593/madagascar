@@ -1,5 +1,6 @@
 package com.example.madagascar.API
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.example.madagascar.R
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class FestivalAdapter(
     private var festivals: List<FestivalItem>,
@@ -20,6 +24,7 @@ class FestivalAdapter(
         val title: TextView = view.findViewById(R.id.title)
         val address: TextView = view.findViewById(R.id.address)
         val image: ImageView = view.findViewById(R.id.image)
+        val eventDate: TextView = view.findViewById(R.id.event_date)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -43,6 +48,14 @@ class FestivalAdapter(
             holder.image.setImageResource(android.R.drawable.ic_menu_gallery)
         }
 
+        val startDateFormatted = formatDate(festival.eventStartDate)
+        val endDateFormatted = formatDate(festival.eventEndDate)
+        if (startDateFormatted.isNotEmpty() && endDateFormatted.isNotEmpty()) {
+            holder.eventDate.text = "기간: $startDateFormatted ~ $endDateFormatted"
+        } else {
+            holder.eventDate.text = "기간 정보 없음"
+        }
+
         // 클릭 이벤트
         holder.itemView.setOnClickListener {
             onItemClick(festival)
@@ -54,5 +67,21 @@ class FestivalAdapter(
     fun setFestivals(newFestivals: List<FestivalItem>) {
         festivals = newFestivals
         notifyDataSetChanged()
+    }
+
+    // 날짜 포맷 변환 함수
+    private fun formatDate(date: String?): String {
+        return try {
+            if (date.isNullOrEmpty() || date.length != 8) return ""
+
+            // "yyyyMMdd" -> "MM.dd" 형식으로 변환
+            val originalFormat = DateTimeFormatter.ofPattern("yyyyMMdd")
+            val targetFormat = DateTimeFormatter.ofPattern("MM.dd")
+            val parsedDate = LocalDate.parse(date, originalFormat)
+            targetFormat.format(parsedDate)
+        } catch (e: Exception) {
+            Log.e("FestivalAdapter", "Date format error: ${e.message}")
+            ""
+        }
     }
 }
