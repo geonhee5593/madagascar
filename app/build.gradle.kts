@@ -89,5 +89,7 @@ dependencies {
     // 파이어베이스
     implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
     implementation("com.google.firebase:firebase-auth")
+    //구글플레이
+
 
 }
