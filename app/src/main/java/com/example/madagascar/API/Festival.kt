@@ -17,6 +17,8 @@ class Festival : AppCompatActivity() {
     private lateinit var categoryAdapter: CategoryAdapter
     private lateinit var festivalAdapter: FestivalAdapter
     private lateinit var festivalRecyclerView: RecyclerView
+    private var isLoading = false
+    private var currentPage = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,13 +37,18 @@ class Festival : AppCompatActivity() {
         )
 
         categoryAdapter = CategoryAdapter(categories) { category ->
-            fetchFestivalsByCategory(category.name)
+            currentPage = 1 // 페이지 초기화
+            if (category != null) {
+                fetchFestivalsByCategory(category.name)
+            } else {
+                fetchAllFestivals()
+            }
         }
 
         categoryRecyclerView.adapter = categoryAdapter
         categoryRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
-        festivalAdapter = FestivalAdapter(emptyList()) { festival ->
+        festivalAdapter = FestivalAdapter(mutableListOf()) { festival ->
             val intent = Intent(this, DetailActivity::class.java)
             intent.putExtra("contentId", festival.contentId)
             startActivity(intent)
@@ -49,11 +56,53 @@ class Festival : AppCompatActivity() {
         festivalRecyclerView.adapter = festivalAdapter
         festivalRecyclerView.layoutManager = GridLayoutManager(this, 2)
 
+        // 여기서 무한 스크롤 리스너 추가
+        setupRecyclerView()
+
+        // 초기 축제 데이터 로드
         fetchAllFestivals()
     }
 
+    private fun setupRecyclerView() {
+        festivalRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView.layoutManager as GridLayoutManager
+                val totalItemCount = layoutManager.itemCount
+                val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+
+                if (!isLoading && lastVisibleItemPosition >= totalItemCount - 2) {
+                    currentPage++
+                    loadMoreFestivals()
+                }
+            }
+        })
+    }
+    // 추가 축제 데이터를 가져오는 함수
+    private fun loadMoreFestivals() {
+        if (isLoading) return
+        isLoading = true
+        val call = RetrofitClient.instance.getFestivals(page = currentPage)
+        call.enqueue(object : Callback<FestivalResponse> {
+            override fun onResponse(call: Call<FestivalResponse>, response: Response<FestivalResponse>) {
+                val moreFestivals = response.body()?.response?.body?.items?.item ?: emptyList()
+                if (moreFestivals.isNotEmpty()) {
+                    festivalAdapter.addFestivals(moreFestivals)
+                }
+                isLoading = false
+            }
+
+            override fun onFailure(call: Call<FestivalResponse>, t: Throwable) {
+                Toast.makeText(this@Festival, "추가 축제 로드 실패", Toast.LENGTH_SHORT).show()
+                isLoading = false
+            }
+        })
+    }
+
+
     private fun fetchAllFestivals() {
-        val call = RetrofitClient.instance.getFestivals()
+        currentPage = 1
+        val call = RetrofitClient.instance.getFestivals(page = currentPage, pageSize = 10)
         call.enqueue(object : Callback<FestivalResponse> {
             override fun onResponse(call: Call<FestivalResponse>, response: Response<FestivalResponse>) {
                 val festivals = response.body()?.response?.body?.items?.item ?: emptyList()
@@ -62,11 +111,14 @@ class Festival : AppCompatActivity() {
 
             override fun onFailure(call: Call<FestivalResponse>, t: Throwable) {
                 Toast.makeText(this@Festival, "API 호출 실패", Toast.LENGTH_SHORT).show()
+                Log.e("Festival", "API 호출 오류: ${t.message}")
             }
         })
     }
 
+
     private fun fetchFestivalsByCategory(category: String) {
+        currentPage = 1
         val call = RetrofitClient.instance.searchFestivals(category)
         call.enqueue(object : Callback<FestivalResponse> {
             override fun onResponse(call: Call<FestivalResponse>, response: Response<FestivalResponse>) {
