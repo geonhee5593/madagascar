@@ -75,6 +75,7 @@ class FestivalAdapter(
         festivals.addAll(newFestivals)
         notifyDataSetChanged()
     }
+
     // 날짜 포맷 변환 함수
     private fun formatDate(date: String?): String {
         return try {
