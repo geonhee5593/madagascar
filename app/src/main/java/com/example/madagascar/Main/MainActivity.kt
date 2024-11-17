@@ -5,10 +5,13 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.example.madagascar.API.Festival
+import com.example.madagascar.AdminActivity
 import com.example.madagascar.FavoritesActivity
 import com.example.madagascar.FreeBoradActivity
 import com.example.madagascar.Mylocation.fragmentActivity
@@ -38,7 +41,20 @@ class MainActivity : AppCompatActivity() {
          Log.d("MainActivity", "MainActivity onCreate started")
         setContentView(R.layout.activity_main)
 
-
+         /* 관리자 버튼 초기화 */
+         val adminButton = findViewById<Button>(R.id.btn_admin)
+         // 로그인 액티비티에서 전달된 관리자 여부 확인
+         val isAdmin = intent.getBooleanExtra("isAdmin", false)
+         if (isAdmin) {
+             adminButton.visibility = View.VISIBLE
+             adminButton.setOnClickListener {
+                 val intent = Intent(this, AdminActivity::class.java)
+                 startActivity(intent)
+             }
+         } else {
+             adminButton.visibility = View.GONE
+         }
+         /* 기존 버튼 동작 코드 유지 */
         /* btn_star1 버튼 클릭 시 즐겨찾기 화면으로 이동 */
         val favoritesBtn = findViewById<ImageView>(R.id.star1)
         favoritesBtn.setOnClickListener {
