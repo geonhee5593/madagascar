@@ -15,9 +15,10 @@ import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
+@Suppress("DEPRECATION")
 class Human : AppCompatActivity() {
 
-    private lateinit var tvName: TextView
+    private lateinit var tvName: TextView //textview 및 imageview 선언
     private lateinit var tvEmail: TextView
     private lateinit var ivProfile: ImageView
     private val auth = FirebaseAuth.getInstance()
@@ -27,7 +28,7 @@ class Human : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_human)
 
-        // Initialize UI elements
+        // UI 요소 초기화
         tvName = findViewById(R.id.tvName)
         tvEmail = findViewById(R.id.tvEmail)
         ivProfile = findViewById(R.id.ivProfile)
@@ -36,40 +37,41 @@ class Human : AppCompatActivity() {
         val btnDeleteAccount = findViewById<Button>(R.id.btnDeleteAccount)
         val arrowBtn101 = findViewById<ImageView>(R.id.btn_arrow101)
 
-        // Load user data
+        //사용자 데이터 로드
         loadUserInfo()
 
-        // Back to Mypage
+        // 마이페이지 돌아가는 버튼
         arrowBtn101.setOnClickListener {
             val intent = Intent(this, MypageActivity::class.java)
             startActivity(intent)
         }
 
-        // Change password
+        // 비밀번호 변경 버튼
         btnChangePassword.setOnClickListener {
             startActivity(Intent(this, ChangePasswordActivity::class.java))
         }
 
-        // Logout
+        // 로그아웃 변경 버튼
         btnLogout.setOnClickListener {
             auth.signOut()
             startActivity(Intent(this, Login::class.java))
             finish()
         }
 
-        // Delete account
+        // 계정삭제 버튼
         btnDeleteAccount.setOnClickListener {
             deleteAccount()
         }
 
-        // Profile image click to change
+        // 프로필 이미지 변경 가능 초기화
         initImageViewProfile()
     }
 
+    //프로필 눌렀을 때 갤러리 접근 권한을 확인하고 권한 요청
     private fun initImageViewProfile() {
         ivProfile.setOnClickListener {
             when {
-                // Check if permission is granted
+                // 권한이 이미 허용된 경우
                 ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.READ_EXTERNAL_STORAGE
@@ -77,20 +79,41 @@ class Human : AppCompatActivity() {
                     navigateGallery()
                 }
 
-                // Show rationale if needed
+                // Android 13 이상: READ_MEDIA_IMAGES 권한 요청 필요
+                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+                        ContextCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.READ_MEDIA_IMAGES
+                        ) == android.content.pm.PackageManager.PERMISSION_GRANTED -> {
+                    navigateGallery()
+                }
+
+                // 권한이 거부된 적이 있는 경우 설명 표시
                 shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE) -> {
                     showPermissionContextPopup()
                 }
 
-                // Request permission
-                else -> requestPermissions(
-                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                    1000
-                )
+                // Android 13 이상: 새로운 권한 요청
+                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU -> {
+                    requestPermissions(
+                        arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
+                        1000
+                    )
+                }
+
+                // Android 12 이하: 기존 권한 요청
+                else -> {
+                    requestPermissions(
+                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                        1000
+                    )
+                }
             }
         }
     }
 
+
+    // 권한 요청 결과 처리
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -99,13 +122,16 @@ class Human : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == 1000) {
+            // 권한 요청 처리
             if (grantResults.isNotEmpty() && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "권한이 허용되었습니다.", Toast.LENGTH_SHORT).show()
                 navigateGallery()
             } else {
                 Toast.makeText(this, "권한을 거부하셨습니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 
     private fun navigateGallery() {
         val intent = Intent(Intent.ACTION_PICK)
@@ -133,12 +159,17 @@ class Human : AppCompatActivity() {
     private fun showPermissionContextPopup() {
         AlertDialog.Builder(this)
             .setTitle("권한이 필요합니다.")
-            .setMessage("프로필 이미지를 바꾸기 위해서는 갤러리 접근 권한이 필요합니다.")
-            .setPositiveButton("동의하기") { _, _ -> requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1000) }
+            .setMessage("프로필 이미지를 변경하려면 갤러리 접근 권한이 필요합니다. 설정에서 권한을 활성화해주세요.")
+            .setPositiveButton("설정으로 이동") { _, _ ->
+                val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                intent.data = Uri.parse("package:$packageName")
+                startActivity(intent)
+            }
             .setNegativeButton("취소하기") { _, _ -> }
             .create()
             .show()
     }
+
 
     private fun loadUserInfo() {
         val user = auth.currentUser

@@ -11,7 +11,7 @@ import com.example.madagascar.R
 
 class CategoryAdapter(
     private val categories: List<Category>,
-    private val onCategoryClick: (Category) -> Unit
+    private val onCategoryClick: (Category?) -> Unit
 ) : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
 
     private var selectedCategory: Int? = null
@@ -39,8 +39,15 @@ class CategoryAdapter(
         }
 
         holder.itemView.setOnClickListener {
-            selectedCategory = position
-            onCategoryClick(category)
+            if (selectedCategory == position) {
+                // 동일한 카테고리를 다시 클릭하면 선택 해제 및 전체 축제 조회
+                selectedCategory = null
+                onCategoryClick(null) // 전체 축제 조회
+            } else {
+                // 새로운 카테고리 선택
+                selectedCategory = position
+                onCategoryClick(category)
+            }
             notifyDataSetChanged()
         }
     }
