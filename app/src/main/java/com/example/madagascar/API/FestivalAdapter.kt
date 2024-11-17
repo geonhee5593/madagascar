@@ -1,5 +1,6 @@
 package com.example.madagascar.API
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,21 +11,20 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.example.madagascar.R
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
-class FestivalAdapter : RecyclerView.Adapter<FestivalAdapter.ViewHolder>() {
-
-    private val festivals = mutableListOf<FestivalItem>()
-
-    fun setFestivals(festivalList: List<FestivalItem>) {
-        festivals.clear()
-        festivals.addAll(festivalList)
-        notifyDataSetChanged()
-    }
+class FestivalAdapter(
+    private var festivals: List<FestivalItem>,
+    private val onItemClick: (FestivalItem) -> Unit
+) : RecyclerView.Adapter<FestivalAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.title)
         val address: TextView = view.findViewById(R.id.address)
         val image: ImageView = view.findViewById(R.id.image)
+        val eventDate: TextView = view.findViewById(R.id.event_date)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -37,19 +37,51 @@ class FestivalAdapter : RecyclerView.Adapter<FestivalAdapter.ViewHolder>() {
         holder.title.text = festival.title
         holder.address.text = festival.addr1
 
-        val imageUrl = festival.firstimage
+        // 이미지 로드
+        val imageUrl = festival.firstImage
         if (!imageUrl.isNullOrEmpty()) {
             Glide.with(holder.itemView.context)
                 .load(imageUrl)
-                .apply(RequestOptions()
-                    .placeholder(android.R.drawable.progress_indeterminate_horizontal)
-                    .error(android.R.drawable.stat_notify_error)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL))
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(holder.image)
         } else {
-            holder.image.setImageResource(android.R.drawable.stat_notify_error)
+            holder.image.setImageResource(android.R.drawable.ic_menu_gallery)
+        }
+
+        val startDateFormatted = formatDate(festival.eventStartDate)
+        val endDateFormatted = formatDate(festival.eventEndDate)
+        if (startDateFormatted.isNotEmpty() && endDateFormatted.isNotEmpty()) {
+            holder.eventDate.text = "기간: $startDateFormatted ~ $endDateFormatted"
+        } else {
+            holder.eventDate.text = "기간 정보 없음"
+        }
+
+        // 클릭 이벤트
+        holder.itemView.setOnClickListener {
+            onItemClick(festival)
         }
     }
 
     override fun getItemCount(): Int = festivals.size
+
+    fun setFestivals(newFestivals: List<FestivalItem>) {
+        festivals = newFestivals
+        notifyDataSetChanged()
+    }
+
+    // 날짜 포맷 변환 함수
+    private fun formatDate(date: String?): String {
+        return try {
+            if (date.isNullOrEmpty() || date.length != 8) return ""
+
+            // "yyyyMMdd" -> "MM.dd" 형식으로 변환
+            val originalFormat = DateTimeFormatter.ofPattern("yyyyMMdd")
+            val targetFormat = DateTimeFormatter.ofPattern("MM.dd")
+            val parsedDate = LocalDate.parse(date, originalFormat)
+            targetFormat.format(parsedDate)
+        } catch (e: Exception) {
+            Log.e("FestivalAdapter", "Date format error: ${e.message}")
+            ""
+        }
+    }
 }
