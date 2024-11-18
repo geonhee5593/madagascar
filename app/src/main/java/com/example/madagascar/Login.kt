@@ -8,6 +8,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.madagascar.Hobby.hobby
+import com.example.madagascar.Main.MainActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -49,9 +50,18 @@ class Login : AppCompatActivity() {
                 if (documents.isEmpty) {
                     Toast.makeText(this, "로그인 실패: 잘못된 ID 또는 비밀번호", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this, hobby::class.java)
-                    startActivity(intent)
+                    if (id == "admin") {
+                        Toast.makeText(this, "관리자로 로그인되었습니다.", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(this, MainActivity::class.java) // 공지사항 전송 화면으로 이동
+                        startActivity(intent)
+                        intent.putExtra("isAdmin", true) // 관리자 여부 전달
+                    } else {
+                        Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(this, MainActivity::class.java)
+                        startActivity(intent)
+                        intent.putExtra("isAdmin", false) // 일반 사용자
+                    }
+                    finish()
                 }
             }
             .addOnFailureListener { e ->
@@ -59,4 +69,8 @@ class Login : AppCompatActivity() {
                 Log.e("Login", "로그인 오류", e)
             }
     }
+
+
+
+
 }

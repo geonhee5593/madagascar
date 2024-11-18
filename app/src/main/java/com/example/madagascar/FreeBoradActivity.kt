@@ -9,13 +9,20 @@ import android.widget.ImageView
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.madagascar.Main.MainActivity
+import com.example.madagascar.Mylocation.fragmentActivity
 
-@Suppress("DEPRECATION")
 class FreeBoradActivity : AppCompatActivity() {
     private lateinit var searchEditText: EditText
     private lateinit var searchButton: Button
     private lateinit var listView: ListView
-    private val dataList = mutableListOf<String>()
+    private lateinit var prevButton: Button
+    private lateinit var nextButton: Button
+
+    private val fullDataList = mutableListOf<String>() // 전체 데이터 저장
+    private val currentPageList = mutableListOf<String>() // 현재 페이지에 보여질 데이터
+    private val pageSize = 10 // 한 페이지에 표시할 항목 수
+    private var currentPage = 0 // 현재 페이지 번호
+
     private lateinit var arrayAdapter: ArrayAdapter<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,26 +33,41 @@ class FreeBoradActivity : AppCompatActivity() {
         searchEditText = findViewById(R.id.searchEditText8)
         searchButton = findViewById(R.id.searchButton8)
         listView = findViewById(R.id.listView8)
+        prevButton = findViewById(R.id.prevButton)
+        nextButton = findViewById(R.id.nextButton)
 
         // 어댑터 초기화
-        arrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, dataList)
+        arrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, currentPageList)
         listView.adapter = arrayAdapter
+
+        // 페이지네이션 버튼 클릭 리스너 설정
+        prevButton.setOnClickListener {
+            if (currentPage > 0) {
+                currentPage--
+                updatePage()
+            }
+        }
+
+        nextButton.setOnClickListener {
+            val maxPages = (fullDataList.size + pageSize - 1) / pageSize // 총 페이지 수
+            if (currentPage < maxPages - 1) {
+                currentPage++
+                updatePage()
+            }
+            }
+            val btn_back = findViewById<ImageView>(R.id.btn_back)
+            btn_back.setOnClickListener {
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+        }
 
         // 검색 버튼 클릭 리스너
         searchButton.setOnClickListener {
             val query = searchEditText.text.toString().trim()
-            if (query.isEmpty()) {
-                arrayAdapter.clear()
-                arrayAdapter.addAll(dataList)
-            } else {
-                val filteredList = dataList.filter { it.contains(query, ignoreCase = true) }
-                arrayAdapter.clear()
-                arrayAdapter.addAll(filteredList)
-            }
-            arrayAdapter.notifyDataSetChanged()
+            filterAndDisplayData(query)
         }
 
-        // 글쓰기 버튼 클릭 시 이동
+        // 글쓰기 버튼 클릭 리스너
         val writeButton: Button = findViewById(R.id.button11)
         writeButton.setOnClickListener {
             val intent = Intent(this, listtextmadeActivity::class.java)
@@ -53,6 +75,29 @@ class FreeBoradActivity : AppCompatActivity() {
         }
     }
 
+    // 페이지네이션 업데이트
+    private fun updatePage() {
+        val start = currentPage * pageSize
+        val end = minOf((currentPage + 1) * pageSize, fullDataList.size)
+        currentPageList.clear()
+        currentPageList.addAll(fullDataList.subList(start, end))
+        arrayAdapter.notifyDataSetChanged()
+    }
+
+    // 검색 결과를 필터링하고 데이터 표시
+    private fun filterAndDisplayData(query: String) {
+        currentPage = 0 // 검색 시 첫 페이지로 초기화
+        if (query.isEmpty()) {
+            updatePage() // 검색어가 없으면 원래 데이터 표시
+        } else {
+            val filteredList = fullDataList.filter { it.contains(query, ignoreCase = true) }
+            currentPageList.clear()
+            currentPageList.addAll(filteredList)
+            arrayAdapter.notifyDataSetChanged()
+        }
+    }
+
+    // 글쓰기 화면에서 데이터 수신
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -61,14 +106,8 @@ class FreeBoradActivity : AppCompatActivity() {
             val content = data?.getStringExtra("content")
 
             if (title != null && content != null) {
-                dataList.add("$title\n$content")
-                arrayAdapter.notifyDataSetChanged() // 어댑터 갱신
-            }
-            val FreeBoradBtn = findViewById<ImageView>(R.id.btn_back)
-
-            FreeBoradBtn.setOnClickListener {
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
+                fullDataList.add(0, "$title\n$content") // 최신 글이 상단에 오도록 추가
+                updatePage() // 새 데이터 추가 후 페이지 갱신
             }
         }
     }

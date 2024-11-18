@@ -8,6 +8,16 @@
     android:layout_height="match_parent"
     tools:context=".Main.MainActivity">
 
+    <Button
+        android:id="@+id/btn_admin"
+        android:layout_width="wrap_content"
+        android:layout_height="41dp"
+        android:layout_marginEnd="8dp"
+        android:text="관리자"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btn_alarm" />
     <View
         android:id="@+id/view"
         android:layout_width="match_parent"
@@ -147,6 +157,7 @@
         android:layout_columnWeight="1"
         android:layout_gravity="center"
         android:src="@drawable/alarm"
+        android:id="@+id/btn_alarm"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.956"
