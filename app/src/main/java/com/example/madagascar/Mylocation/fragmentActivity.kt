@@ -4,10 +4,16 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.madagascar.API.FestivalItem
+import com.example.madagascar.API.FestivalResponse
+import com.example.madagascar.API.RetrofitClient
 import com.example.madagascar.Main.MainActivity
 import com.example.madagascar.R
 import com.naver.maps.geometry.LatLng
@@ -16,8 +22,10 @@ import com.naver.maps.map.LocationSource
 import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
+import com.naver.maps.map.overlay.InfoWindow
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.util.FusedLocationSource
+import retrofit2.Call
 
 class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -66,6 +74,15 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // 권한이 허용되면 위치를 설정
         setupMapWithLocation()
+
+        // 지도 초기 위치 설정
+        setupMapWithLocation()
+
+        // 주변 축제 정보를 가져와 지도에 표시
+        val currentLocation = locationSource.lastLocation
+        if (currentLocation != null) {
+            fetchNearbyFestivals(currentLocation.latitude, currentLocation.longitude)
+        }
     }
 
     private fun setupMapWithLocation() {
@@ -85,6 +102,46 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
             // 현재 위치 오버레이 활성화
             val locationOverlay = naverMap.locationOverlay
             locationOverlay.isVisible = true
+        }
+    }
+
+    private fun fetchNearbyFestivals(lat: Double, lon: Double) {
+        val call = RetrofitClient.instance.getNearbyFestivals(lat, lon, 5000)
+        call.enqueue(object : retrofit2.Callback<FestivalResponse> {
+            override fun onResponse(call: Call<FestivalResponse>, response: retrofit2.Response<FestivalResponse>) {
+                if (response.isSuccessful) {
+                    response.body()?.response?.body?.items?.item?.let { festivals ->
+                        for (festival in festivals) {
+                            addMarker(festival)
+                        }
+                    }
+                } else {
+                    Log.e("API Error", "Response failed")
+                }
+            }
+
+            override fun onFailure(call: Call<FestivalResponse>, t: Throwable) {
+                Log.e("API Error", "Request failed: ${t.message}")
+            }
+        })
+    }
+
+    private fun addMarker(festival: FestivalItem) {
+        val marker = Marker()
+        marker.position = LatLng(festival.latitude, festival.longitude)
+        marker.map = naverMap
+        marker.captionText = festival.title
+
+        // 마커 클릭 시 축제 정보 표시
+        val infoWindow = InfoWindow()
+        marker.setOnClickListener {
+            infoWindow.adapter = object : InfoWindow.DefaultTextAdapter(this) {
+                override fun getText(infoWindow: InfoWindow): CharSequence {
+                    return "${festival.title}\n주소: ${festival.addr1}\n기간: ${festival.eventStartDate} ~ ${festival.eventEndDate}"
+                }
+            }
+            infoWindow.open(marker)
+            true
         }
     }
 

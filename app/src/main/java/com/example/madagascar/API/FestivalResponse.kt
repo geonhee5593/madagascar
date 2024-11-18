@@ -28,7 +28,9 @@ data class FestivalItem(
     @SerializedName("firstimage2") val firstImage2: String?,
     @SerializedName("contentid") val contentId: String,
     @SerializedName("tel") val tel: String?,
-    @SerializedName("eventplace") val eventPlace: String?
+    @SerializedName("eventplace") val eventPlace: String?,
+    @SerializedName("mapx") val longitude: Double,  // 추가된 필드
+    @SerializedName("mapy") val latitude: Double   // 추가된 필드
 )
 
 // 공통정보 조회 모델
@@ -55,7 +57,9 @@ data class CommonItem(
     val homepage: String?,
     val overview: String?,
     val tel: String?,
-    val telname: String?
+    val telname: String?,
+    @SerializedName("mapx") val longitude: Double?, // 추가된 필드
+    @SerializedName("mapy") val latitude: Double?   // 추가된 필드
 )
 
 // 소개정보 조회 모델
@@ -82,7 +86,9 @@ data class IntroItem(
     val playtime: String?,
     val eventplace: String?,
     val eventStartdate: String,
-    val usetimefestival: String?
+    val usetimefestival: String?,
+    @SerializedName("mapx") val longitude: Double?,
+    @SerializedName("mapy") val latitude: Double?
 )
 
 data class Category(
