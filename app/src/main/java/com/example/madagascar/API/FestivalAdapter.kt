@@ -16,7 +16,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class FestivalAdapter(
-    private var festivals: List<FestivalItem>,
+    private var festivals:  MutableList<FestivalItem>,
     private val onItemClick: (FestivalItem) -> Unit
 ) : RecyclerView.Adapter<FestivalAdapter.ViewHolder>() {
 
@@ -64,8 +64,15 @@ class FestivalAdapter(
 
     override fun getItemCount(): Int = festivals.size
 
+    fun addFestivals(newFestivals: List<FestivalItem>) {
+        val startPosition = festivals.size
+        festivals.addAll(newFestivals)
+        notifyItemRangeInserted(startPosition, newFestivals.size)
+    }
+
     fun setFestivals(newFestivals: List<FestivalItem>) {
-        festivals = newFestivals
+        festivals.clear()
+        festivals.addAll(newFestivals)
         notifyDataSetChanged()
     }
 

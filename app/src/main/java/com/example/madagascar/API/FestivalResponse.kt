@@ -6,6 +6,13 @@ data class FestivalResponse(
     val response: FestivalBody
 )
 
+data class DataWrapper(
+    val response: FestivalBody,
+    val currentPage: Int,
+    val hasMore: Boolean
+)
+
+
 data class FestivalBody(
     val body: FestivalItems
 )
