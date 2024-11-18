@@ -26,6 +26,7 @@
             android:name=".Login"
             android:exported="true"
             android:windowSoftInputMode="adjustNothing">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,6 +34,8 @@
             </intent-filter>
         </activity>
         <!--키보드가 나타나도 ui가 변하지 않게 adjustPan 설정 -->
+        <activity android:name=".Main.MainActivity"
+            android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".API.Festival" />
         <activity android:name=".API.DetailActivity"/>
         <activity android:name=".Hobby.hobby_Activity"
@@ -48,8 +51,6 @@
         <activity android:name=".Mypage.Favorites"
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".Mypage.Human"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".Main.MainActivity"
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".Mylocation.fragmentActivity"
             android:windowSoftInputMode="adjustNothing"/>

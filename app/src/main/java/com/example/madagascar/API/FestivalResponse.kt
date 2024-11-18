@@ -29,8 +29,8 @@ data class FestivalItem(
     val title: String,
     val addr1: String,
     val addr2: String?,
-    @SerializedName("eventstartdate") val eventStartDate: String,
-    @SerializedName("eventenddate") val eventEndDate: String,
+    @SerializedName("eventstartdate") var eventStartDate: String,
+    @SerializedName("eventenddate") var eventEndDate: String,
     @SerializedName("firstimage") val firstImage: String?,
     @SerializedName("firstimage2") val firstImage2: String?,
     @SerializedName("contentid") val contentId: String,
@@ -65,6 +65,8 @@ data class CommonItem(
     val overview: String?,
     val tel: String?,
     val telname: String?,
+    @SerializedName("eventstartdate") val eventStartDate: String?,
+    @SerializedName("eventenddate") val eventEndDate: String?,
     @SerializedName("mapx") val longitude: Double?, // 추가된 필드
     @SerializedName("mapy") val latitude: Double?   // 추가된 필드
 )
