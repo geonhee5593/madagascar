@@ -26,7 +26,7 @@ interface FestivalApi {
     fun searchFestivals(
         @Query("keyword") keyword: String,
         @Query("page") page: Int = 1,
-        @Query("pageSize") pageSize: Int = 10
+    @Query("pageSize") pageSize: Int = 10
     ): Call<FestivalResponse>
 
     // 5. 위치 기반 관광 정보 조회 API
