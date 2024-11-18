@@ -59,6 +59,7 @@ dependencies {
     implementation ("com.google.code.gson:gson:2.8.9")
     implementation ("com.github.bumptech.glide:glide:4.13.0")
     implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.database.ktx)
     annotationProcessor ("com.github.bumptech.glide:compiler:4.13.0")
 
     implementation(libs.androidx.core.ktx)
