@@ -4,9 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.madagascar.Main.MainActivity
 
-    class listtextmadeActivity : AppCompatActivity() {
+class listtextmadeActivity : AppCompatActivity() {
         private lateinit var titleEditText: EditText
         private lateinit var contentEditText: EditText
         private lateinit var saveButton: Button
@@ -34,6 +36,11 @@ import androidx.appcompat.app.AppCompatActivity
 
                     // 현재 액티비티 종료
                     finish()
+                }
+                val btn_back = findViewById<ImageView>(R.id.btn_back2)
+                btn_back.setOnClickListener {
+                    val intent = Intent(this, FreeBoradActivity::class.java)
+                    startActivity(intent)
                 }
             }
         }
