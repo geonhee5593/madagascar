@@ -18,7 +18,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.madagascar"
-        minSdk = 34
+        minSdk = 31
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -59,6 +59,7 @@ dependencies {
     implementation ("com.google.code.gson:gson:2.8.9")
     implementation ("com.github.bumptech.glide:glide:4.13.0")
     implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.database.ktx)
     annotationProcessor ("com.github.bumptech.glide:compiler:4.13.0")
 
     implementation(libs.androidx.core.ktx)

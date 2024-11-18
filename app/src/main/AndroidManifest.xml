@@ -60,6 +60,12 @@
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".FreeBoradActivity"
             android:windowSoftInputMode="adjustNothing"/>
+        <activity android:name=".AdminActivity"
+            android:windowSoftInputMode="adjustNothing"/>
+        <activity android:name=".CreateNoticeActivity"
+            android:windowSoftInputMode="adjustNothing"/>
+        <activity android:name=".NoticeActivity"
+            android:windowSoftInputMode="adjustNothing"/>
         <meta-data
             android:name="com.naver.maps.map.CLIENT_ID"
             android:value="${NAVERMAP_CLIENT_ID}" />

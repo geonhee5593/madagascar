@@ -42,33 +42,35 @@ class Login : AppCompatActivity() {
         val id = findViewById<EditText>(R.id.Email_id).text.toString()
         val password = findViewById<EditText>(R.id.Password).text.toString()
 
-        if (id == "admin" && password == "admin") {
-            Toast.makeText(this, "관리자로 로그인되었습니다.", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("isAdmin", true) // 관리자 여부 전달
-            startActivity(intent)
-            finish()
-        } else {
-            firestore.collection("users")
-                .whereEqualTo("id", id)
-                .whereEqualTo("password", password)
-                .get()
-                .addOnSuccessListener { documents ->
-                    if (documents.isEmpty) {
-                        Toast.makeText(this, "로그인 실패: 잘못된 ID 또는 비밀번호", Toast.LENGTH_SHORT).show()
+        firestore.collection("users")
+            .whereEqualTo("id", id)
+            .whereEqualTo("password", password)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    Toast.makeText(this, "로그인 실패: 잘못된 ID 또는 비밀번호", Toast.LENGTH_SHORT).show()
+                } else {
+                    if (id == "admin") {
+                        Toast.makeText(this, "관리자로 로그인되었습니다.", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(this, MainActivity::class.java) // 공지사항 전송 화면으로 이동
+                        startActivity(intent)
+                        intent.putExtra("isAdmin", true) // 관리자 여부 전달
                     } else {
                         Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show()
                         val intent = Intent(this, MainActivity::class.java)
-                        intent.putExtra("isAdmin", false) // 일반 사용자 여부 전달
                         startActivity(intent)
-                        finish()
+                        intent.putExtra("isAdmin", false) // 일반 사용자
                     }
+                    finish()
                 }
-                .addOnFailureListener { e ->
-                    Toast.makeText(this, "로그인 오류: ${e.message}", Toast.LENGTH_SHORT).show()
-                    Log.e("Login", "로그인 오류", e)
-                }
-        }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "로그인 오류: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("Login", "로그인 오류", e)
+            }
     }
+
+
+
 
 }
