@@ -17,7 +17,7 @@ class MypageActivity : AppCompatActivity() {
         val noticeBtn = findViewById<ImageView>(R.id.btn_notice)
 
         noticeBtn.setOnClickListener {
-            val intent = Intent(this, Notice::class.java)
+            val intent = Intent(this, NoticeActivity::class.java)
             startActivity(intent)
         }
 
