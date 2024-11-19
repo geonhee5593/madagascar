@@ -51,8 +51,6 @@
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".Main.MainActivity"
             android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".freeborad.ListItemActivity"
-            android:windowSoftInputMode="adjustNothing" />
         <activity android:name=".Mylocation.fragmentActivity"
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".RegisterActivity"

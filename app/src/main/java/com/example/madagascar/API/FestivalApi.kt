@@ -29,6 +29,7 @@ interface FestivalApi {
     @Query("pageSize") pageSize: Int = 10
     ): Call<FestivalResponse>
 
+
     // 5. 위치 기반 관광 정보 조회 API
     @GET("/api/nearbyFestivals")
     fun getNearbyFestivals(
