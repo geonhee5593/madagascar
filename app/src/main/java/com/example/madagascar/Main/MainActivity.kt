@@ -13,7 +13,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.madagascar.API.Festival
 import com.example.madagascar.AdminActivity
 import com.example.madagascar.FavoritesActivity
-import com.example.madagascar.FreeBoradActivity
+import com.example.madagascar.freeborad.FreeBoradActivity
 import com.example.madagascar.Mylocation.fragmentActivity
 import com.example.madagascar.Mypage.MypageActivity
 import com.example.madagascar.R

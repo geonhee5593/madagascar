@@ -1,4 +1,4 @@
-package com.example.madagascar
+package com.example.madagascar.freeborad
 
 import android.content.Intent
 import android.os.Bundle
@@ -9,7 +9,8 @@ import android.widget.ImageView
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.madagascar.Main.MainActivity
-import com.example.madagascar.Mylocation.fragmentActivity
+import com.example.madagascar.R
+import kotlin.math.min
 
 class FreeBoradActivity : AppCompatActivity() {
     private lateinit var searchEditText: EditText
@@ -54,11 +55,26 @@ class FreeBoradActivity : AppCompatActivity() {
                 currentPage++
                 updatePage()
             }
-            }
-            val btn_back = findViewById<ImageView>(R.id.btn_back)
-            btn_back.setOnClickListener {
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
+        }
+
+        // 글쓰기 버튼 클릭 리스너
+        val writeButton: Button = findViewById(R.id.button11)
+        writeButton.setOnClickListener {
+            val intent = Intent(this, ListtextmadeActivity::class.java)
+            startActivityForResult(intent, 1) // 글쓰기 화면으로 이동
+        }
+
+        // 리스트 항목 클릭 리스너 추가
+        listView.setOnItemClickListener { parent, view, position, id ->
+            val selectedItem = fullDataList[position]
+            val title = selectedItem.split("\n")[0] // 제목
+            val content = selectedItem.split("\n")[1] // 내용
+
+            // 클릭된 항목의 제목과 내용을 ListItemActivity로 전달
+            val intent = Intent(this, ListItemActivity::class.java)
+            intent.putExtra("title", title)
+            intent.putExtra("content", content)
+            startActivity(intent) // ListItemActivity로 이동
         }
 
         // 검색 버튼 클릭 리스너
@@ -66,19 +82,12 @@ class FreeBoradActivity : AppCompatActivity() {
             val query = searchEditText.text.toString().trim()
             filterAndDisplayData(query)
         }
-
-        // 글쓰기 버튼 클릭 리스너
-        val writeButton: Button = findViewById(R.id.button11)
-        writeButton.setOnClickListener {
-            val intent = Intent(this, listtextmadeActivity::class.java)
-            startActivityForResult(intent, 1)
-        }
     }
 
     // 페이지네이션 업데이트
     private fun updatePage() {
         val start = currentPage * pageSize
-        val end = minOf((currentPage + 1) * pageSize, fullDataList.size)
+        val end = min((currentPage + 1) * pageSize, fullDataList.size)
         currentPageList.clear()
         currentPageList.addAll(fullDataList.subList(start, end))
         arrayAdapter.notifyDataSetChanged()
