@@ -43,8 +43,6 @@
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".Mypage.MypageActivity"
             android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".Mypage.Notice"
-            android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".Mypage.Favorites"
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".Mypage.Human"
@@ -67,7 +65,8 @@
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".CreateNoticeActivity"
             android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".NoticeActivity"
+        <activity android:name=".Mypage.NoticeActivity"
+            android:exported="true"
             android:windowSoftInputMode="adjustNothing"/>
         <meta-data
             android:name="com.naver.maps.map.CLIENT_ID"

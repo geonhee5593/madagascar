@@ -80,37 +80,58 @@ class hobby : AppCompatActivity() {
         }
 
         // 확인 버튼 클릭 시 선택한 항목과 전체 관심사 리스트를 전달
-        val confirmButton = findViewById<Button>(R.id.btn_confirm)
-        confirmButton.setOnClickListener {
-            sharedPreferences.edit().putStringSet("selectedInterests", selectedInterests.toSet()).apply()
+            val confirmButton = findViewById<Button>(R.id.btn_confirm)
+            confirmButton.setOnClickListener {
+                sharedPreferences.edit().putStringSet("selectedInterests", selectedInterests.toSet()).apply()
 
-            // Firebase Firestore에 관심 분야 저장
-            val user = FirebaseAuth.getInstance().currentUser
-            user?.let {
-                val uid = user.uid
-                val db = FirebaseFirestore.getInstance()
+                // Firebase Firestore에 관심 분야 저장
+                val user = FirebaseAuth.getInstance().currentUser
+                user?.let {
+                    val uid = user.uid
+                    val db = FirebaseFirestore.getInstance()
 
-                val interestsData = hashMapOf(
-                    "userId" to uid,
-                    "interests" to selectedInterests,
-                    "isFirstLogin" to false // 첫 로그인을 완료로 표시
-                )
-
-                db.collection("users").document(uid)
-                    .set(interestsData)
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "관심사가 저장되었습니다", Toast.LENGTH_SHORT).show()
-
-                        startActivity(Intent(this, MainActivity::class.java))
-                        finish()
+                    val interestsData = selectedInterests.map { interest ->
+                        hashMapOf(
+                            "interestName" to interest // 각 관심사를 저장
+                        )
                     }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(this, "저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
+
+                    val userInterestsCollection = db.collection("users").document(uid).collection("interests")
+
+                    // 기존 데이터를 지우고 새로 추가 (중복 방지)
+                    userInterestsCollection.get()
+                        .addOnSuccessListener { documents ->
+                            for (document in documents) {
+                                userInterestsCollection.document(document.id).delete()
+                            }
+
+                            // 새 관심 분야 저장
+                            for (interest in interestsData) {
+                                userInterestsCollection.add(interest)
+                            }
+
+                            // `isFirstLogin` 업데이트
+                            db.collection("users").document(uid)
+                                .update("isFirstLogin", false)
+                                .addOnSuccessListener {
+                                    Toast.makeText(this, "관심사가 저장되었습니다", Toast.LENGTH_SHORT).show()
+
+                                    // 메인 화면으로 이동
+                                    startActivity(Intent(this, MainActivity::class.java))
+                                    finish()
+                                }
+                                .addOnFailureListener { e ->
+                                    Toast.makeText(this, "저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "기존 관심사 삭제 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
             }
-        }
 
-        // 건너뛰기 클릭 시 메인 화면으로 이동
+
+            // 건너뛰기 클릭 시 메인 화면으로 이동
         val skipText = findViewById<TextView>(R.id.tv_skip)
         skipText.setOnClickListener {
             startActivity(Intent(this, MainActivity::class.java))
