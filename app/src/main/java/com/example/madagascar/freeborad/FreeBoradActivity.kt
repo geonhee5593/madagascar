@@ -2,46 +2,58 @@ package com.example.madagascar.freeborad
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.madagascar.Main.MainActivity
 import com.example.madagascar.R
 import kotlin.math.min
+import java.text.SimpleDateFormat
+import java.util.Locale
+
+data class FreeBoardItem(
+    val title: String,
+    val content: String,
+    var views: Int,
+    val date : String
+)
 
 class FreeBoradActivity : AppCompatActivity() {
+
     private lateinit var searchEditText: EditText
     private lateinit var searchButton: Button
     private lateinit var listView: ListView
     private lateinit var prevButton: Button
     private lateinit var nextButton: Button
 
-    private val fullDataList = mutableListOf<String>() // 전체 데이터 저장
-    private val currentPageList = mutableListOf<String>() // 현재 페이지에 보여질 데이터
-    private val pageSize = 10 // 한 페이지에 표시할 항목 수
+    private val fullDataList = mutableListOf<FreeBoardItem>() // 전체 게시글 데이터
+    private val currentPageList = mutableListOf<FreeBoardItem>() // 현재 페이지 게시글
+    private val pageSize = 10 // 한 페이지 게시글 수
     private var currentPage = 0 // 현재 페이지 번호
 
-    private lateinit var arrayAdapter: ArrayAdapter<String>
+    private lateinit var adapter: FreeBoardAdapter // 리스트 뷰 어댑터
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_freeborad)
 
-        // 레이아웃 컴포넌트 초기화
+        // UI 초기화
         searchEditText = findViewById(R.id.searchEditText8)
         searchButton = findViewById(R.id.searchButton8)
         listView = findViewById(R.id.listView8)
         prevButton = findViewById(R.id.prevButton)
         nextButton = findViewById(R.id.nextButton)
 
-        // 어댑터 초기화
-        arrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, currentPageList)
-        listView.adapter = arrayAdapter
+        // 어댑터 설정
+        adapter = FreeBoardAdapter(this, currentPageList)
+        listView.adapter = adapter
 
-        // 페이지네이션 버튼 클릭 리스너 설정
+        // '새 글 작성' 버튼 클릭
+        findViewById<Button>(R.id.button11).setOnClickListener {
+            startActivityForResult(Intent(this, ListtextmadeActivity::class.java), 1)
+        }
+
+        // 이전 페이지 버튼 클릭
         prevButton.setOnClickListener {
             if (currentPage > 0) {
                 currentPage--
@@ -49,74 +61,82 @@ class FreeBoradActivity : AppCompatActivity() {
             }
         }
 
+        // 다음 페이지 버튼 클릭
         nextButton.setOnClickListener {
-            val maxPages = (fullDataList.size + pageSize - 1) / pageSize // 총 페이지 수
+            val maxPages = (fullDataList.size + pageSize - 1) / pageSize
             if (currentPage < maxPages - 1) {
                 currentPage++
                 updatePage()
             }
         }
 
-        // 글쓰기 버튼 클릭 리스너
-        val writeButton: Button = findViewById(R.id.button11)
-        writeButton.setOnClickListener {
-            val intent = Intent(this, ListtextmadeActivity::class.java)
-            startActivityForResult(intent, 1) // 글쓰기 화면으로 이동
+        // 리스트 아이템 클릭
+        listView.setOnItemClickListener { _, _, position, _ ->
+            val actualPosition = currentPage * pageSize + position
+            val selectedItem = fullDataList[actualPosition]
+
+            // ListItemActivity로 이동
+            Intent(this, ListItemActivity::class.java).apply {
+                putExtra("title", selectedItem.title)
+                putExtra("content", selectedItem.content)
+                putExtra("views", selectedItem.views)
+                putExtra("position", actualPosition)
+                startActivityForResult(this, 2)
+            }
         }
 
-        // 리스트 항목 클릭 리스너 추가
-        listView.setOnItemClickListener { parent, view, position, id ->
-            val selectedItem = fullDataList[position]
-            val title = selectedItem.split("\n")[0] // 제목
-            val content = selectedItem.split("\n")[1] // 내용
-
-            // 클릭된 항목의 제목과 내용을 ListItemActivity로 전달
-            val intent = Intent(this, ListItemActivity::class.java)
-            intent.putExtra("title", title)
-            intent.putExtra("content", content)
-            startActivity(intent) // ListItemActivity로 이동
-        }
-
-        // 검색 버튼 클릭 리스너
+        // 검색 버튼 클릭
         searchButton.setOnClickListener {
             val query = searchEditText.text.toString().trim()
             filterAndDisplayData(query)
         }
     }
 
-    // 페이지네이션 업데이트
+    // 페이지 업데이트
     private fun updatePage() {
         val start = currentPage * pageSize
         val end = min((currentPage + 1) * pageSize, fullDataList.size)
         currentPageList.clear()
         currentPageList.addAll(fullDataList.subList(start, end))
-        arrayAdapter.notifyDataSetChanged()
+        adapter.notifyDataSetChanged()
     }
 
-    // 검색 결과를 필터링하고 데이터 표시
+    // 검색 결과 필터링
     private fun filterAndDisplayData(query: String) {
-        currentPage = 0 // 검색 시 첫 페이지로 초기화
-        if (query.isEmpty()) {
-            updatePage() // 검색어가 없으면 원래 데이터 표시
+        val filteredList = if (query.isEmpty()) {
+            fullDataList
         } else {
-            val filteredList = fullDataList.filter { it.contains(query, ignoreCase = true) }
-            currentPageList.clear()
-            currentPageList.addAll(filteredList)
-            arrayAdapter.notifyDataSetChanged()
+            fullDataList.filter {
+                it.title.contains(query, ignoreCase = true) || it.content.contains(query, ignoreCase = true)
+            }
         }
+
+        currentPage = 0
+        currentPageList.clear()
+        currentPageList.addAll(filteredList.take(pageSize))
+        adapter.notifyDataSetChanged()
     }
 
-    // 글쓰기 화면에서 데이터 수신
+    // 새 데이터 추가 및 조회수 업데이트 처리
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            1 -> if (resultCode == RESULT_OK) {
+                val title = data?.getStringExtra("title") ?: ""
+                val content = data?.getStringExtra("content") ?: ""
+                val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(System.currentTimeMillis()) // 현재 날짜
 
-        if (requestCode == 1 && resultCode == RESULT_OK) {
-            val title = data?.getStringExtra("title")
-            val content = data?.getStringExtra("content")
-
-            if (title != null && content != null) {
-                fullDataList.add(0, "$title\n$content") // 최신 글이 상단에 오도록 추가
-                updatePage() // 새 데이터 추가 후 페이지 갱신
+                fullDataList.add(0, FreeBoardItem(title, content, 0, currentDate)) // 등록일 추가
+                currentPage = 0
+                updatePage()
+            }
+            2 -> if (resultCode == RESULT_OK) {
+                val updatedViews = data?.getIntExtra("updatedViews", 0) ?: 0
+                val position = data?.getIntExtra("position", -1) ?: -1
+                if (position in fullDataList.indices) {
+                    fullDataList[position].views = updatedViews
+                    updatePage()
+                }
             }
         }
     }

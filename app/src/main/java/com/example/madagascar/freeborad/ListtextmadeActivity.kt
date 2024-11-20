@@ -28,7 +28,7 @@ class ListtextmadeActivity : AppCompatActivity() {
         val title = intent.getStringExtra("title") ?: ""
         val content = intent.getStringExtra("content") ?: ""
 
-        // EditText에 제목과 내용 채우기
+        // EditText에 초기값 설정
         titleEditText.setText(title)
         contentEditText.setText(content)
 
@@ -37,12 +37,12 @@ class ListtextmadeActivity : AppCompatActivity() {
             val newTitle = titleEditText.text.toString()
             val newContent = contentEditText.text.toString()
 
-            // 새 제목과 내용을 FreeBoradActivity로 전달
+            // 새 데이터를 반환
             val resultIntent = Intent()
             resultIntent.putExtra("title", newTitle)
             resultIntent.putExtra("content", newContent)
-            setResult(RESULT_OK, resultIntent) // 결과를 FreeBoradActivity로 전달
-            finish() // ListtextmadeActivity 종료하고 이전 화면으로 돌아가기
+            setResult(RESULT_OK, resultIntent)
+            finish()
         }
     }
 }
