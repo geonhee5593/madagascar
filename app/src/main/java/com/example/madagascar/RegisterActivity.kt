@@ -199,24 +199,35 @@ class RegisterActivity : AppCompatActivity() {
         val phoneNumber = findViewById<EditText>(R.id.editTextPhone).text.toString()
         val password = findViewById<EditText>(R.id.editTextPassword).text.toString()
 
-        val user = hashMapOf(
-            "username" to username,
-            "id" to id,
-            "phoneNumber" to phoneNumber,
-            "password" to password
-        )
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            val uid = user.uid // Firebase Auth UID
+            val userData = hashMapOf(
+                "username" to username,
+                "id" to id,
+                "phoneNumber" to phoneNumber,
+                "password" to password,
+                "isFirstLogin" to true, // 첫 로그인 플래그 추가
+                "isAdmin" to false
+            )
 
-        firestore.collection("users").add(user)
-            .addOnSuccessListener {
-                Toast.makeText(this, "회원가입 성공", Toast.LENGTH_SHORT).show()
-                Log.d("RegisterActivity", "회원가입 정보 Firestore에 저장됨: $username, $id, $phoneNumber")
-                navigateToLogin()
-            }
-            .addOnFailureListener { e ->
-                Log.e("RegisterActivity", "회원가입 오류", e)
-                Toast.makeText(this, "회원가입 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
+            // Firestore에 UID를 문서 ID로 사용
+            firestore.collection("users").document(uid)
+                .set(userData)
+                .addOnSuccessListener {
+                    Toast.makeText(this, "회원가입 성공", Toast.LENGTH_SHORT).show()
+                    Log.d("RegisterActivity", "회원가입 정보 Firestore에 저장됨: $username, $id, $phoneNumber")
+                    navigateToLogin()
+                }
+                .addOnFailureListener { e ->
+                    Log.e("RegisterActivity", "회원가입 오류", e)
+                    Toast.makeText(this, "회원가입 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            Toast.makeText(this, "사용자 인증 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+        }
     }
+
 
     private fun navigateToLogin() {
         val intent = Intent(this, Login::class.java)

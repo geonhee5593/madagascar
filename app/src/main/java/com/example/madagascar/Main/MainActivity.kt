@@ -15,7 +15,7 @@ import com.example.madagascar.API.MonthFestival
 import com.example.madagascar.API.RegionFestival
 import com.example.madagascar.AdminActivity
 import com.example.madagascar.FavoritesActivity
-import com.example.madagascar.FreeBoradActivity
+import com.example.madagascar.freeborad.FreeBoradActivity
 import com.example.madagascar.Mylocation.fragmentActivity
 import com.example.madagascar.Mypage.MypageActivity
 import com.example.madagascar.R
