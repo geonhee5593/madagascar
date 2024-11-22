@@ -54,6 +54,7 @@ android {
 
 dependencies {
 
+    implementation ("androidx.recyclerview:recyclerview:1.3.0")
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("com.google.code.gson:gson:2.8.9")
@@ -86,8 +87,6 @@ dependencies {
     // 네이버 SDK 추가
     implementation("com.naver.maps:map-sdk:3.19.1")
 
-    implementation ("com.github.bumptech.glide:glide:4.12.0")
-    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
     // 파이어베이스
     implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
     implementation("com.google.firebase:firebase-auth")

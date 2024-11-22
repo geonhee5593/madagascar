@@ -11,6 +11,8 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.example.madagascar.API.Festival
+import com.example.madagascar.API.MonthFestival
+import com.example.madagascar.API.RegionFestival
 import com.example.madagascar.AdminActivity
 import com.example.madagascar.FavoritesActivity
 import com.example.madagascar.FreeBoradActivity
@@ -62,17 +64,23 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        /* btn_happhuy 버튼 클릭 시 월별 축제 화면으로 이동 */
-        val happguyBtn = findViewById<ImageView>(R.id.btn_happguy)
-        happguyBtn.setOnClickListener {
-            val intent = Intent(this, HappguyActivity::class.java)
-            startActivity(intent)
-        }
-
          /* btn_imageView4 버튼 클릭 시 내 위치 기반 축제 화면으로 이동 */
          val MylocationBtn = findViewById<ImageView>(R.id.btn_imageView4)
          MylocationBtn.setOnClickListener {
              val intent = Intent(this, fragmentActivity::class.java)
+             startActivity(intent)
+         }
+
+         /* btn_region 버튼 클릭 시 지역 별 축제 화면으로 이동 */
+         val regionbtn = findViewById<ImageView>(R.id.btn_region)
+         regionbtn.setOnClickListener {
+             val intent = Intent(this, RegionFestival::class.java)
+             startActivity(intent)
+         }
+         /* btn_month 버튼 클릭 시 월 별 축제 화면으로 이동 */
+         val monthbtn = findViewById<ImageView>(R.id.btn_month)
+         monthbtn.setOnClickListener {
+             val intent = Intent(this, MonthFestival::class.java)
              startActivity(intent)
          }
 

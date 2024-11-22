@@ -3,11 +3,13 @@ package com.example.madagascar.API
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.madagascar.Main.MainActivity
 import com.example.madagascar.R
 import retrofit2.Call
 import retrofit2.Callback
@@ -26,6 +28,7 @@ class Festival : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_festival)
+
 
         val categoryRecyclerView = findViewById<RecyclerView>(R.id.categoryRecyclerView)
         festivalRecyclerView = findViewById(R.id.festivalRecyclerView)
@@ -49,6 +52,12 @@ class Festival : AppCompatActivity() {
                 fetchAllFestivals()
             }
         }
+        val arrowbtn110 = findViewById<ImageView>(R.id.btn_arrow110)
+
+        arrowbtn110.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
 
         categoryRecyclerView.adapter = categoryAdapter
         categoryRecyclerView.layoutManager =
@@ -56,7 +65,8 @@ class Festival : AppCompatActivity() {
 
         festivalAdapter = FestivalAdapter(mutableListOf()) { festival ->
             val intent = Intent(this, DetailActivity::class.java)
-            intent.putExtra("contentId", festival.contentId)
+            intent.putExtra("previous_screen", "FestivalScreen") // 현재 화면 정보를 전달
+            intent.putExtra("contentId", festival.contentId) // 축제 ID 전달
             startActivity(intent)
         }
         festivalRecyclerView.adapter = festivalAdapter
@@ -104,13 +114,10 @@ class Festival : AppCompatActivity() {
         }
 
         call.enqueue(object : Callback<FestivalResponse> {
-            override fun onResponse(
-                call: Call<FestivalResponse>,
-                response: Response<FestivalResponse>
-            ) {
+            override fun onResponse(call: Call<FestivalResponse>, response: Response<FestivalResponse>) {
                 val moreFestivals = response.body()?.response?.body?.items?.item ?: emptyList()
 
-                // 중복된 데이터 방지
+                // 중복된 데이터 방지 및 추가
                 val existingFestivals = festivalAdapter.getFestivals()
                 val uniqueFestivals = moreFestivals.filter { newFestival ->
                     existingFestivals.none { it.contentId == newFestival.contentId }
@@ -118,7 +125,6 @@ class Festival : AppCompatActivity() {
 
                 if (uniqueFestivals.isNotEmpty()) {
                     festivalAdapter.addFestivals(uniqueFestivals)
-                    currentPage++
                 }
                 isLoading = false
             }
@@ -132,55 +138,28 @@ class Festival : AppCompatActivity() {
 
     private fun fetchAllFestivals() {
         currentPage = 1
-        val call = RetrofitClient.instance.getFestivals(page = currentPage, pageSize = 100)
+        isLoading = true
+
+        // Flask API 호출 (전체 데이터를 한 번에 가져옴)
+        val call = RetrofitClient.instance.getFestivals(
+            page = currentPage,
+            pageSize = 500
+        )
+
         call.enqueue(object : Callback<FestivalResponse> {
-            override fun onResponse(
-                call: Call<FestivalResponse>,
-                response: Response<FestivalResponse>
-            ) {
+            override fun onResponse(call: Call<FestivalResponse>, response: Response<FestivalResponse>) {
                 val festivals = response.body()?.response?.body?.items?.item ?: emptyList()
+                Log.d("API_CALL", "Response: ${response.raw()}")
+                Log.d("API_CALL", "Body: ${response.body()?.response?.body?.items?.item}")
 
-                val currentDate = LocalDate.now()
-                val currentYearMonth = currentDate.format(DateTimeFormatter.ofPattern("yyyyMM"))
-
-
-                // 축제 데이터 필터링 및 정렬
-                val filteredFestivals = festivals.filter { it.eventStartDate.isNotEmpty() }
-                    .distinctBy { it.contentId }
-
-                val parsedFestivals = filteredFestivals.mapNotNull { festival ->
-                    try {
-                        val eventStartDate = LocalDate.parse(
-                            festival.eventStartDate,
-                            DateTimeFormatter.ofPattern("yyyyMMdd")
-                        )
-                        festival to eventStartDate
-                    } catch (e: Exception) {
-                        null
-                    }
-                }
-
-                // 현재 달 -> 이후 달 -> 과거 달 순으로 정렬
-                val currentMonthFestivals =
-                    parsedFestivals.filter { it.second.format(DateTimeFormatter.ofPattern("yyyyMM")) == currentYearMonth }
-                        .sortedBy { it.second }
-                        .map { it.first }
-
-                val upcomingFestivals = parsedFestivals.filter { it.second > currentDate }
-                    .sortedBy { it.second }
-                    .map { it.first }
-
-                val pastFestivals = parsedFestivals.filter { it.second < currentDate }
-                    .sortedByDescending { it.second }
-                    .map { it.first }
-
-                val sortedFestivals = currentMonthFestivals + upcomingFestivals + pastFestivals
-                festivalAdapter.setFestivals(sortedFestivals)
+                // 현재 달 -> 이후 달 -> 과거 달 순으로 정렬된 축제 데이터 설정
+                festivalAdapter.setFestivals(festivals)
+                isLoading = false
             }
 
             override fun onFailure(call: Call<FestivalResponse>, t: Throwable) {
                 Toast.makeText(this@Festival, "API 호출 실패", Toast.LENGTH_SHORT).show()
-                Log.e("Festival", "API 호출 오류: ${t.message}")
+                isLoading = false
             }
         })
     }
@@ -190,32 +169,67 @@ class Festival : AppCompatActivity() {
         currentPage = 1
         isLoading = true
         selectedCategory = category
-        festivalAdapter.setFestivals(emptyList())
+        festivalAdapter.setFestivals(emptyList()) // 기존 데이터를 초기화
 
         // 1. 카테고리 검색 API 호출
         RetrofitClient.instance.searchFestivals(category, page = currentPage, pageSize = 100)
             .enqueue(object : Callback<FestivalResponse> {
-                override fun onResponse(
-                    call: Call<FestivalResponse>,
-                    response: Response<FestivalResponse>
-                ) {
+                override fun onResponse(call: Call<FestivalResponse>, response: Response<FestivalResponse>) {
                     val festivals = response.body()?.response?.body?.items?.item ?: emptyList()
-                    Log.d("fetchFestivalsByCategory", "Fetched festivals: $festivals")
 
-                    if (festivals.isNotEmpty()) {
-                        // 공통 정보(기간 정보)를 추가로 가져오기
-                        fetchFestivalDetailsWithDates(festivals)
-                    } else {
+                    if (festivals.isEmpty()) {
+                        Toast.makeText(this@Festival, "해당 카테고리에 축제가 없습니다.", Toast.LENGTH_SHORT).show()
                         isLoading = false
+                        return
                     }
+                    // 축제 데이터의 기간 정보 업데이트
+                    fetchFestivalDetailsWithDates(festivals)
                 }
 
                 override fun onFailure(call: Call<FestivalResponse>, t: Throwable) {
                     Log.e("fetchFestivalsByCategory", "API call failed: ${t.message}")
+                    Toast.makeText(this@Festival, "API 호출 실패", Toast.LENGTH_SHORT).show()
                     isLoading = false
                 }
             })
     }
+
+
+    private fun sortFestivalsByDate(festivals: List<FestivalItem>): List<FestivalItem> {
+        val currentDate = LocalDate.now()
+        val currentYearMonth = currentDate.format(DateTimeFormatter.ofPattern("yyyyMM"))
+
+        val currentMonthFestivals = festivals.filter {
+            it.eventStartDate.isNotEmpty() && parseDate(it.eventStartDate).format(DateTimeFormatter.ofPattern("yyyyMM")) == currentYearMonth
+        }
+
+        // 이후 달 축제 (오름차순)
+        val upcomingFestivals = festivals.filter {
+            it.eventStartDate.isNotEmpty() && parseDate(it.eventStartDate) > currentDate
+        }.sortedBy { parseDate(it.eventStartDate) }
+
+        // 과거 달 축제 (내림차순)
+        val pastFestivals = festivals.filter {
+            it.eventStartDate.isNotEmpty() && parseDate(it.eventStartDate) < currentDate
+        }.sortedByDescending { parseDate(it.eventStartDate) }
+
+        return currentMonthFestivals + upcomingFestivals + pastFestivals
+    }
+
+    // 날짜 문자열을 LocalDate로 변환하는 함수
+    private fun parseDate(date: String?): LocalDate {
+        return try {
+            if (date.isNullOrEmpty() || date.length != 8) {
+                LocalDate.MAX // 유효하지 않은 날짜는 가장 나중으로 설정
+            } else {
+                LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyyMMdd"))
+            }
+        } catch (e: Exception) {
+            Log.e("parseDate", "Error parsing date: $date, ${e.message}")
+            LocalDate.MAX
+        }
+    }
+
 
     private fun fetchFestivalDetailsWithDates(festivals: List<FestivalItem>) {
         val updatedFestivals = mutableListOf<FestivalItem>()
@@ -241,13 +255,32 @@ class Festival : AppCompatActivity() {
                         completedRequests++
 
                         if (completedRequests == festivals.size) {
-                            festivalAdapter.setFestivals(updatedFestivals)
+                            // 정렬 후 어댑터에 설정
+                            try {
+                                val sortedFestivals = sortFestivalsByDate(updatedFestivals)
+                                festivalAdapter.setFestivals(sortedFestivals)
+                            } catch (e: Exception) {
+                                Log.e("fetchFestivalDetailsWithDates", "정렬 오류: ${e.message}")
+                                Toast.makeText(this@Festival, "정렬 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                            isLoading = false
                         }
                     }
 
                     override fun onFailure(call: Call<CommonResponse>, t: Throwable) {
                         Log.e("fetchFestivalDetailsWithDates", "API 호출 실패: ${t.message}")
                         completedRequests++
+
+                        if (completedRequests == festivals.size) {
+                            try {
+                                val sortedFestivals = sortFestivalsByDate(updatedFestivals)
+                                festivalAdapter.setFestivals(sortedFestivals)
+                            } catch (e: Exception) {
+                                Log.e("fetchFestivalDetailsWithDates", "정렬 오류: ${e.message}")
+                                Toast.makeText(this@Festival, "정렬 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                            isLoading = false
+                        }
                     }
                 })
         }
