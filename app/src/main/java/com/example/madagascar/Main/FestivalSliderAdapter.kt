@@ -7,11 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.madagascar.API.DetailActivity
 import com.example.madagascar.API.FestivalItem
 import com.example.madagascar.R
+import com.google.firebase.auth.FirebaseAuth
 
 class FestivalSliderAdapter(
     private val context: Context,
@@ -46,6 +48,7 @@ class FestivalSliderAdapter(
         // 클릭 이벤트: DetailActivity로 이동
         holder.itemView.setOnClickListener {
             val intent = Intent(context, DetailActivity::class.java)
+            intent.putExtra("userId", FirebaseAuth.getInstance().currentUser?.uid)
             intent.putExtra("contentId", festival.contentId)
             context.startActivity(intent)
         }

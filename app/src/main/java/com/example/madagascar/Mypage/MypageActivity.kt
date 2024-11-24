@@ -67,7 +67,7 @@ class MypageActivity : AppCompatActivity() {
         val favoritesBtn = findViewById<ImageView>(R.id.btn_favorites)
 
         favoritesBtn.setOnClickListener {
-            val intent = Intent(this, Favorites::class.java)
+            val intent = Intent(this, FavoritesAdapter::class.java)
             startActivity(intent)
         }
 
