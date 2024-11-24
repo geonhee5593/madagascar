@@ -129,6 +129,7 @@ class MainActivity : AppCompatActivity() {
          freeBoradbtn.setOnClickListener {
              val intent = Intent(this, FreeBoradActivity::class.java)
              startActivity(intent)
+
          }
     }
 

@@ -5,20 +5,29 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ListView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.madagascar.R
-import kotlin.math.min
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlin.math.min
 
 data class FreeBoardItem(
-    val title: String,
-    val content: String,
-    var views: Int,
-    val date : String
+    var id: String = "", // Firestore에서 key로 사용할 ID
+    var title: String = "",
+    var content: String = "",
+    var views: Int = 0,
+    var date: String = ""
 )
 
+@Suppress("DEPRECATION")
 class FreeBoradActivity : AppCompatActivity() {
+
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val freeBoardCollection = firestore.collection("FreeBoardItems") // Firestore 컬렉션 참조
 
     private lateinit var searchEditText: EditText
     private lateinit var searchButton: Button
@@ -50,8 +59,12 @@ class FreeBoradActivity : AppCompatActivity() {
 
         // '새 글 작성' 버튼 클릭
         findViewById<Button>(R.id.button11).setOnClickListener {
+            // 새 글 작성 화면으로 이동
             startActivityForResult(Intent(this, ListtextmadeActivity::class.java), 1)
         }
+
+        // 게시글 조회
+        loadFreeBoardItems()
 
         // 이전 페이지 버튼 클릭
         prevButton.setOnClickListener {
@@ -70,26 +83,28 @@ class FreeBoradActivity : AppCompatActivity() {
             }
         }
 
-        // 리스트 아이템 클릭
-        listView.setOnItemClickListener { _, _, position, _ ->
-            val actualPosition = currentPage * pageSize + position
-            val selectedItem = fullDataList[actualPosition]
-
-            // ListItemActivity로 이동
-            Intent(this, ListItemActivity::class.java).apply {
-                putExtra("title", selectedItem.title)
-                putExtra("content", selectedItem.content)
-                putExtra("views", selectedItem.views)
-                putExtra("position", actualPosition)
-                startActivityForResult(this, 2)
-            }
-        }
-
         // 검색 버튼 클릭
         searchButton.setOnClickListener {
             val query = searchEditText.text.toString().trim()
             filterAndDisplayData(query)
         }
+    }
+
+    // Firestore에서 게시글 로드
+    private fun loadFreeBoardItems() {
+        freeBoardCollection.get()
+            .addOnSuccessListener { documents ->
+                fullDataList.clear()
+                for (document in documents) {
+                    val item = document.toObject(FreeBoardItem::class.java)
+                    item.id = document.id // Firestore 문서 ID를 설정
+                    fullDataList.add(item)
+                }
+                updatePage() // 데이터 로드 후 페이지 업데이트
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "데이터 로드 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     // 페이지 업데이트
@@ -126,16 +141,31 @@ class FreeBoradActivity : AppCompatActivity() {
                 val content = data?.getStringExtra("content") ?: ""
                 val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(System.currentTimeMillis()) // 현재 날짜
 
-                fullDataList.add(0, FreeBoardItem(title, content, 0, currentDate)) // 등록일 추가
-                currentPage = 0
-                updatePage()
+                // Firestore에 데이터 추가
+                val newItem = FreeBoardItem(title = title, content = content, views = 0, date = currentDate)
+                freeBoardCollection.add(newItem) // Firestore에 새 문서 추가
+                    .addOnSuccessListener { documentReference ->
+                        newItem.id = documentReference.id // Firestore 문서 ID 설정
+                        fullDataList.add(0, newItem) // 새 글을 맨 앞에 추가
+                        currentPage = 0
+                        updatePage()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "데이터 추가 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
             }
             2 -> if (resultCode == RESULT_OK) {
                 val updatedViews = data?.getIntExtra("updatedViews", 0) ?: 0
                 val position = data?.getIntExtra("position", -1) ?: -1
                 if (position in fullDataList.indices) {
-                    fullDataList[position].views = updatedViews
-                    updatePage()
+                    val updatedItem = fullDataList[position]
+                    updatedItem.views = updatedViews
+                    freeBoardCollection.document(updatedItem.id).set(updatedItem) // Firestore에 조회수 업데이트
+                        .addOnSuccessListener {
+                            updatePage()
+                        }
+                        .addOnFailureListener { e -> Toast.makeText(this, "조회수 업데이트 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
                 }
             }
         }
