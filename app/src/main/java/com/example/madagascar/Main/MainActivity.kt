@@ -187,5 +187,6 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null) // 핸들러 정리
     }
+
 }
 

@@ -48,7 +48,7 @@
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".Mypage.MypageActivity"
             android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".Mypage.Favorites"
+        <activity android:name=".Mypage.FavoritesActivity"
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".Mypage.Human"
             android:windowSoftInputMode="adjustNothing"/>

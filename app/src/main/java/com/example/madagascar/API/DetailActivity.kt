@@ -21,6 +21,8 @@ import retrofit2.Response
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import com.bumptech.glide.request.transition.Transition // Transition 인터페이스를 사용하기 위한 import
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class DetailActivity : AppCompatActivity() {
     private lateinit var titleView: TextView
@@ -31,10 +33,24 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var telView: TextView
     private lateinit var priceView: TextView
     private lateinit var playtimeView: TextView
+    private lateinit var favoriteButton: ImageView
+
+    private lateinit var firestore: FirebaseFirestore
+    private lateinit var userId: String
+    private var contentId: String? = null
+    private var isFavorite = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
+
+        // Firebase 초기화
+        firestore = FirebaseFirestore.getInstance()
+        userId = FirebaseAuth.getInstance().currentUser?.uid ?: run{
+            Toast.makeText(this, "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
 
         // 뷰 초기화
         initializeViews()
@@ -43,9 +59,18 @@ class DetailActivity : AppCompatActivity() {
         setupBackButton()
 
         // contentId를 받아 두 API 호출
-        val contentId = intent.getStringExtra("contentId")
-        if (contentId != null) {
-            fetchDetailData(contentId)
+        contentId = intent.getStringExtra("contentId")
+        contentId?.let {
+            fetchDetailData(it)
+            checkFavoriteStatus(it)
+        }
+        // 즐겨찾기 버튼 클릭 이벤트
+        favoriteButton.setOnClickListener {
+            if (isFavorite) {
+                removeFavorite()
+            } else {
+                addFavorite()
+            }
         }
     }
         // 뷰 초기화
@@ -58,7 +83,76 @@ class DetailActivity : AppCompatActivity() {
             telView = findViewById(R.id.tel)
             priceView = findViewById(R.id.price)
             playtimeView = findViewById(R.id.playtime)
+            favoriteButton = findViewById(R.id.favorite_button) // 즐겨찾기 버튼
         }
+
+    private fun checkFavoriteStatus(contentId: String) {
+        firestore.collection("users")
+            .document(userId)
+            .collection("favorites")
+            .document(contentId)
+            .get()
+            .addOnSuccessListener { document ->
+                isFavorite = document.exists()
+                updateFavoriteIcon()
+            }
+            .addOnFailureListener {
+                isFavorite = false
+                updateFavoriteIcon()
+                Toast.makeText(this, "즐겨찾기 상태 확인 실패", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun addFavorite() {
+        val favoriteData = mapOf(
+            "title" to titleView.text.toString(),
+            "image" to intent.getStringExtra("imageUrl") // 이미지 URL 전달
+        )
+
+        firestore.collection("users")
+            .document(userId)
+            .collection("favorites")
+            .document(contentId!!)
+            .set(favoriteData)
+            .addOnSuccessListener {
+                isFavorite = true
+                updateFavoriteIcon()
+                Toast.makeText(this, "즐겨찾기에 추가되었습니다.", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "즐겨찾기 추가 실패", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun removeFavorite() {
+        if (contentId == null || userId.isEmpty()) {
+            Toast.makeText(this, "필수 데이터가 누락되었습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        firestore.collection("users")
+            .document(userId)
+            .collection("favorites")
+            .document(contentId!!)
+            .delete()
+            .addOnSuccessListener {
+                isFavorite = false
+                updateFavoriteIcon()
+                Toast.makeText(this, "즐겨찾기에서 제거되었습니다.", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "즐겨찾기 제거 실패", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun updateFavoriteIcon() {
+        if (isFavorite) {
+            favoriteButton.setImageResource(R.drawable.ic_favorite_filled) // 노란 별
+        } else {
+            favoriteButton.setImageResource(R.drawable.ic_favorite_empty) // 빈 별
+        }
+    }
+
     private fun setupBackButton() {
         val backButton = findViewById<ImageView>(R.id.btn_arrow120)
         backButton.setOnClickListener { handleBackNavigation() }

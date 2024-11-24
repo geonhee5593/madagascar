@@ -67,8 +67,18 @@
             android:textSize="16sp"
             android:layout_marginBottom="16dp" />
 
-        <!-- 구분선 -->
-        <View
+            <!-- 구분선 -->
+            <ImageView
+                android:id="@+id/favorite_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_margin="16dp"
+                android:contentDescription="즐겨찾기"
+                android:src="@drawable/ic_favorite_empty"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#E0E0E0"
