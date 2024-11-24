@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="8dp"
-    tools:context=".API.Festival">
+    tools:context=".API.MonthFestival">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,7 +17,7 @@
 
         <!-- 뒤로가기 화살표 -->
         <ImageView
-            android:id="@+id/btn_arrow110"
+            android:id="@+id/btn_month_arrow"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/arrow"
@@ -29,10 +29,16 @@
             android:layout_width="280dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="축제 정보"
+            android:text="월 별 축제"
             android:textSize="24sp"
             android:textStyle="bold" />
     </LinearLayout>
+
+    <Spinner
+        android:id="@+id/monthSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:spinnerMode="dropdown"/>
 
     <!-- 검색 바 -->
     <LinearLayout
@@ -42,11 +48,10 @@
         android:padding="8dp">
 
         <EditText
-            android:id="@+id/searchEditText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="Search" />
+            android:id="@+id/searchField"
+            android:layout_width="300dp"
+            android:layout_height="50dp"
+            android:hint="축제 검색" />
 
         <Button
             android:id="@+id/searchButton"
@@ -55,16 +60,9 @@
             android:text="검색" />
     </LinearLayout>
 
-    <!-- 카테고리 리스트 -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/categoryRecyclerView"
+        android:id="@+id/monthRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" />
-
-    <!-- 축제 리스트 -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/festivalRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 </LinearLayout>

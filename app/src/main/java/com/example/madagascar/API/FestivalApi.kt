@@ -9,7 +9,7 @@ interface FestivalApi {
     @GET("/api/festivals")
     fun getFestivals(
         @Query("page") page: Int = 1,
-        @Query("pageSize") pageSize: Int = 10,
+        @Query("pageSize") pageSize: Int = 500,
         @Query("eventStartDate") startDate: String? = null
     ): Call<FestivalResponse>
 
@@ -26,7 +26,7 @@ interface FestivalApi {
     fun searchFestivals(
         @Query("keyword") keyword: String,
         @Query("page") page: Int = 1,
-    @Query("pageSize") pageSize: Int = 10
+        @Query("pageSize") pageSize: Int = 500
     ): Call<FestivalResponse>
 
 
@@ -37,4 +37,13 @@ interface FestivalApi {
         @Query("longitude") longitude: Double,
         @Query("radius") radius: Int = 5000
     ): Call<FestivalResponse>
+
+    // 6. 지역별 축제 조회 API (추가)
+    @GET("/api/regionFestivals")
+    fun getRegionFestivals(
+        @Query("regionName") regionName: String,
+        @Query("areaCode") areaCode: Int // 지역명을 숫자 코드로 전달
+    ): Call<FestivalResponse>
+
+    abstract fun getRegionFestivals(regionName: String): Call<FestivalResponse>
 }

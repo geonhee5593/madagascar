@@ -18,7 +18,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Madagascar"
         tools:targetApi="35">
-
+        <activity
+            android:name=".API.RegionFestival"
+            android:exported="false" />
         <activity
             android:name=".Mypage.ChangePasswordActivity"
             android:exported="false" />
@@ -26,6 +28,7 @@
             android:name=".Login"
             android:exported="true"
             android:windowSoftInputMode="adjustNothing">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,6 +36,8 @@
             </intent-filter>
         </activity>
         <!--키보드가 나타나도 ui가 변하지 않게 adjustPan 설정 -->
+        <activity android:name=".Main.MainActivity"
+            android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".API.Festival" />
         <activity android:name=".API.DetailActivity"/>
         <activity android:name=".Hobby.hobby_Activity"
@@ -46,8 +51,6 @@
         <activity android:name=".Mypage.Favorites"
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".Mypage.Human"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".Main.MainActivity"
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".freeborad.ListItemActivity"
             android:windowSoftInputMode="adjustNothing" />
@@ -67,6 +70,9 @@
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".Mypage.NoticeActivity"
             android:exported="true"
+            android:windowSoftInputMode="adjustNothing"/>
+        <activity
+            android:name=".API.MonthFestival"
             android:windowSoftInputMode="adjustNothing"/>
         <meta-data
             android:name="com.naver.maps.map.CLIENT_ID"
