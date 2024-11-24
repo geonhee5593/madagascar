@@ -8,12 +8,16 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.madagascar.R
+import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class ListtextmadeActivity : AppCompatActivity() {
 
     private lateinit var titleEditText: EditText
     private lateinit var contentEditText: EditText
     private lateinit var saveButton: Button
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,25 +28,33 @@ class ListtextmadeActivity : AppCompatActivity() {
         contentEditText = findViewById(R.id.contentEditText9)
         saveButton = findViewById(R.id.saveButton9)
 
-        // 전달된 데이터 받기
-        val title = intent.getStringExtra("title") ?: ""
-        val content = intent.getStringExtra("content") ?: ""
-
-        // EditText에 초기값 설정
-        titleEditText.setText(title)
-        contentEditText.setText(content)
-
         // 저장 버튼 클릭 리스너
         saveButton.setOnClickListener {
-            val newTitle = titleEditText.text.toString()
-            val newContent = contentEditText.text.toString()
+            val title = titleEditText.text.toString().trim()
+            val content = contentEditText.text.toString().trim()
+            val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(System.currentTimeMillis())
 
-            // 새 데이터를 반환
-            val resultIntent = Intent()
-            resultIntent.putExtra("title", newTitle)
-            resultIntent.putExtra("content", newContent)
-            setResult(RESULT_OK, resultIntent)
-            finish()
+            if (title.isEmpty() || content.isEmpty()) {
+                Toast.makeText(this, "제목과 내용을 입력해주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Firestore에 새 데이터 추가
+            val newPost = hashMapOf(
+                "title" to title,
+                "content" to content,
+                "views" to 0,
+                "date" to currentDate
+            )
+            firestore.collection("FreeBoardItems")
+                .add(newPost)
+                .addOnSuccessListener {
+                    Toast.makeText(this, "게시글이 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                    finish() // Activity 종료
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "게시글 저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 }
