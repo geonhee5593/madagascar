@@ -16,19 +16,44 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import android.view.View
+import android.widget.ImageView
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.madagascar.Main.MainActivity
 
 class RegionFestival : AppCompatActivity() {
     private lateinit var regionSpinner: Spinner
     private lateinit var searchField: EditText
     private lateinit var searchButton: Button
     private lateinit var regionRecyclerView: RecyclerView
-    private val regions = listOf("서울", "인천", "대전", "대구", "광주", "부산", "울산", "경기도", "강원특별자치도", "충청북도", "충청남도", "경상북도", "경상남도", "전북특별자치도", "전라남도")
+    private val regions = listOf(
+        "서울",
+        "인천",
+        "대전",
+        "대구",
+        "광주",
+        "부산",
+        "울산",
+        "경기도",
+        "강원특별자치도",
+        "충청북도",
+        "충청남도",
+        "경상북도",
+        "경상남도",
+        "전북특별자치도",
+        "전라남도"
+    )
     private val festivalsByRegion = mutableMapOf<String, List<FestivalItem>>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_region_festival)
+
+        val regionBtn = findViewById<ImageView>(R.id.btn_arrow110)
+
+        regionBtn.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java) // 'FavoritesActivity'로 수정
+            startActivity(intent)
+        }
 
         regionSpinner = findViewById(R.id.regionSpinner)
         searchField = findViewById(R.id.searchField)
@@ -49,13 +74,20 @@ class RegionFestival : AppCompatActivity() {
         }
     }
 
+
     private fun setupSpinner() {
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, listOf("전체") + regions)
+        val adapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, listOf("전체") + regions)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         regionSpinner.adapter = adapter
 
         regionSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 val selectedRegion = regionSpinner.selectedItem.toString()
 
                 if (selectedRegion == "전체") {
@@ -65,7 +97,10 @@ class RegionFestival : AppCompatActivity() {
                     val regionFestivals = festivalsByRegion[selectedRegion] ?: emptyList()
 
                     // 특정 지역 축제만 표시 (가로 2개 배치)
-                    updateRecyclerView(mapOf(selectedRegion to regionFestivals), isRegionSpecific = true)
+                    updateRecyclerView(
+                        mapOf(selectedRegion to regionFestivals),
+                        isRegionSpecific = true
+                    )
                 }
             }
 
@@ -75,7 +110,10 @@ class RegionFestival : AppCompatActivity() {
         }
     }
 
-    private fun updateRecyclerView(updatedData: Map<String, List<FestivalItem>>, isRegionSpecific: Boolean) {
+    private fun updateRecyclerView(
+        updatedData: Map<String, List<FestivalItem>>,
+        isRegionSpecific: Boolean
+    ) {
         // 특정 지역 선택 시 가로 2개씩 배치, 아니면 기본 세로 레이아웃 사용
         if (isRegionSpecific) {
             regionRecyclerView.layoutManager = GridLayoutManager(this, 2) // 가로 2개씩 배치
@@ -94,11 +132,15 @@ class RegionFestival : AppCompatActivity() {
     private fun fetchAllFestivals() {
         RetrofitClient.instance.getFestivals(page = 1, pageSize = 500)
             .enqueue(object : Callback<FestivalResponse> {
-                override fun onResponse(call: Call<FestivalResponse>, response: Response<FestivalResponse>) {
+                override fun onResponse(
+                    call: Call<FestivalResponse>,
+                    response: Response<FestivalResponse>
+                ) {
                     val festivals = response.body()?.response?.body?.items?.item ?: emptyList()
 
                     regions.forEach { region ->
-                        festivalsByRegion[region] = festivals.filter { it.addr1?.contains(region) == true }
+                        festivalsByRegion[region] =
+                            festivals.filter { it.addr1?.contains(region) == true }
                     }
 
                     // 기본 전체 화면은 세로 배치
@@ -106,7 +148,8 @@ class RegionFestival : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<FestivalResponse>, t: Throwable) {
-                    Toast.makeText(this@RegionFestival, "축제 데이터를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@RegionFestival, "축제 데이터를 불러오지 못했습니다.", Toast.LENGTH_SHORT)
+                        .show()
                 }
             })
     }
@@ -115,7 +158,10 @@ class RegionFestival : AppCompatActivity() {
     private fun fetchRegionFestivals(regionName: String) {
         RetrofitClient.instance.getRegionFestivals(regionName)
             .enqueue(object : Callback<FestivalResponse> {
-                override fun onResponse(call: Call<FestivalResponse>, response: Response<FestivalResponse>) {
+                override fun onResponse(
+                    call: Call<FestivalResponse>,
+                    response: Response<FestivalResponse>
+                ) {
                     val festivals = response.body()?.response?.body?.items?.item ?: emptyList()
 
                     festivalsByRegion[regionName] = festivals
@@ -123,7 +169,11 @@ class RegionFestival : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<FestivalResponse>, t: Throwable) {
-                    Toast.makeText(this@RegionFestival, "지역별 축제 데이터를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@RegionFestival,
+                        "지역별 축제 데이터를 불러오지 못했습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             })
     }
@@ -137,6 +187,7 @@ class RegionFestival : AppCompatActivity() {
         }
         regionRecyclerView.adapter = adapter
     }
+
 
     private fun searchFestivals(query: String, region: String) {
         val filteredFestivals = if (region == "전체") {

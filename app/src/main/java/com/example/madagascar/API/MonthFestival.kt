@@ -16,7 +16,9 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import android.view.View
+import android.widget.ImageView
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.madagascar.Main.MainActivity
 
 class MonthFestival : AppCompatActivity() {
     private lateinit var monthSpinner: Spinner
@@ -30,6 +32,13 @@ class MonthFestival : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_month_festival)
+
+        val monthBtn = findViewById<ImageView>(R.id.btn_month_arrow)
+
+        monthBtn.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java) // 'FavoritesActivity'로 수정
+            startActivity(intent)
+        }
 
         monthSpinner = findViewById(R.id.monthSpinner)
         searchField = findViewById(R.id.searchField)

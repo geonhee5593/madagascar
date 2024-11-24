@@ -48,8 +48,6 @@
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".Mypage.MypageActivity"
             android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".Mypage.Notice"
-            android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".Mypage.Favorites"
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".Mypage.Human"
@@ -62,7 +60,7 @@
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".Hobby.hobby"
             android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".freeborad.listtextmadeActivity"
+        <activity android:name=".freeborad.ListtextmadeActivity"
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".freeborad.FreeBoradActivity"
             android:windowSoftInputMode="adjustNothing"/>
