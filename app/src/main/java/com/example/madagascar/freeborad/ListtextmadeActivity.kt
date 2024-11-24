@@ -50,6 +50,13 @@ class ListtextmadeActivity : AppCompatActivity() {
                 .add(newPost)
                 .addOnSuccessListener {
                     Toast.makeText(this, "게시글이 저장되었습니다.", Toast.LENGTH_SHORT).show()
+
+                    // 게시글 저장 후 FreeBoradActivity로 데이터 전달
+                    val resultIntent = Intent()
+                    resultIntent.putExtra("newPostTitle", title)
+                    resultIntent.putExtra("newPostContent", content)
+                    setResult(RESULT_OK, resultIntent) // 결과를 FreeBoradActivity로 전달
+
                     finish() // Activity 종료
                 }
                 .addOnFailureListener { e ->
