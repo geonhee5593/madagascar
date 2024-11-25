@@ -93,6 +93,7 @@ class MonthFestival : AppCompatActivity() {
         val adapter = FestivalAdapter(updatedData.values.flatten().toMutableList()) { festival ->
             val intent = Intent(this, DetailActivity::class.java)
             intent.putExtra("contentId", festival.contentId)
+            intent.putExtra("previous_screen", "MonthFestival")
             startActivity(intent)
         }
         monthRecyclerView.adapter = adapter

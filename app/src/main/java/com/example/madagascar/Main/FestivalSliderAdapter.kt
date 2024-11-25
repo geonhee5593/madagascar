@@ -20,6 +20,12 @@ class FestivalSliderAdapter(
     private val festivalList: List<FestivalItem>
 ) : RecyclerView.Adapter<FestivalSliderAdapter.FestivalViewHolder>() {
 
+    private var onItemClickListener: ((FestivalItem) -> Unit)? = null
+
+    fun setOnItemClickListener(listener: (FestivalItem) -> Unit) {
+        this.onItemClickListener = listener
+    }
+
     inner class FestivalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val festivalImage: ImageView = itemView.findViewById(R.id.festivalImage)
         val festivalInfo: TextView = itemView.findViewById(R.id.festivalInfo)

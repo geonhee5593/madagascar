@@ -108,5 +108,5 @@ data class Category(
 data class FavoriteItem(
     val contentId: String, // 축제 ID
     val title: String, // 축제 제목
-    val image: String? // 축제 이미지 URL (nullable)
+    val firstimage: String? //축제 이미지
 )

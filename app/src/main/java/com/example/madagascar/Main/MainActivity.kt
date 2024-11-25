@@ -13,6 +13,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
+import com.example.madagascar.API.DetailActivity
 import com.example.madagascar.API.Festival
 import com.example.madagascar.API.FestivalResponse
 import com.example.madagascar.API.MonthFestival
@@ -26,6 +27,8 @@ import com.example.madagascar.Mypage.MypageActivity
 import com.example.madagascar.R
 import com.example.madagascar.happyguy.HappguyActivity
 import com.example.madagascar.Hobby.hobby_Activity
+import com.example.madagascar.Mypage.Favorites
+import com.example.madagascar.Mypage.FavoritesAdapter
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import retrofit2.Call
@@ -81,8 +84,12 @@ class MainActivity : AppCompatActivity() {
         /* btn_star1 버튼 클릭 시 즐겨찾기 화면으로 이동 */
         val favoritesBtn = findViewById<ImageView>(R.id.star1)
         favoritesBtn.setOnClickListener {
-            val intent = Intent(this, FavoritesActivity::class.java)
-            startActivity(intent)
+            try {
+                val intent = Intent(this, Favorites::class.java)
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(this, "즐겨찾기 화면으로 이동 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            }
         }
 
          /* btn_imageView4 버튼 클릭 시 내 위치 기반 축제 화면으로 이동 */
@@ -181,7 +188,19 @@ class MainActivity : AppCompatActivity() {
             }
         }
         handler.postDelayed(runnable, 3000)
+
+        // 어댑터에 클릭 리스너 설정
+        if (viewPager2.adapter is FestivalSliderAdapter) {
+            val adapter = viewPager2.adapter as FestivalSliderAdapter
+            adapter.setOnItemClickListener { festival ->
+                val intent = Intent(this@MainActivity, DetailActivity::class.java)
+                intent.putExtra("contentId", festival.contentId)
+                intent.putExtra("previous_screen", "MainActivity")
+                startActivity(intent)
+            }
+        }
     }
+
 
     override fun onDestroy() {
         super.onDestroy()

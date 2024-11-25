@@ -32,8 +32,8 @@
     <!-- 즐겨찾기 아이콘 -->
     <ImageView
         android:id="@+id/favoriteIcon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:layout_marginTop="8dp"
         android:src="@drawable/ic_favorite_filled"
         android:contentDescription="즐겨찾기 아이콘"
