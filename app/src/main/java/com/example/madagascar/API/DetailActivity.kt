@@ -21,6 +21,8 @@ import retrofit2.Response
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import com.bumptech.glide.request.transition.Transition // Transition 인터페이스를 사용하기 위한 import
+import com.example.madagascar.Main.MainActivity
+import com.example.madagascar.Mypage.Favorites
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -104,10 +106,16 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun addFavorite() {
+        if (fetchedImageUrl.isNullOrEmpty()) {
+            Toast.makeText(this, "이미지 URL을 가져오지 못했습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val favoriteData = mapOf(
-            "title" to titleView.text.toString(),
-            "image" to intent.getStringExtra("imageUrl") // 이미지 URL 전달
+            "title" to titleView.text.toString(), // 제목 가져오기
+            "image" to fetchedImageUrl // 저장된 이미지 URL 사용
         )
+
 
         firestore.collection("users")
             .document(userId)
@@ -155,7 +163,9 @@ class DetailActivity : AppCompatActivity() {
 
     private fun setupBackButton() {
         val backButton = findViewById<ImageView>(R.id.btn_arrow120)
-        backButton.setOnClickListener { handleBackNavigation() }
+        backButton.setOnClickListener {
+            handleBackNavigation()
+        }
     }
 
     private fun handleBackNavigation() {
@@ -171,10 +181,28 @@ class DetailActivity : AppCompatActivity() {
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
             }
+
+            "MonthFestival" -> {
+                val intent = Intent(this, MonthFestival::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                startActivity(intent)
+            }
+
+            "Favorites" -> {
+                val intent = Intent(this, Favorites::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                startActivity(intent)
+            }
+            "MainActivity" -> {
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                startActivity(intent)
+            }
             else -> onBackPressedDispatcher.onBackPressed()
         }
     }
 
+    private var fetchedImageUrl: String? = null // API로 가져온 이미지 URL 저장용
 
     private fun fetchDetailData(contentId: String) {
         // 공통 정보 호출
@@ -189,6 +217,7 @@ class DetailActivity : AppCompatActivity() {
             ) {
                 val commonItem = response.body()?.response?.body?.items?.item?.firstOrNull()
                 if (commonItem != null) {
+                    fetchedImageUrl = commonItem.firstimage // 이미지 URL 저장
                     updateCommonData(commonItem)
                 } else {
                     Toast.makeText(this@DetailActivity, "공통 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT)

@@ -55,6 +55,7 @@ class RegionFestival : AppCompatActivity() {
             startActivity(intent)
         }
 
+
         regionSpinner = findViewById(R.id.regionSpinner)
         searchField = findViewById(R.id.searchField)
         searchButton = findViewById(R.id.searchButton)
@@ -124,6 +125,7 @@ class RegionFestival : AppCompatActivity() {
         val adapter = FestivalAdapter(updatedData.values.flatten().toMutableList()) { festival ->
             val intent = Intent(this, DetailActivity::class.java)
             intent.putExtra("contentId", festival.contentId)
+            intent.putExtra("previous_screen", "RegionFestival") // 이전 화면 정보 전달
             startActivity(intent)
         }
         regionRecyclerView.adapter = adapter

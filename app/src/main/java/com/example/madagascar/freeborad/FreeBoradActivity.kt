@@ -144,21 +144,15 @@ class FreeBoradActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
             1 -> if (resultCode == RESULT_OK) {
-                val title = data?.getStringExtra("title") ?: ""
-                val content = data?.getStringExtra("content") ?: ""
+                val title = data?.getStringExtra("newPostTitle") ?: ""
+                val content = data?.getStringExtra("newPostContent") ?: ""
                 val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(System.currentTimeMillis())
 
+                // Firestore 저장 대신 로컬 리스트에만 추가
                 val newItem = FreeBoardItem(title = title, content = content, views = 0, date = currentDate)
-                freeBoardCollection.add(newItem)
-                    .addOnSuccessListener { documentReference ->
-                        newItem.id = documentReference.id
-                        fullDataList.add(0, newItem)
-                        currentPage = 0
-                        updatePage()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(this, "데이터 추가 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
+                fullDataList.add(0, newItem)
+                currentPage = 0
+                updatePage() // UI 갱신
             }
             2 -> if (resultCode == RESULT_OK) {
                 val updatedViews = data?.getIntExtra("updatedViews", 0) ?: 0
