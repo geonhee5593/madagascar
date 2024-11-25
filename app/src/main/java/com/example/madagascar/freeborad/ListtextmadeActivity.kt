@@ -28,7 +28,6 @@ class ListtextmadeActivity : AppCompatActivity() {
         contentEditText = findViewById(R.id.contentEditText9)
         saveButton = findViewById(R.id.saveButton9)
 
-        // 저장 버튼 클릭 리스너
         saveButton.setOnClickListener {
             val title = titleEditText.text.toString().trim()
             val content = contentEditText.text.toString().trim()
@@ -39,7 +38,7 @@ class ListtextmadeActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Firestore에 새 데이터 추가
+            // Firestore에 데이터 저장
             val newPost = hashMapOf(
                 "title" to title,
                 "content" to content,
@@ -50,11 +49,19 @@ class ListtextmadeActivity : AppCompatActivity() {
                 .add(newPost)
                 .addOnSuccessListener {
                     Toast.makeText(this, "게시글이 저장되었습니다.", Toast.LENGTH_SHORT).show()
+
+                    // FreeBoradActivity에 전달할 데이터 설정
+                    val resultIntent = Intent()
+                    resultIntent.putExtra("newPostTitle", title)
+                    resultIntent.putExtra("newPostContent", content)
+                    setResult(RESULT_OK, resultIntent) // FreeBoradActivity에 데이터 전달
+
                     finish() // Activity 종료
                 }
                 .addOnFailureListener { e ->
                     Toast.makeText(this, "게시글 저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         }
+
     }
 }

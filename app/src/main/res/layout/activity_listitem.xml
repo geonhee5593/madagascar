@@ -71,7 +71,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="댓글을 입력하세요" />
+                android:hint="댓글을 입력하세요"
+                android:maxHeight="30dp" /> <!-- 댓글 입력란의 최대 높이 지정 -->
 
             <Button
                 android:id="@+id/commentButton"
@@ -80,12 +81,12 @@
                 android:text="등록" />
         </LinearLayout>
 
-        <!-- 댓글 목록 -->
+        <!-- 댓글 목록을 스크롤 가능한 영역으로 감싸기 -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/commentsRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp" />
+            android:layout_height="200dp"
+        android:padding="8dp" />
     </LinearLayout>
 
     <!-- 돌아가기 버튼 -->
