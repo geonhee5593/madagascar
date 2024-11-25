@@ -69,6 +69,8 @@
         <activity android:name=".Mypage.NoticeActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustNothing"/>
+        <activity android:name=".FindActivity"
+            android:windowSoftInputMode="adjustNothing"/>
         <activity
             android:name=".Mypage.ChangePasswordActivity"
             android:exported="true" />
