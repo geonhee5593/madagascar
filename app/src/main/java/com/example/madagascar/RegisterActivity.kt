@@ -1,12 +1,16 @@
 package com.example.madagascar
 
 import android.content.Intent
+import android.graphics.LinearGradient
+import android.graphics.Shader
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.*
 import com.google.firebase.firestore.FirebaseFirestore
@@ -18,13 +22,37 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var firestore: FirebaseFirestore
     private var verificationId: String? = null
 
+
+    // 버튼 상태 업데이트 함수
+    private fun updateButtonState(button: Button, isAvailable: Boolean) {
+        if (isAvailable) {
+            button.setBackgroundColor(ContextCompat.getColor(this, R.color.deep_blue)) // 사용 가능 시 진한 파란색
+        } else {
+            button.setBackgroundColor(ContextCompat.getColor(this, R.color.light_blue)) // 사용 불가능 시 연한 파란색
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
+        // 축모아 그라데이션
+        val titleTextView: TextView = findViewById(R.id.app_title)
+        val paint = titleTextView.paint
+        val width = paint.measureText(titleTextView.text.toString())
 
+        val shader = LinearGradient(
+            0f, 0f, width, 0f,
+            intArrayOf(
+                ContextCompat.getColor(this, R.color.deep_blue),  // 진한 파란색
+                ContextCompat.getColor(this, R.color.light_blue) // 연한 파란색
+            ),
+            null,
+            Shader.TileMode.CLAMP
+        )
+        titleTextView.paint.shader = shader
         val registerButton: Button = findViewById(R.id.buttonRegister)
         registerButton.isEnabled = false // 처음에는 회원가입 버튼 비활성화
 
@@ -36,27 +64,44 @@ class RegisterActivity : AppCompatActivity() {
         checkUsernameButton.setOnClickListener {
             val username = findViewById<EditText>(R.id.editTextUsername).text.toString()
             if (isValidUsername(username)) {
-                checkUsernameAvailability(username)
+                checkUsernameAvailability(username, checkUsernameButton)
             } else {
                 Toast.makeText(this, "사용자 이름은 2글자 이상 한글, 영어, 숫자만 입력 가능합니다.", Toast.LENGTH_SHORT).show()
+                updateButtonState(checkUsernameButton, false)
             }
         }
 
         checkIdButton.setOnClickListener {
             val id = findViewById<EditText>(R.id.editTextId).text.toString()
-            checkIdAvailability(id)
+            if (id.isNotEmpty()) {
+                checkIdAvailability(id, checkIdButton)
+            } else {
+                Toast.makeText(this, "아이디를 입력하세요.", Toast.LENGTH_SHORT).show()
+                updateButtonState(checkIdButton, false)
+            }
         }
 
         sendCodeButton.setOnClickListener {
             val phoneNumber = findViewById<EditText>(R.id.editTextPhone).text.toString()
-            val formattedPhoneNumber = formatPhoneNumber(phoneNumber)  // 국제 형식으로 변환
-            Log.d("RegisterActivity", "Formatted phone number: $formattedPhoneNumber")
-            sendVerificationCode(formattedPhoneNumber)
+            if (phoneNumber.matches("^\\d{10,11}$".toRegex())) {
+                val formattedPhoneNumber = formatPhoneNumber(phoneNumber)
+                sendVerificationCode(formattedPhoneNumber)
+                updateButtonState(sendCodeButton, true)
+            } else {
+                Toast.makeText(this, "유효한 전화번호를 입력하세요.", Toast.LENGTH_SHORT).show()
+                updateButtonState(sendCodeButton, false)
+            }
         }
 
         verifyCodeButton.setOnClickListener {
             val code = findViewById<EditText>(R.id.editTextVerificationCode).text.toString()
-            verifyCode(code)
+            if (code.isNotEmpty()) {
+                verifyCode(code)
+                updateButtonState(verifyCodeButton, true)
+            } else {
+                Toast.makeText(this, "인증 코드를 입력하세요.", Toast.LENGTH_SHORT).show()
+                updateButtonState(verifyCodeButton, false)
+            }
         }
 
         registerButton.setOnClickListener {
@@ -65,40 +110,45 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun isValidUsername(username: String): Boolean {
-        // 한글, 영어, 숫자만 허용하는 정규식 (최소 2글자 이상)
         val usernamePattern = "^[가-힣a-zA-Z0-9]{2,}$"
         return username.matches(usernamePattern.toRegex())
     }
 
-    private fun checkUsernameAvailability(username: String) {
+    private fun checkUsernameAvailability(username: String, button: Button) {
         firestore.collection("users")
             .whereEqualTo("username", username)
             .get()
             .addOnSuccessListener { documents ->
                 if (documents.isEmpty) {
                     Toast.makeText(this, "사용 가능한 이름입니다.", Toast.LENGTH_SHORT).show()
+                    updateButtonState(button, true) // 중복되지 않으면 버튼 활성화
                 } else {
                     Toast.makeText(this, "이미 사용중인 이름입니다.", Toast.LENGTH_SHORT).show()
+                    updateButtonState(button, false) // 중복되면 버튼 비활성화
                 }
             }
             .addOnFailureListener { e ->
                 Log.e("RegisterActivity", "사용자 이름 확인 오류", e)
+                updateButtonState(button, false) // 오류 발생 시 비활성화
             }
     }
 
-    private fun checkIdAvailability(id: String) {
+    private fun checkIdAvailability(id: String, button: Button) {
         firestore.collection("users")
             .whereEqualTo("id", id)
             .get()
             .addOnSuccessListener { documents ->
                 if (documents.isEmpty) {
                     Toast.makeText(this, "사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show()
+                    updateButtonState(button, true) // 중복되지 않으면 버튼 활성화
                 } else {
                     Toast.makeText(this, "이미 사용중인 아이디입니다.", Toast.LENGTH_SHORT).show()
+                    updateButtonState(button, false) // 중복되면 버튼 비활성화
                 }
             }
             .addOnFailureListener { e ->
                 Log.e("RegisterActivity", "아이디 확인 오류", e)
+                updateButtonState(button, false) // 오류 발생 시 비활성화
             }
     }
 
@@ -133,7 +183,6 @@ class RegisterActivity : AppCompatActivity() {
             })
             .build()
         PhoneAuthProvider.verifyPhoneNumber(options)
-        auth.setLanguageCode("kr")
     }
 
     private fun verifyCode(code: String) {
@@ -201,22 +250,20 @@ class RegisterActivity : AppCompatActivity() {
 
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
-            val uid = user.uid // Firebase Auth UID
+            val uid = user.uid
             val userData = hashMapOf(
                 "username" to username,
                 "id" to id,
                 "phoneNumber" to phoneNumber,
                 "password" to password,
-                "isFirstLogin" to true, // 첫 로그인 플래그 추가
+                "isFirstLogin" to true,
                 "isAdmin" to false
             )
 
-            // Firestore에 UID를 문서 ID로 사용
             firestore.collection("users").document(uid)
                 .set(userData)
                 .addOnSuccessListener {
                     Toast.makeText(this, "회원가입 성공", Toast.LENGTH_SHORT).show()
-                    Log.d("RegisterActivity", "회원가입 정보 Firestore에 저장됨: $username, $id, $phoneNumber")
                     navigateToLogin()
                 }
                 .addOnFailureListener { e ->
@@ -227,7 +274,6 @@ class RegisterActivity : AppCompatActivity() {
             Toast.makeText(this, "사용자 인증 정보가 없습니다.", Toast.LENGTH_SHORT).show()
         }
     }
-
 
     private fun navigateToLogin() {
         val intent = Intent(this, Login::class.java)
