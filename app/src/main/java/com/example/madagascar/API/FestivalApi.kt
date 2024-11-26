@@ -45,5 +45,17 @@ interface FestivalApi {
         @Query("areaCode") areaCode: Int // 지역명을 숫자 코드로 전달
     ): Call<FestivalResponse>
 
+    // 7. 카테고리별 축제 조회 API
+    @GET("/api/festivalsByCategory")
+    fun getFestivalsByCategory(
+        @Query("category") category: String,
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 500,
+        @Query("eventStartDate") eventStartDate: String? = null,
+        @Query("eventEndDate") eventEndDate: String? = null
+    ): Call<FestivalResponse>
+
+
+
     abstract fun getRegionFestivals(regionName: String): Call<FestivalResponse>
 }

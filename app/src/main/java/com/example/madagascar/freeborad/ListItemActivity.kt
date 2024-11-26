@@ -1,6 +1,8 @@
 package com.example.madagascar.freeborad
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -46,11 +48,11 @@ class ListItemActivity : AppCompatActivity() {
 
         val title = intent.getStringExtra("title") ?: "No Title"
         val content = intent.getStringExtra("content") ?: "No Content"
-        views = intent.getIntExtra("views", 0)
         documentId = intent.getStringExtra("documentId") ?: ""
 
+        // documentId가 비어있는 경우 오류 메시지를 띄우고 종료
         if (documentId.isEmpty()) {
-            Toast.makeText(this, "Invalid document ID", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "잘못된 게시글입니다.", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -59,14 +61,12 @@ class ListItemActivity : AppCompatActivity() {
         contentTextView.text = content
         updateViews()
 
-        // 댓글 RecyclerView 설정
         commentAdapter = CommentAdapter(comments)
         commentsRecyclerView.layoutManager = LinearLayoutManager(this)
         commentsRecyclerView.adapter = commentAdapter
 
         loadComments()
 
-        // 댓글 등록 버튼 클릭 처리
         commentButton.setOnClickListener {
             val commentText = commentEditText.text.toString().trim()
             if (commentText.isNotEmpty()) {
@@ -76,34 +76,56 @@ class ListItemActivity : AppCompatActivity() {
             }
         }
 
-        // 뒤로가기 버튼 클릭 처리
         findViewById<Button>(R.id.backButton).setOnClickListener {
             finish()
         }
     }
 
-    // 조회수 업데이트
     private fun updateViews() {
-        views++
-        viewsTextView.text = "조회수: $views"
-
+        // Firestore에서 조회수를 가져와서 업데이트
         firestore.collection("FreeBoardItems")
             .document(documentId)
-            .update("views", views)
-            .addOnSuccessListener {
-                Toast.makeText(this, "조회수가 업데이트되었습니다.", Toast.LENGTH_SHORT).show()
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val currentViews = document.getLong("views")?.toInt() ?: 0
+                    views = currentViews + 1
+
+                    // 조회수 업데이트
+                    firestore.collection("FreeBoardItems")
+                        .document(documentId)
+                        .update("views", views)
+                        .addOnSuccessListener {
+                            Log.d("ListItemActivity", "조회수 업데이트 성공: $views")
+                            viewsTextView.text = "조회수: $views"
+                            // 조회수 업데이트 후 FreeBoradActivity로 결과 전달
+                            val resultIntent = Intent().apply {
+                                putExtra("updatedViews", views)
+                                putExtra("documentId", documentId)
+                            }
+                            setResult(RESULT_OK, resultIntent)
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("ListItemActivity", "조회수 업데이트 실패: ${e.message}")
+                            Toast.makeText(this, "조회수 업데이트 실패", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    Toast.makeText(this, "게시글을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "조회수 업데이트 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("ListItemActivity", "게시글 가져오기 실패: ${e.message}")
+                Toast.makeText(this, "게시글 조회 실패", Toast.LENGTH_SHORT).show()
             }
     }
 
-    // 댓글 불러오기
+
     private fun loadComments() {
         firestore.collection("FreeBoardItems")
             .document(documentId)
             .collection("comments")
-            .orderBy("timestamp") // 최신 댓글이 먼저 나오도록 정렬
+            .orderBy("timestamp") // 댓글 시간 순 정렬
             .get()
             .addOnSuccessListener { result ->
                 comments.clear()
@@ -111,14 +133,14 @@ class ListItemActivity : AppCompatActivity() {
                     val comment = document.toObject(Comment::class.java)
                     comments.add(comment)
                 }
-                commentAdapter.notifyDataSetChanged() // RecyclerView 업데이트
+                commentAdapter.notifyDataSetChanged()
             }
             .addOnFailureListener { e ->
+                Log.e("ListItemActivity", "댓글 불러오기 실패: ${e.message}")
                 Toast.makeText(this, "댓글 불러오기 실패: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
-    // 댓글 추가
     private fun addComment(commentText: String) {
         val comment = Comment(commentText, System.currentTimeMillis())
 
@@ -128,10 +150,11 @@ class ListItemActivity : AppCompatActivity() {
             .add(comment)
             .addOnSuccessListener {
                 commentEditText.text.clear()
-                loadComments() // 댓글 등록 후 새로 고침
+                loadComments()
                 Toast.makeText(this, "댓글이 등록되었습니다.", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e ->
+                Log.e("ListItemActivity", "댓글 등록 실패: ${e.message}")
                 Toast.makeText(this, "댓글 등록 실패: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }

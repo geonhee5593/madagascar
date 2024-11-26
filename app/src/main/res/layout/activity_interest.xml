@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/white">
+
+    <!-- 관심 분야 제목 -->
+    <TextView
+        android:id="@+id/tv_interest_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="선택된 관심 분야"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:paddingBottom="8dp" />
+
+    <!-- 선택된 관심사들을 표시할 TextView -->
+    <TextView
+        android:id="@+id/tv_selected_interests"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:layout_marginBottom="8dp"
+        android:gravity="center_horizontal"
+        android:textColor="@android:color/black" />
+
+    <!-- 축제 목록 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_festival_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingTop="8dp" />
+
+    <!-- 뒤로 가기 버튼 -->
+    <ImageView
+        android:id="@+id/btn_arrow_back"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/arrow"
+        android:layout_gravity="end"
+        android:contentDescription="Go Back" />
+</LinearLayout>
