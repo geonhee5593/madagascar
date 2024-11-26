@@ -28,16 +28,12 @@ class Human : AppCompatActivity() {
     private lateinit var ivProfile: ImageView
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
-    private val storage = FirebaseStorage.getInstance()
-    private lateinit var storageRef: StorageReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_human)
         Log.d("DeleteAccount", "FirebaseAuth 초기화: ${auth != null}")
         Log.d("DeleteAccount", "FirebaseFirestore 초기화: ${db != null}")
-
-        storageRef = storage.reference // Firebase Storage 참조 설정
 
         // UI 요소 초기화
         tvName = findViewById(R.id.tvName)
@@ -62,7 +58,7 @@ class Human : AppCompatActivity() {
             startActivity(Intent(this, ChangePasswordActivity::class.java))
         }
 
-        // 로그아웃 변경 버튼
+        // 로그아웃 버튼
         btnLogout.setOnClickListener {
             auth.signOut() // Firebase 로그아웃
             // 사용자 데이터 초기화
@@ -142,28 +138,11 @@ class Human : AppCompatActivity() {
                 val selectedImageUri: Uri? = data?.data
                 if (selectedImageUri != null) {
                     ivProfile.setImageURI(selectedImageUri)
-                    uploadImageToFirebase(selectedImageUri)
+                    saveProfileImageUrlToFirestore(selectedImageUri.toString()) // Firestore에 이미지 URL 저장
                 } else {
                     Toast.makeText(this, "사진을 가져오지 못했습니다.", Toast.LENGTH_SHORT).show()
                 }
             }
-        }
-    }
-
-    // Firebase Storage에 이미지 업로드
-    private fun uploadImageToFirebase(imageUri: Uri) {
-        val user = auth.currentUser
-        user?.let {
-            val imageRef = storageRef.child("profile_pictures/${user.uid}.jpg")
-            imageRef.putFile(imageUri)
-                .addOnSuccessListener {
-                    // 이미지 업로드 성공 후 Firestore에 URL 저장
-                    imageRef.downloadUrl.addOnSuccessListener { uri -> saveProfileImageUrlToFirestore(uri.toString())
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    Toast.makeText(this, "이미지 업로드 실패: ${exception.message}", Toast.LENGTH_SHORT).show()
-                }
         }
     }
 
@@ -178,22 +157,6 @@ class Human : AppCompatActivity() {
                 }
                 .addOnFailureListener { exception ->
                     Toast.makeText(this, "프로필 이미지 URL 저장 실패: ${exception.message}", Toast.LENGTH_SHORT).show()
-                }
-        }
-    }
-
-    // Firestore에서 이미지 로드
-    private fun loadProfileImage() {
-        val user = auth.currentUser
-        user?.let {
-            db.collection("users").document(user.uid).get()
-                .addOnSuccessListener { document ->
-                    val profileImageUrl = document.getString("profileImage")
-                    if (profileImageUrl != null) {
-                        Glide.with(this)
-                            .load(profileImageUrl)
-                            .into(ivProfile)
-                    }
                 }
         }
     }
@@ -239,9 +202,6 @@ class Human : AppCompatActivity() {
             .create()
             .show()
     }
-
-
-
     private fun deleteAccount() {
         val user = auth.currentUser
         if (user == null) {
