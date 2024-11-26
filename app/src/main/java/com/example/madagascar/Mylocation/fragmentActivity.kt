@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
+import com.example.madagascar.API.CommonResponse
 import com.example.madagascar.API.DetailActivity
 import com.example.madagascar.API.FestivalItem
 import com.example.madagascar.API.FestivalResponse
@@ -45,6 +46,9 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
     private var handler: Handler = Handler(Looper.getMainLooper())
     private lateinit var fetchRunnable: Runnable
     private var lastFetchTime: Long = 0 // 마지막 fetch 호출 시간
+    private var lastRequestLat: Double? = null
+    private var lastRequestLng: Double? = null
+    private var lastRequestRadius: Int = 3000 // 기본 반경 설정
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -128,10 +132,16 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
     private fun fetchNearbyFestivals(latitude: Double, longitude: Double) {
-        Log.d("DEBUG", "Fetching festivals at lat: $latitude, lng: $longitude")
-        val radius = 5000 // 반경 5km 내의 축제를 검색
+        // 기존 요청과 동일한 좌표 및 반경이면 요청하지 않음
+        if (lastRequestLat == latitude && lastRequestLng == longitude) {
+            Log.d("DEBUG", "이미 요청된 좌표로 추가 요청하지 않음")
+            return
+        }
 
-        RetrofitClient.instance.getNearbyFestivals(latitude, longitude, radius)
+        lastRequestLat = latitude
+        lastRequestLng = longitude
+
+        RetrofitClient.instance.getNearbyFestivals(latitude, longitude, lastRequestRadius)
             .enqueue(object : Callback<FestivalResponse> {
                 override fun onResponse(
                     call: Call<FestivalResponse>,
@@ -140,19 +150,7 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
                     if (response.isSuccessful) {
                         val festivals = response.body()?.response?.body?.items?.item ?: emptyList()
                         Log.d("DEBUG", "Fetched ${festivals.size} festivals")
-                        if (festivals.isEmpty()) {
-                            Toast.makeText(
-                                this@fragmentActivity,
-                                "주변에 축제가 없습니다.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        } else {
-                            Toast.makeText(
-                                this@fragmentActivity,
-                                "${festivals.size}개의 축제를 불러왔습니다.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+
                         // 기존 마커 제거
                         markers.forEach { it.map = null }
                         markers.clear()
@@ -186,17 +184,36 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
         marker.map = naverMap
         marker.captionText = festival.title
 
+        // 클릭 이벤트 처리
         marker.setOnClickListener {
             if (currentInfoWindow?.marker == marker) {
                 currentInfoWindow?.close()
                 currentInfoWindow = null
             } else {
-                showFestivalInfo(festival, marker)
+                fetchAndShowFestivalInfo(festival, marker)
             }
             true
         }
 
         markers.add(marker)
+    }
+
+    private fun fetchAndShowFestivalInfo(festival: FestivalItem, marker: Marker) {
+        // 공통 정보 조회로 기간 데이터를 보강
+        RetrofitClient.instance.getCommon(festival.contentId).enqueue(object : Callback<CommonResponse> {
+            override fun onResponse(call: Call<CommonResponse>, response: Response<CommonResponse>) {
+                val commonInfo = response.body()?.response?.body?.items?.item?.firstOrNull()
+                if (commonInfo != null) {
+                    festival.eventStartDate = commonInfo.eventStartDate ?: "정보 없음"
+                    festival.eventEndDate = commonInfo.eventEndDate ?: "정보 없음"
+                }
+                showFestivalInfo(festival, marker)
+            }
+
+            override fun onFailure(call: Call<CommonResponse>, t: Throwable) {
+                showFestivalInfo(festival, marker) // 기본 데이터로 표시
+            }
+        })
     }
 
 
@@ -212,14 +229,16 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 // 축제 데이터 표시
                 view.findViewById<TextView>(R.id.festivalTitle).text = festival.title
-                view.findViewById<TextView>(R.id.festivalDates).text = "기간: ${festival.eventStartDate} ~ ${festival.eventEndDate}"
+                view.findViewById<TextView>(R.id.festivalDates).text =
+                    "기간: ${festival.eventStartDate} ~ ${festival.eventEndDate}"
                 view.findViewById<TextView>(R.id.festivalAddress).text = "주소: ${festival.addr1}"
                 view.findViewById<TextView>(R.id.festivalPhone).text = "전화번호: ${festival.tel ?: "정보 없음"}"
 
                 // 팝업 클릭 이벤트: 축제 정보 화면으로 이동
                 view.setOnClickListener {
+                    Log.d("Debug", "Navigating to DetailActivity with contentId: ${festival.contentId}")
                     val intent = Intent(this@fragmentActivity, DetailActivity::class.java)
-                    intent.putExtra("contentId", festival.contentId) // 추가 데이터 전달
+                    intent.putExtra("contentId", festival.contentId)
                     startActivity(intent)
                 }
 
@@ -227,11 +246,18 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
+        // 팝업 클릭이 제대로 작동하도록 설정
+        infoWindow.setOnClickListener {
+            Log.d("Debug", "InfoWindow clicked for ${festival.title}")
+            val intent = Intent(this, DetailActivity::class.java)
+            intent.putExtra("contentId", festival.contentId)
+            startActivity(intent)
+            true
+        }
         // 마커에 팝업 연결
         infoWindow.open(marker)
         currentInfoWindow = infoWindow
     }
-
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
