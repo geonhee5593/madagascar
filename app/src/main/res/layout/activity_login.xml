@@ -4,56 +4,71 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F9F9F9"
+
     tools:context=".Login">
 
+    <!-- 상단 "축모아" 텍스트 -->
+<TextView
+android:id="@+id/app_title"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginTop="40dp"
+android:text="축모아"
+android:textSize="32sp"
+android:fontFamily="sans-serif-medium"
+android:gravity="center"
+android:textColor="@android:color/black"
+app:layout_constraintTop_toTopOf="parent"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- 아이디 입력 필드 -->
-    <EditText
-        android:id="@+id/Email_id"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginTop="120dp"
-        android:hint="아이디"
-        android:padding="12dp"
-        android:background="@drawable/input_field_background"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        android:inputType="text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+<EditText
+android:id="@+id/Email_id"
+android:layout_width="0dp"
+android:layout_height="50dp"
+android:layout_marginStart="24dp"
+android:layout_marginEnd="24dp"
+android:layout_marginTop="120dp"
+android:hint="아이디"
+android:padding="12dp"
+android:background="@drawable/input_field_background"
+android:textColor="#000000"
+android:textSize="16sp"
+android:inputType="text"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintEnd_toEndOf="parent"
+app:layout_constraintTop_toBottomOf="@+id/app_title" />
 
     <!-- 비밀번호 입력 필드 -->
-    <EditText
-        android:id="@+id/Password"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginTop="16dp"
-        android:hint="비밀번호"
-        android:padding="12dp"
-        android:background="@drawable/input_field_background"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        android:inputType="textPassword"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Email_id" />
+<EditText
+android:id="@+id/Password"
+android:layout_width="0dp"
+android:layout_height="50dp"
+android:layout_marginStart="24dp"
+android:layout_marginEnd="24dp"
+android:layout_marginTop="16dp"
+android:hint="비밀번호"
+android:padding="12dp"
+android:background="@drawable/input_field_background"
+android:textColor="#000000"
+android:textSize="16sp"
+android:inputType="textPassword"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintEnd_toEndOf="parent"
+app:layout_constraintTop_toBottomOf="@+id/Email_id" />
 
     <!-- 로그인 버튼 -->
-    <Button
-        android:id="@+id/loginbutton"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginTop="24dp"
-        android:text="로그인"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#1976D2"
+<Button
+android:id="@+id/loginbutton"
+android:layout_width="0dp"
+android:layout_height="50dp"
+android:layout_marginStart="24dp"
+android:layout_marginEnd="24dp"
+android:layout_marginTop="24dp"
+android:text="로그인"
+android:textColor="#FFFFFF"
+android:backgroundTint="#1E88E5"
     android:textSize="16sp"
     android:fontFamily="sans-serif-medium"
     app:layout_constraintStart_toStartOf="parent"
@@ -61,14 +76,14 @@
     app:layout_constraintTop_toBottomOf="@+id/Password" />
 
     <!-- 회원가입 버튼 -->
-    <Button
-        android:id="@+id/registerbutton"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:layout_marginTop="16dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:backgroundTint="#2196F3"
+<Button
+android:id="@+id/registerbutton"
+android:layout_width="wrap_content"
+android:layout_height="50dp"
+android:layout_marginTop="16dp"
+android:paddingStart="16dp"
+android:paddingEnd="16dp"
+android:backgroundTint="#42A5F5"
     android:text="회원가입"
     android:textColor="#FFFFFF"
     android:textSize="14sp"
@@ -77,14 +92,14 @@
     app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- 아이디/비밀번호 찾기 버튼 -->
-    <Button
-        android:id="@+id/findButton"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:layout_marginTop="8dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:backgroundTint="#BBDEFB"
+<Button
+android:id="@+id/findButton"
+android:layout_width="wrap_content"
+android:layout_height="50dp"
+android:layout_marginTop="8dp"
+android:paddingStart="16dp"
+android:paddingEnd="16dp"
+android:backgroundTint="#BBDEFB"
     android:text="아이디/비밀번호 찾기"
     android:textColor="#FFFFFF"
     android:textSize="14sp"
@@ -92,4 +107,4 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintEnd_toEndOf="parent" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
