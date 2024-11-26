@@ -18,9 +18,8 @@ class hobby : AppCompatActivity() {
 
     private val selectedInterests = mutableListOf<String>()
     private val interests = listOf(
-        "음악", "음식", "예술", "패션", "스포츠", "영화",
-        "문학", "드라마", "게임", "문화 체험", "동물", "힐링",
-        "환경", "여행", "뷰티"
+        "음악", "음식", "예술", "스포츠", "영화",
+        "문학", "힐링", "환경", "여행"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
