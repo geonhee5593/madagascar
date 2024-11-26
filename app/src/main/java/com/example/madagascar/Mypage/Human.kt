@@ -35,9 +35,9 @@ class Human : AppCompatActivity() {
         tvName = findViewById(R.id.tvName)
         tvEmail = findViewById(R.id.tvEmail)
         ivProfile = findViewById(R.id.ivProfile)
-        val btnChangePassword = findViewById<Button>(R.id.btnChangePassword)
-        val btnLogout = findViewById<Button>(R.id.btnLogout)
-        val btnDeleteAccount = findViewById<Button>(R.id.btnDeleteAccount)
+        val btnChangePassword = findViewById<TextView>(R.id.btnChangePassword)
+        val btnLogout = findViewById<TextView>(R.id.btnLogout)
+        val btnDeleteAccount = findViewById<TextView>(R.id.btnDeleteAccount)
         val arrowBtn101 = findViewById<ImageView>(R.id.btn_arrow101)
 
         //사용자 데이터 로드
@@ -56,10 +56,15 @@ class Human : AppCompatActivity() {
 
         // 로그아웃 변경 버튼
         btnLogout.setOnClickListener {
-            auth.signOut()
+            auth.signOut() // Firebase 로그아웃
+            // 사용자 데이터 초기화
+            tvName.text = ""
+            tvEmail.text = ""
+            // 로그인 화면으로 이동
             startActivity(Intent(this, Login::class.java))
-            finish()
+            finish() // 현재 Activity 종료
         }
+
 
         // 계정삭제 버튼
         btnDeleteAccount.setOnClickListener {
@@ -177,11 +182,19 @@ class Human : AppCompatActivity() {
     private fun loadUserInfo() {
         val user = auth.currentUser
         user?.let {
-            tvEmail.text = user.email
             db.collection("users").document(user.uid).get()
                 .addOnSuccessListener { document ->
                     if (document != null) {
-                        tvName.text = document.getString("name") ?: "이름 없음"
+                        // Firestore에서 username과 phoneNumber 필드를 가져와 TextView에 설정
+                        val username = document.getString("username") ?: "이름 없음"
+                        val phoneNumber = document.getString("phoneNumber") ?: "번호 없음"
+
+                        // 전화번호 형식 변경
+                        val formattedPhoneNumber = formatPhoneNumber(phoneNumber)
+
+                        // UI에 반영
+                        tvName.text = username
+                        tvEmail.text = formattedPhoneNumber
                     }
                 }
                 .addOnFailureListener {
@@ -189,6 +202,16 @@ class Human : AppCompatActivity() {
                 }
         }
     }
+
+    // 전화번호 형식을 변경하는 메서드
+    private fun formatPhoneNumber(phoneNumber: String): String {
+        return if (phoneNumber.length == 11) {
+            "${phoneNumber.substring(0, 3)}-${phoneNumber.substring(3, 7)}-${phoneNumber.substring(7)}"
+        } else {
+            phoneNumber // 형식이 맞지 않으면 원래 값을 반환
+        }
+    }
+
 
     private fun deleteAccount() {
         val user = auth.currentUser
@@ -235,29 +258,15 @@ class Human : AppCompatActivity() {
                             val uid = document.id // UID 가져오기
                             Log.d("DeleteAccount", "Firestore 인증 성공, UID: $uid")
 
-                            // Firestore 데이터 삭제
-                            db.collection("users").document(uid)
-                                .delete()
-                                .addOnSuccessListener {
-                                    Log.d("DeleteAccount", "Firestore 데이터 삭제 성공")
-
+                            // Firestore 문서와 서브컬렉션 삭제
+                            deleteDocumentWithSubcollections("users/$uid") { isDeleted ->
+                                if (isDeleted) {
                                     // Firebase Authentication 계정 삭제
-                                    auth.currentUser?.delete()
-                                        ?.addOnSuccessListener {
-                                            Log.d("DeleteAccount", "Firebase 계정 삭제 성공")
-                                            Toast.makeText(this, "계정 및 데이터가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
-                                            startActivity(Intent(this, Login::class.java))
-                                            finish()
-                                        }
-                                        ?.addOnFailureListener { authError ->
-                                            Log.e("DeleteAccount", "Firebase 계정 삭제 실패: ${authError.message}")
-                                            Toast.makeText(this, "Firebase 계정 삭제 실패: ${authError.message}", Toast.LENGTH_SHORT).show()
-                                        }
+                                    deleteAuthAccount(user)
+                                } else {
+                                    Toast.makeText(this, "계정 삭제 중 문제가 발생했습니다.", Toast.LENGTH_SHORT).show()
                                 }
-                                .addOnFailureListener { firestoreError ->
-                                    Log.e("DeleteAccount", "Firestore 데이터 삭제 실패: ${firestoreError.message}")
-                                    Toast.makeText(this, "Firestore 데이터 삭제 실패: ${firestoreError.message}", Toast.LENGTH_SHORT).show()
-                                }
+                            }
                         } else {
                             Toast.makeText(this, "아이디 또는 비밀번호가 잘못되었습니다.", Toast.LENGTH_SHORT).show()
                             Log.e("DeleteAccount", "Firestore에서 해당 아이디 또는 비밀번호를 찾을 수 없음.")
@@ -275,21 +284,44 @@ class Human : AppCompatActivity() {
             .show()
     }
 
+    // 문서 및 서브컬렉션 삭제 함수
+    private fun deleteDocumentWithSubcollections(documentPath: String, callback: (Boolean) -> Unit) {
+        val docRef = db.document(documentPath)
 
+        // 서브컬렉션 조회 및 삭제
+        docRef.get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    // 서브컬렉션 목록 가져오기
+                    docRef.collection("interests").get()
+                        .addOnSuccessListener { subcollections ->
+                            // 서브컬렉션 내 모든 문서 삭제
+                            for (subDoc in subcollections.documents) {
+                                subDoc.reference.delete()
+                            }
 
-
-    // Firestore 데이터 삭제
-    private fun deleteFirestoreData(uid: String, callback: (Boolean) -> Unit) {
-        Log.d("DeleteAccount", "Firestore 데이터 삭제 시도: user.uid=$uid")
-        db.collection("users").document(uid)
-            .delete()
-            .addOnSuccessListener {
-                Log.d("DeleteAccount", "Firestore 데이터 삭제 성공")
-                callback(true)
+                            // 부모 문서 삭제
+                            docRef.delete()
+                                .addOnSuccessListener {
+                                    Log.d("DeleteAccount", "문서 및 서브컬렉션 삭제 성공")
+                                    callback(true)
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e("DeleteAccount", "문서 삭제 실패: ${e.message}")
+                                    callback(false)
+                                }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("DeleteAccount", "서브컬렉션 조회 실패: ${e.message}")
+                            callback(false)
+                        }
+                } else {
+                    Log.e("DeleteAccount", "삭제하려는 문서가 존재하지 않음")
+                    callback(false)
+                }
             }
-            .addOnFailureListener { firestoreError ->
-                Log.e("DeleteAccount", "Firestore 데이터 삭제 실패: ${firestoreError.message}")
-                Toast.makeText(this, "Firestore 데이터 삭제 실패: ${firestoreError.message}", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener { e ->
+                Log.e("DeleteAccount", "문서 조회 실패: ${e.message}")
                 callback(false)
             }
     }
@@ -309,6 +341,7 @@ class Human : AppCompatActivity() {
                 Toast.makeText(this, "Firebase 계정 삭제 실패: ${authError.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
 
 
 

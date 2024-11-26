@@ -21,9 +21,7 @@
         <activity
             android:name=".API.RegionFestival"
             android:exported="false" />
-        <activity
-            android:name=".Mypage.ChangePasswordActivity"
-            android:exported="false" />
+
         <activity
             android:name=".Login"
             android:exported="true"
@@ -71,6 +69,11 @@
         <activity android:name=".Mypage.NoticeActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustNothing"/>
+        <activity android:name=".FindActivity"
+            android:windowSoftInputMode="adjustNothing"/>
+        <activity
+            android:name=".Mypage.ChangePasswordActivity"
+            android:exported="true" />
         <activity
             android:name=".API.MonthFestival"
             android:windowSoftInputMode="adjustNothing"/>

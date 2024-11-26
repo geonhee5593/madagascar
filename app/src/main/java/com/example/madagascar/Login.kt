@@ -36,6 +36,12 @@ class Login : AppCompatActivity() {
         loginButton.setOnClickListener {
             loginUser()
         }
+        // 새로 추가된 아이디/비밀번호 찾기 버튼
+        val findButton: Button = findViewById(R.id.findButton)
+        findButton.setOnClickListener {
+            val intent = Intent(this, FindActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun loginUser() {
@@ -65,12 +71,14 @@ class Login : AppCompatActivity() {
                                 Toast.makeText(this, "관리자로 로그인되었습니다.", Toast.LENGTH_SHORT).show()
                                 val intent = Intent(this, MainActivity::class.java)
                                 intent.putExtra("isAdmin", true) // 관리자 여부 전달
+                                intent.putExtra("uid", uid) // 사용자 UID 전달
                                 startActivity(intent)
                                 finish()
                             } else if (isFirstLogin) {
                                 // 관심 분야 선택 화면으로 이동
                                 Toast.makeText(this, "첫 로그인: 관심 분야 선택 화면으로 이동합니다.", Toast.LENGTH_SHORT).show()
                                 val intent = Intent(this, hobby::class.java)
+                                intent.putExtra("uid", uid) // 사용자 UID 전달
                                 startActivity(intent)
                                 finish()
                             } else {
@@ -78,6 +86,7 @@ class Login : AppCompatActivity() {
                                 Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show()
                                 val intent = Intent(this, MainActivity::class.java)
                                 intent.putExtra("isAdmin", false) // 일반 사용자 여부 전달
+                                intent.putExtra("uid", uid) // 사용자 UID 전달
                                 startActivity(intent)
                                 finish()
                             }

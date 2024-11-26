@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
          /* 관리자 버튼 초기화 */
          val adminButton = findViewById<Button>(R.id.btn_admin)
          // 로그인 액티비티에서 전달된 관리자 여부 확인
-         val isAdmin = intent.getBooleanExtra("isAdmin", true)
+         val isAdmin = intent.getBooleanExtra("isAdmin", false)
          if (isAdmin) {
              adminButton.visibility = View.VISIBLE
              adminButton.setOnClickListener {
