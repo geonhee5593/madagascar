@@ -10,12 +10,15 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
 import com.example.madagascar.Login
 import com.example.madagascar.R
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 
 @Suppress("DEPRECATION")
 class Human : AppCompatActivity() {
@@ -25,12 +28,17 @@ class Human : AppCompatActivity() {
     private lateinit var ivProfile: ImageView
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
+    private val storage = FirebaseStorage.getInstance()
+    private lateinit var storageRef: StorageReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_human)
         Log.d("DeleteAccount", "FirebaseAuth 초기화: ${auth != null}")
         Log.d("DeleteAccount", "FirebaseFirestore 초기화: ${db != null}")
+
+        storageRef = storage.reference // Firebase Storage 참조 설정
+
         // UI 요소 초기화
         tvName = findViewById(R.id.tvName)
         tvEmail = findViewById(R.id.tvEmail)
@@ -40,7 +48,7 @@ class Human : AppCompatActivity() {
         val btnDeleteAccount = findViewById<TextView>(R.id.btnDeleteAccount)
         val arrowBtn101 = findViewById<ImageView>(R.id.btn_arrow101)
 
-        //사용자 데이터 로드
+        // 사용자 데이터 로드
         loadUserInfo()
 
         // 마이페이지 돌아가는 버튼
@@ -65,8 +73,7 @@ class Human : AppCompatActivity() {
             finish() // 현재 Activity 종료
         }
 
-
-        // 계정삭제 버튼
+        // 계정 삭제 버튼
         btnDeleteAccount.setOnClickListener {
             deleteAccount()
         }
@@ -75,62 +82,39 @@ class Human : AppCompatActivity() {
         initImageViewProfile()
     }
 
-    //프로필 눌렀을 때 갤러리 접근 권한을 확인하고 권한 요청
+    // 프로필 이미지 변경 시 갤러리 접근
     private fun initImageViewProfile() {
         ivProfile.setOnClickListener {
             when {
-                // 권한이 이미 허용된 경우
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ) == android.content.pm.PackageManager.PERMISSION_GRANTED -> {
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == android.content.pm.PackageManager.PERMISSION_GRANTED -> {
                     navigateGallery()
                 }
 
-                // Android 13 이상: READ_MEDIA_IMAGES 권한 요청 필요
                 android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
-                        ContextCompat.checkSelfPermission(
-                            this,
-                            Manifest.permission.READ_MEDIA_IMAGES
-                        ) == android.content.pm.PackageManager.PERMISSION_GRANTED -> {
+                        ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == android.content.pm.PackageManager.PERMISSION_GRANTED -> {
                     navigateGallery()
                 }
 
-                // 권한이 거부된 적이 있는 경우 설명 표시
                 shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE) -> {
                     showPermissionContextPopup()
                 }
 
-                // Android 13 이상: 새로운 권한 요청
                 android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU -> {
-                    requestPermissions(
-                        arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
-                        1000
-                    )
+                    requestPermissions(arrayOf(Manifest.permission.READ_MEDIA_IMAGES), 1000)
                 }
 
-                // Android 12 이하: 기존 권한 요청
                 else -> {
-                    requestPermissions(
-                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                        1000
-                    )
+                    requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1000)
                 }
             }
         }
     }
 
-
     // 권한 요청 결과 처리
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == 1000) {
-            // 권한 요청 처리
             if (grantResults.isNotEmpty() && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "권한이 허용되었습니다.", Toast.LENGTH_SHORT).show()
                 navigateGallery()
@@ -140,13 +124,14 @@ class Human : AppCompatActivity() {
         }
     }
 
-
+    // 갤러리로 이동
     private fun navigateGallery() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         startActivityForResult(intent, 2000)
     }
 
+    // 갤러리에서 선택한 이미지 처리
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -157,6 +142,7 @@ class Human : AppCompatActivity() {
                 val selectedImageUri: Uri? = data?.data
                 if (selectedImageUri != null) {
                     ivProfile.setImageURI(selectedImageUri)
+                    uploadImageToFirebase(selectedImageUri)
                 } else {
                     Toast.makeText(this, "사진을 가져오지 못했습니다.", Toast.LENGTH_SHORT).show()
                 }
@@ -164,35 +150,64 @@ class Human : AppCompatActivity() {
         }
     }
 
-    private fun showPermissionContextPopup() {
-        AlertDialog.Builder(this)
-            .setTitle("권한이 필요합니다.")
-            .setMessage("프로필 이미지를 변경하려면 갤러리 접근 권한이 필요합니다. 설정에서 권한을 활성화해주세요.")
-            .setPositiveButton("설정으로 이동") { _, _ ->
-                val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                intent.data = Uri.parse("package:$packageName")
-                startActivity(intent)
-            }
-            .setNegativeButton("취소하기") { _, _ -> }
-            .create()
-            .show()
+    // Firebase Storage에 이미지 업로드
+    private fun uploadImageToFirebase(imageUri: Uri) {
+        val user = auth.currentUser
+        user?.let {
+            val imageRef = storageRef.child("profile_pictures/${user.uid}.jpg")
+            imageRef.putFile(imageUri)
+                .addOnSuccessListener {
+                    // 이미지 업로드 성공 후 Firestore에 URL 저장
+                    imageRef.downloadUrl.addOnSuccessListener { uri -> saveProfileImageUrlToFirestore(uri.toString())
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Toast.makeText(this, "이미지 업로드 실패: ${exception.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
     }
 
+    // Firestore에 프로필 이미지 URL 저장
+    private fun saveProfileImageUrlToFirestore(imageUrl: String) {
+        val user = auth.currentUser
+        user?.let {
+            db.collection("users").document(user.uid)
+                .update("profileImage", imageUrl)
+                .addOnSuccessListener {
+                    Log.d("Profile", "프로필 이미지 URL Firestore에 저장됨")
+                }
+                .addOnFailureListener { exception ->
+                    Toast.makeText(this, "프로필 이미지 URL 저장 실패: ${exception.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
 
+    // Firestore에서 이미지 로드
+    private fun loadProfileImage() {
+        val user = auth.currentUser
+        user?.let {
+            db.collection("users").document(user.uid).get()
+                .addOnSuccessListener { document ->
+                    val profileImageUrl = document.getString("profileImage")
+                    if (profileImageUrl != null) {
+                        Glide.with(this)
+                            .load(profileImageUrl)
+                            .into(ivProfile)
+                    }
+                }
+        }
+    }
+
+    // 사용자 정보 로드
     private fun loadUserInfo() {
         val user = auth.currentUser
         user?.let {
             db.collection("users").document(user.uid).get()
                 .addOnSuccessListener { document ->
                     if (document != null) {
-                        // Firestore에서 username과 phoneNumber 필드를 가져와 TextView에 설정
                         val username = document.getString("username") ?: "이름 없음"
                         val phoneNumber = document.getString("phoneNumber") ?: "번호 없음"
-
-                        // 전화번호 형식 변경
                         val formattedPhoneNumber = formatPhoneNumber(phoneNumber)
-
-                        // UI에 반영
                         tvName.text = username
                         tvEmail.text = formattedPhoneNumber
                     }
@@ -211,6 +226,20 @@ class Human : AppCompatActivity() {
             phoneNumber // 형식이 맞지 않으면 원래 값을 반환
         }
     }
+    private fun showPermissionContextPopup() {
+        AlertDialog.Builder(this)
+            .setTitle("권한이 필요합니다.")
+            .setMessage("프로필 이미지를 변경하려면 갤러리 접근 권한이 필요합니다. 설정에서 권한을 활성화해주세요.")
+            .setPositiveButton("설정으로 이동") { _, _ ->
+                val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                intent.data = Uri.parse("package:$packageName")
+                startActivity(intent)
+            }
+            .setNegativeButton("취소하기") { _, _ -> }
+            .create()
+            .show()
+    }
+
 
 
     private fun deleteAccount() {
