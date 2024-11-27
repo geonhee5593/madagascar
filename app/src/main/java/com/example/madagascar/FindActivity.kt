@@ -1,9 +1,12 @@
 package com.example.madagascar
 
+import android.graphics.LinearGradient
+import android.graphics.Shader
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.FirebaseException
@@ -31,6 +34,21 @@ class FindActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_find)
 
+        // "축모아" 텍스트에 그라데이션 적용
+        val titleTextView: TextView = findViewById(R.id.app_title)
+        val paint = titleTextView.paint
+        val width = paint.measureText(titleTextView.text.toString())
+
+        val shader = LinearGradient(
+            0f, 0f, width, 0f,
+            intArrayOf(
+                getColor(R.color.deep_blue),  // 진한 파란색
+                getColor(R.color.light_blue) // 연한 파란색
+            ),
+            null,
+            Shader.TileMode.CLAMP
+        )
+        titleTextView.paint.shader = shader
         // 뷰 연결
         editTextPhone = findViewById(R.id.editTextPhone)
         editTextVerificationCode = findViewById(R.id.editTextVerificationCode)

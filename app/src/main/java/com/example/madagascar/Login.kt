@@ -1,10 +1,13 @@
 package com.example.madagascar
 
 import android.content.Intent
+import android.graphics.LinearGradient
+import android.graphics.Shader
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.madagascar.Hobby.Hobby
@@ -20,6 +23,23 @@ class Login : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        // "축모아" 텍스트에 그라데이션 적용
+        val titleTextView: TextView = findViewById(R.id.app_title)
+        val paint = titleTextView.paint
+        val width = paint.measureText(titleTextView.text.toString())
+
+        val shader = LinearGradient(
+            0f, 0f, width, 0f,
+            intArrayOf(
+                getColor(R.color.deep_blue),  // 진한 파란색
+                getColor(R.color.light_blue) // 연한 파란색
+            ),
+            null,
+            Shader.TileMode.CLAMP
+        )
+        titleTextView.paint.shader = shader
+
 
         // Firestore 인스턴스 초기화
         firestore = FirebaseFirestore.getInstance()
@@ -42,6 +62,7 @@ class Login : AppCompatActivity() {
             val intent = Intent(this, FindActivity::class.java)
             startActivity(intent)
         }
+
     }
 
     private fun loginUser() {

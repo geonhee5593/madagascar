@@ -66,13 +66,15 @@
             android:orientation="horizontal"
             android:padding="8dp">
 
+            <!-- 댓글 입력란의 최대 높이 지정 -->
+
             <EditText
                 android:id="@+id/commentEditText"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="43dp"
                 android:layout_weight="1"
                 android:hint="댓글을 입력하세요"
-                android:maxHeight="30dp" /> <!-- 댓글 입력란의 최대 높이 지정 -->
+                android:maxHeight="30dp" />
 
             <Button
                 android:id="@+id/commentButton"
