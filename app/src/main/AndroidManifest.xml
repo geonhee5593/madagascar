@@ -71,6 +71,8 @@
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".FindActivity"
             android:windowSoftInputMode="adjustNothing"/>
+        <activity android:name=".Mypage.inquiries.UserActivity"
+        android:windowSoftInputMode="adjustNothing"/>
         <activity
             android:name=".Mypage.ChangePasswordActivity"
             android:exported="true" />

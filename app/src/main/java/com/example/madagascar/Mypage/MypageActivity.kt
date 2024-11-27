@@ -6,6 +6,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.madagascar.Main.MainActivity
+import com.example.madagascar.Mypage.inquiries.UserActivity
 import com.example.madagascar.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -67,6 +68,19 @@ class MypageActivity : AppCompatActivity() {
 
         arrowbtn103.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+        /* 공지사항으로 화면 전환 코드 */
+        val NoticeBtn = findViewById<ImageView>(R.id.btn_notice)
+
+        NoticeBtn.setOnClickListener {
+            val intent = Intent(this, NoticeActivity::class.java)
+            startActivity(intent)
+        }
+        /* 고객센터로 화면 전환 코드 */
+        val serviceBtn = findViewById<ImageView>(R.id.btn_customer_service)
+        serviceBtn.setOnClickListener {
+            val intent = Intent(this, UserActivity::class.java)
             startActivity(intent)
         }
     }
