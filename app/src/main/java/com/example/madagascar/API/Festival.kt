@@ -3,6 +3,8 @@ package com.example.madagascar.API
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +34,8 @@ class Festival : AppCompatActivity() {
 
         val categoryRecyclerView = findViewById<RecyclerView>(R.id.categoryRecyclerView)
         festivalRecyclerView = findViewById(R.id.festivalRecyclerView)
+        val searchEditText = findViewById<EditText>(R.id.searchEditText)
+        val searchButton = findViewById<Button>(R.id.searchButton)
 
         // 카테고리 설정
         val categories = listOf(
@@ -75,6 +79,16 @@ class Festival : AppCompatActivity() {
         }
         festivalRecyclerView.adapter = festivalAdapter
         festivalRecyclerView.layoutManager = GridLayoutManager(this, 2)
+
+        // 검색 버튼 클릭 리스너 설정
+        searchButton.setOnClickListener {
+            val query = searchEditText.text.toString().trim()
+            if (query.isNotEmpty()) {
+                searchFestivals(query)
+            } else {
+                Toast.makeText(this, "검색어를 입력하세요.", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         // 여기서 무한 스크롤 리스너 추가
         setupRecyclerView()
@@ -166,6 +180,27 @@ class Festival : AppCompatActivity() {
                 isLoading = false
             }
         })
+    }
+
+    private fun searchFestivals(query: String) {
+        RetrofitClient.instance.searchFestivals(keyword = query, page = 1, pageSize = 100)
+            .enqueue(object : Callback<FestivalResponse> {
+                override fun onResponse(call: Call<FestivalResponse>, response: Response<FestivalResponse>) {
+                    if (response.isSuccessful) {
+                        val festivals = response.body()?.response?.body?.items?.item ?: emptyList()
+                        if (festivals.isEmpty()) {
+                            Toast.makeText(this@Festival, "검색 결과가 없습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                        festivalAdapter.setFestivals(festivals)
+                    } else {
+                        Toast.makeText(this@Festival, "검색에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<FestivalResponse>, t: Throwable) {
+                    Toast.makeText(this@Festival, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
     }
 
 
