@@ -1,88 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
-    <uses-feature android:name="android.hardware.telephony" android:required="false" />
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <application
-        android:networkSecurityConfig="@xml/network_security_config"
-        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Madagascar"
+        android:usesCleartextTraffic="true"
         tools:targetApi="35">
         <activity
             android:name=".API.RegionFestival"
             android:exported="false" />
-
         <activity
             android:name=".Login"
             android:exported="true"
             android:windowSoftInputMode="adjustNothing">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <!--키보드가 나타나도 ui가 변하지 않게 adjustPan 설정 -->
-        <activity android:name=".Main.MainActivity"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".API.Festival" />
-        <activity android:name=".API.DetailActivity"/>
-        <activity android:name=".Hobby.hobby_Activity"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".FavoritesActivity"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".happyguy.HappguyActivity"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".Mypage.MypageActivity"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".Mypage.Favorites"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".Mypage.Human"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".freeborad.ListItemActivity"
+        </activity> <!-- 키보드가 나타나도 ui가 변하지 않게 adjustPan 설정 -->
+        <activity
+            android:name=".Main.MainActivity"
             android:windowSoftInputMode="adjustNothing" />
-        <activity android:name=".Mylocation.fragmentActivity"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".RegisterActivity"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".Hobby.hobby"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".freeborad.ListtextmadeActivity"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".freeborad.FreeBoradActivity"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".AdminActivity"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".CreateNoticeActivity"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".Mypage.NoticeActivity"
+        <activity android:name=".API.Festival" />
+        <activity android:name=".API.DetailActivity" />
+        <activity
+            android:name=".Hobby.Hobby_Activity"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".FavoritesActivity"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".Mypage.MypageActivity"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".Mypage.Favorites"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".Main.SearchResultsActivity"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".Mypage.Human"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".freeborad.ListItemActivity"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".Mylocation.fragmentActivity"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".RegisterActivity"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".Hobby.Hobby"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".freeborad.ListtextmadeActivity"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".freeborad.FreeBoradActivity"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".AdminActivity"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".CreateNoticeActivity"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".Mypage.NoticeActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".FindActivity"
-            android:windowSoftInputMode="adjustNothing"/>
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
+            android:name=".FindActivity"
+            android:windowSoftInputMode="adjustNothing" />
         <activity
             android:name=".Mypage.ChangePasswordActivity"
             android:exported="true" />
         <activity
             android:name=".API.MonthFestival"
-            android:windowSoftInputMode="adjustNothing"/>
+            android:windowSoftInputMode="adjustNothing" />
+
         <meta-data
             android:name="com.naver.maps.map.CLIENT_ID"
             android:value="${NAVERMAP_CLIENT_ID}" />
     </application>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
 
 </manifest>

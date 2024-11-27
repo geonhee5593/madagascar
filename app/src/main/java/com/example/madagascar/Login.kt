@@ -7,7 +7,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.madagascar.Hobby.hobby
+import com.example.madagascar.Hobby.Hobby
 import com.example.madagascar.Main.MainActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -77,7 +77,7 @@ class Login : AppCompatActivity() {
                             } else if (isFirstLogin) {
                                 // 관심 분야 선택 화면으로 이동
                                 Toast.makeText(this, "첫 로그인: 관심 분야 선택 화면으로 이동합니다.", Toast.LENGTH_SHORT).show()
-                                val intent = Intent(this, hobby::class.java)
+                                val intent = Intent(this, Hobby::class.java)
                                 intent.putExtra("uid", uid) // 사용자 UID 전달
                                 startActivity(intent)
                                 finish()
