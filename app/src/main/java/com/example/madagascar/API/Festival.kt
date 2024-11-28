@@ -1,6 +1,8 @@
 package com.example.madagascar.API
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.madagascar.Main.MainActivity
+import com.example.madagascar.Mypage.MypageActivity
 import com.example.madagascar.R
 import retrofit2.Call
 import retrofit2.Callback
@@ -27,10 +30,22 @@ class Festival : AppCompatActivity() {
     private var currentPage = 1
     private var selectedCategory: String? = null
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_festival)
 
+        val mainbtn = findViewById<ImageView>(R.id.homeIcon)
+        mainbtn.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
+        val mypagebtn = findViewById<ImageView>(R.id.mypageIcon)
+        mypagebtn.setOnClickListener {
+            val intent = Intent(this, MypageActivity::class.java)
+            startActivity(intent)
+        }
 
         val categoryRecyclerView = findViewById<RecyclerView>(R.id.categoryRecyclerView)
         festivalRecyclerView = findViewById(R.id.festivalRecyclerView)

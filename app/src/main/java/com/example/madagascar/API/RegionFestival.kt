@@ -22,8 +22,6 @@ import com.example.madagascar.Main.MainActivity
 
 class RegionFestival : AppCompatActivity() {
     private lateinit var regionSpinner: Spinner
-    private lateinit var searchField: EditText
-    private lateinit var searchButton: Button
     private lateinit var regionRecyclerView: RecyclerView
     private val regions = listOf(
         "서울",
@@ -57,22 +55,10 @@ class RegionFestival : AppCompatActivity() {
 
 
         regionSpinner = findViewById(R.id.regionSpinner)
-        searchField = findViewById(R.id.searchField)
-        searchButton = findViewById(R.id.searchButton)
         regionRecyclerView = findViewById(R.id.regionRecyclerView)
 
         setupSpinner()
         fetchAllFestivals()
-
-        searchButton.setOnClickListener {
-            val query = searchField.text.toString().trim()
-            val selectedRegion = regionSpinner.selectedItem.toString()
-            if (selectedRegion == "전체") {
-                fetchAllFestivals()
-            } else {
-                fetchRegionFestivals(selectedRegion)
-            }
-        }
     }
 
 

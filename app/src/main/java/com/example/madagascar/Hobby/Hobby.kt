@@ -30,18 +30,21 @@ class Hobby : AppCompatActivity() {
         // Intent로 첫 로그인 여부를 확인
         isFirstLogin = intent.getBooleanExtra("isFirstLogin", false)
 
+        // 첫 로그인이 아닐 경우 MainActivity로 바로 이동 후 종료
+        if (!isFirstLogin) {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish() // 현재 액티비티 종료
+            return // 아래 코드를 실행하지 않음
+        }
+
         setContentView(R.layout.hobby_screen)
         setupInterestSelection()
 
-        // 첫 로그인일 경우 건너뛰기 텍스트 표시
+        // 건너뛰기 텍스트 표시
         val skipText = findViewById<TextView>(R.id.tv_skip)
-        if (isFirstLogin) {
-            skipText.setOnClickListener {
-                startActivity(Intent(this, MainActivity::class.java))
-                finish()
-            }
-        } else {
-            skipText.visibility = View.GONE // 첫 로그인이 아니면 숨김
+        skipText.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
         }
     }
 

@@ -22,8 +22,6 @@ import com.example.madagascar.Main.MainActivity
 
 class MonthFestival : AppCompatActivity() {
     private lateinit var monthSpinner: Spinner
-    private lateinit var searchField: EditText
-    private lateinit var searchButton: Button
     private lateinit var monthRecyclerView: RecyclerView
     private val months = listOf("1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월")
     private val festivalsByMonth = mutableMapOf<String, List<FestivalItem>>()
@@ -41,23 +39,11 @@ class MonthFestival : AppCompatActivity() {
         }
 
         monthSpinner = findViewById(R.id.monthSpinner)
-        searchField = findViewById(R.id.searchField)
-        searchButton = findViewById(R.id.searchButton)
         monthRecyclerView = findViewById(R.id.monthRecyclerView)
 
 
         setupSpinner()
         fetchAllFestivals()
-
-        searchButton.setOnClickListener {
-            val query = searchField.text.toString().trim()
-            val selectedMonth = monthSpinner.selectedItem.toString()
-            if (selectedMonth == "전체") {
-                fetchAllFestivals()
-            } else {
-                fetchMonthFestivals(selectedMonth)
-            }
-        }
     }
 
     private fun setupSpinner() {

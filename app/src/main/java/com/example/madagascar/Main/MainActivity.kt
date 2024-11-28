@@ -102,6 +102,18 @@ class MainActivity : AppCompatActivity() {
              startActivity(intent)
          }
 
+        val festivalbtn = findViewById<ImageView>(R.id.festivalIcon)
+        festivalbtn.setOnClickListener {
+            val intent = Intent(this, Festival::class.java)
+            startActivity(intent)
+        }
+
+        val mypagebtn = findViewById<ImageView>(R.id.mypageIcon)
+        mypagebtn.setOnClickListener {
+            val intent = Intent(this, MypageActivity::class.java)
+            startActivity(intent)
+        }
+
          /* btn_region 버튼 클릭 시 지역 별 축제 화면으로 이동 */
          val regionbtn = findViewById<ImageView>(R.id.btn_region)
          regionbtn.setOnClickListener {
@@ -115,26 +127,12 @@ class MainActivity : AppCompatActivity() {
              startActivity(intent)
          }
 
-
-        /* btn_mypage1 버튼 클릭 시 마이페이지 화면으로 이동 */
-        val mypageBtn = findViewById<ImageView>(R.id.btn_mypage1)
-        mypageBtn.setOnClickListener {
-            val intent = Intent(this, MypageActivity::class.java)
-            startActivity(intent)
-        }
-
         /* btn_field 버튼 클릭 시 관심분야별 화면으로 이동 */
         val fieldBtn = findViewById<ImageView>(R.id.btn_field)
         fieldBtn.setOnClickListener {
             val intent = Intent(this, Hobby_Activity::class.java)
             startActivity(intent)
         }
-
-         val festivalbtn = findViewById<ImageView>(R.id.Festival)
-         festivalbtn.setOnClickListener {
-             val intent = Intent(this, Festival::class.java)
-             startActivity(intent)
-         }
          val freeBoradbtn = findViewById<ImageView>(R.id.imageView)
          freeBoradbtn.setOnClickListener {
              val intent = Intent(this, FreeBoradActivity::class.java)
