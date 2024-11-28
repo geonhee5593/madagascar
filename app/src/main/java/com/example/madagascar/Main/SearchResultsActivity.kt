@@ -5,10 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.madagascar.API.CommonResponse
@@ -18,7 +15,7 @@ import com.example.madagascar.API.FestivalItem
 import com.example.madagascar.API.FestivalResponse
 import com.example.madagascar.API.RetrofitClient
 import com.example.madagascar.R
-import retrofit2.Call // 여기 수정
+import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 

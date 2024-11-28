@@ -10,8 +10,11 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.madagascar.FindActivity
 import com.example.madagascar.Hobby.Hobby
 import com.example.madagascar.Main.MainActivity
+import com.example.madagascar.R
+import com.example.madagascar.RegisterActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -123,11 +126,4 @@ class Login : AppCompatActivity() {
                 Log.e("Login", "Firestore 조회 오류", e)
             }
     }
-
-
-
-
-
-
-
 }
