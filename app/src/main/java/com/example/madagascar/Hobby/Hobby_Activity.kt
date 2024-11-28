@@ -2,6 +2,7 @@ package com.example.madagascar.Hobby
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -24,7 +25,7 @@ import retrofit2.Response
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class hobby_Activity : AppCompatActivity() {
+class Hobby_Activity : AppCompatActivity() {
 
     private lateinit var festivalAdapter: FestivalAdapter
     private lateinit var rvFestivalList: RecyclerView
@@ -38,6 +39,14 @@ class hobby_Activity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_interest)
 
+        // 버튼 클릭 이벤트 설정
+        val selectInterestsButton = findViewById<Button>(R.id.btn_select_interests)
+        selectInterestsButton.setOnClickListener {
+            // Hobby 액티비티로 이동
+            val intent = Intent(this, Hobby::class.java)
+            startActivity(intent)
+        }
+
         tvSelectedInterests = findViewById(R.id.tv_selected_interests)
         rvFestivalList = findViewById(R.id.rv_festival_list)
 
@@ -49,9 +58,8 @@ class hobby_Activity : AppCompatActivity() {
 
         rvFestivalList.layoutManager = GridLayoutManager(this, 2)
         festivalAdapter = FestivalAdapter(allFestivals) { festival ->
-            val intent = Intent(this, DetailActivity::class.java)
-            intent.putExtra("contentId", festival.contentId)
-            startActivity(intent)
+
+            fetchFestivalDetailsOnClick(festival)
         }
         rvFestivalList.adapter = festivalAdapter
 
@@ -115,11 +123,12 @@ class hobby_Activity : AppCompatActivity() {
         val requests = interests.map { interest ->
             RetrofitClient.instance.searchFestivals(
                 keyword = interest,
-                page = currentPage,
-                pageSize = 20 // 한 번에 가져올 데이터 수
+                page = 1, // 첫 페이지만 가져옴
+                pageSize = 10 // 필요한 만큼만 가져옴
             )
         }
 
+        // Retrofit 비동기 요청 병합
         val festivals = mutableListOf<FestivalItem>()
         var completedRequests = 0
 
@@ -131,7 +140,6 @@ class hobby_Activity : AppCompatActivity() {
                     completedRequests++
 
                     if (completedRequests == requests.size) {
-                        // 모든 요청이 완료된 후 날짜 정보를 보강
                         fetchFestivalDetailsWithDates(festivals)
                     }
                 }
@@ -139,8 +147,7 @@ class hobby_Activity : AppCompatActivity() {
                 override fun onFailure(call: Call<FestivalResponse>, t: Throwable) {
                     completedRequests++
                     if (completedRequests == requests.size) {
-                        // 모든 요청이 실패한 경우에도 기본 데이터만 정렬
-                        displaySortedFestivals(allFestivals)
+                        displaySortedFestivals(festivals)
                         isLoading = false
                     }
                 }
@@ -172,7 +179,6 @@ class hobby_Activity : AppCompatActivity() {
                         completedRequests++
 
                         if (completedRequests == festivals.size) {
-                            // 데이터를 정렬 후 업데이트
                             displaySortedFestivals(updatedFestivals)
                             isLoading = false
                         }
@@ -188,6 +194,31 @@ class hobby_Activity : AppCompatActivity() {
                     }
                 })
         }
+    }
+
+    private fun fetchFestivalDetailsOnClick(festival: FestivalItem) {
+        RetrofitClient.instance.getCommon(festival.contentId)
+            .enqueue(object : Callback<CommonResponse> {
+                override fun onResponse(call: Call<CommonResponse>, response: Response<CommonResponse>) {
+                    val commonInfo = response.body()?.response?.body?.items?.item?.firstOrNull()
+                    if (commonInfo != null) {
+                        festival.eventStartDate = commonInfo.eventStartDate ?: "정보 없음"
+                        festival.eventEndDate = commonInfo.eventEndDate ?: "정보 없음"
+                    }
+                    // 축제 상세 화면으로 이동
+                    navigateToDetail(festival)
+                }
+
+                override fun onFailure(call: Call<CommonResponse>, t: Throwable) {
+                    navigateToDetail(festival) // 기본 데이터로 이동
+                }
+            })
+    }
+
+    private fun navigateToDetail(festival: FestivalItem) {
+        val intent = Intent(this, DetailActivity::class.java)
+        intent.putExtra("contentId", festival.contentId)
+        startActivity(intent)
     }
 
 

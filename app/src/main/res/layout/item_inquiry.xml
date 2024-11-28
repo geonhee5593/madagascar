@@ -1,0 +1,60 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/card_background"
+    android:elevation="4dp">
+
+    <!-- 문의 내용 -->
+    <TextView
+        android:id="@+id/textQuestion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="문의 내용"
+        android:textColor="#424242"
+        android:textStyle="bold"
+        android:textSize="16sp" />
+
+    <!-- 문의 보낸 시간 -->
+    <TextView
+        android:id="@+id/textTimestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="보낸 시간"
+        android:textColor="#757575"
+        android:layout_marginTop="4dp" />
+
+    <!-- 답변 상태 -->
+    <TextView
+        android:id="@+id/textResponseStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="답변 상태"
+        android:textStyle="bold"
+        android:layout_marginTop="4dp"
+         />
+
+    <!-- 답변 입력 필드 -->
+    <EditText
+        android:id="@+id/editTextResponse"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="답변 입력"
+        android:background="@drawable/admin_input_field_background"
+        android:layout_marginTop="8dp"
+        android:enabled="true"
+        android:padding="12dp" />
+
+    <!-- 답변 보내기 버튼 -->
+    <Button
+        android:id="@+id/buttonRespond"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="답변 보내기"
+        android:backgroundTint="#42A5F5"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="8dp"
+        android:padding="8dp" />
+</LinearLayout>

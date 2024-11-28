@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
@@ -21,12 +22,11 @@ import com.example.madagascar.API.RegionFestival
 import com.example.madagascar.API.RetrofitClient
 import com.example.madagascar.AdminActivity
 import com.example.madagascar.FavoritesActivity
+import com.example.madagascar.Hobby.Hobby_Activity
 import com.example.madagascar.freeborad.FreeBoradActivity
 import com.example.madagascar.Mylocation.fragmentActivity
 import com.example.madagascar.Mypage.MypageActivity
 import com.example.madagascar.R
-import com.example.madagascar.happyguy.HappguyActivity
-import com.example.madagascar.Hobby.hobby_Activity
 import com.example.madagascar.Mypage.Favorites
 import com.example.madagascar.Mypage.FavoritesAdapter
 import com.google.android.material.tabs.TabLayout
@@ -64,6 +64,9 @@ class MainActivity : AppCompatActivity() {
          } else {
              adminButton.visibility = View.GONE
          }
+
+         // 검색 버튼 동작 설정
+         setupSearch()
 
          // 버튼 클릭 리스너 설정
          setupButtons()
@@ -123,7 +126,7 @@ class MainActivity : AppCompatActivity() {
         /* btn_field 버튼 클릭 시 관심분야별 화면으로 이동 */
         val fieldBtn = findViewById<ImageView>(R.id.btn_field)
         fieldBtn.setOnClickListener {
-            val intent = Intent(this, hobby_Activity::class.java)
+            val intent = Intent(this, Hobby_Activity::class.java)
             startActivity(intent)
         }
 
@@ -176,6 +179,27 @@ class MainActivity : AppCompatActivity() {
                 Log.e("MainActivity", "API 호출 오류: ${t.message}")
             }
         })
+    }
+
+    private fun setupSearch() {
+        try {
+            val searchView = findViewById<androidx.appcompat.widget.SearchView>(R.id.search_view)
+            val searchButton = findViewById<Button>(R.id.search_button_main)
+
+            searchButton.setOnClickListener {
+                val query = searchView.query.toString().trim()
+                if (query.isNotEmpty()) {
+                    val intent = Intent(this, SearchResultsActivity::class.java)
+                    intent.putExtra("searchQuery", query)
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(this, "검색어를 입력하세요", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error setting up search: ${e.message}")
+            Toast.makeText(this, "검색 기능 설정 중 오류 발생", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun setupAutoSlide(itemCount: Int) {
