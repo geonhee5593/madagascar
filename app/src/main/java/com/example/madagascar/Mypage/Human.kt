@@ -137,13 +137,39 @@ class Human : AppCompatActivity() {
             2000 -> {
                 val selectedImageUri: Uri? = data?.data
                 if (selectedImageUri != null) {
+                    // 이미지 미리보기 업데이트
                     ivProfile.setImageURI(selectedImageUri)
-                    saveProfileImageUrlToFirestore(selectedImageUri.toString()) // Firestore에 이미지 URL 저장
+
+                    // Firebase Storage에 이미지 업로드
+                    uploadImageToFirebaseStorage(selectedImageUri)
                 } else {
                     Toast.makeText(this, "사진을 가져오지 못했습니다.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+    }
+    // Firebase Storage에 이미지 업로드 및 Firestore에 URL 저장
+    private fun uploadImageToFirebaseStorage(imageUri: Uri) {
+        val user = auth.currentUser
+        if (user == null) {
+            Toast.makeText(this, "로그인된 사용자가 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val storageRef = FirebaseStorage.getInstance().reference.child("profileImages/${user.uid}.jpg")
+
+        storageRef.putFile(imageUri)
+            .addOnSuccessListener {
+                // 업로드 성공 시 다운로드 URL 가져오기
+                storageRef.downloadUrl.addOnSuccessListener { uri ->
+                    saveProfileImageUrlToFirestore(uri.toString())
+                }.addOnFailureListener {
+                    Toast.makeText(this, "프로필 이미지 URL을 가져오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "프로필 이미지 업로드에 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
     }
 
     // Firestore에 프로필 이미지 URL 저장
@@ -154,6 +180,7 @@ class Human : AppCompatActivity() {
                 .update("profileImage", imageUrl)
                 .addOnSuccessListener {
                     Log.d("Profile", "프로필 이미지 URL Firestore에 저장됨")
+                    Toast.makeText(this, "프로필 이미지가 저장되었습니다.", Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener { exception ->
                     Toast.makeText(this, "프로필 이미지 URL 저장 실패: ${exception.message}", Toast.LENGTH_SHORT).show()
@@ -161,7 +188,6 @@ class Human : AppCompatActivity() {
         }
     }
 
-    // 사용자 정보 로드
     private fun loadUserInfo() {
         val user = auth.currentUser
         user?.let {
@@ -170,9 +196,16 @@ class Human : AppCompatActivity() {
                     if (document != null) {
                         val username = document.getString("username") ?: "이름 없음"
                         val phoneNumber = document.getString("phoneNumber") ?: "번호 없음"
-                        val formattedPhoneNumber = formatPhoneNumber(phoneNumber)
+                        val profileImage = document.getString("profileImage") // Firestore에 저장된 프로필 이미지 URL
+
+                        // TextView에 사용자 정보 설정
                         tvName.text = username
-                        tvEmail.text = formattedPhoneNumber
+                        tvEmail.text = formatPhoneNumber(phoneNumber)
+
+                        // Glide를 사용하여 프로필 이미지 로드
+                        if (!profileImage.isNullOrEmpty()) {
+                            Glide.with(this).load(profileImage).into(ivProfile)
+                        }
                     }
                 }
                 .addOnFailureListener {
@@ -180,6 +213,7 @@ class Human : AppCompatActivity() {
                 }
         }
     }
+
 
     // 전화번호 형식을 변경하는 메서드
     private fun formatPhoneNumber(phoneNumber: String): String {
@@ -202,6 +236,9 @@ class Human : AppCompatActivity() {
             .create()
             .show()
     }
+
+
+
     private fun deleteAccount() {
         val user = auth.currentUser
         if (user == null) {
@@ -330,11 +367,4 @@ class Human : AppCompatActivity() {
                 Toast.makeText(this, "Firebase 계정 삭제 실패: ${authError.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
-
-
-
-
-
-
 }
