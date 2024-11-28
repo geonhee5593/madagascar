@@ -44,11 +44,9 @@
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".API.Festival" />
         <activity android:name=".API.DetailActivity"/>
-        <activity android:name=".Hobby.hobby_Activity"
+        <activity android:name=".Hobby.Hobby_Activity"
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".FavoritesActivity"
-            android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".happyguy.HappguyActivity"
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".Mypage.MypageActivity"
             android:windowSoftInputMode="adjustNothing"/>
@@ -62,7 +60,7 @@
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".RegisterActivity"
             android:windowSoftInputMode="adjustNothing"/>
-        <activity android:name=".Hobby.hobby"
+        <activity android:name=".Hobby.Hobby"
             android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".freeborad.ListtextmadeActivity"
             android:windowSoftInputMode="adjustNothing"/>

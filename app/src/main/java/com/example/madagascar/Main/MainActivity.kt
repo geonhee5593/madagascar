@@ -2,6 +2,8 @@ package com.example.madagascar.Main
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.LinearGradient
+import android.graphics.Shader
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
@@ -11,6 +13,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.SearchView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
@@ -50,7 +53,21 @@ class MainActivity : AppCompatActivity() {
          Log.d("MainActivity", "MainActivity onCreate started")
         setContentView(R.layout.activity_main)
 
+         // "축모아" 텍스트에 그라데이션 적용
+         val titleTextView: TextView = findViewById(R.id.bigfat)
+         val paint = titleTextView.paint
+         val width = paint.measureText(titleTextView.text.toString())
 
+         val shader = LinearGradient(
+             0f, 0f, width, 0f,
+             intArrayOf(
+                 getColor(R.color.deep_blue),  // 진한 파란색
+                 getColor(R.color.light_blue) // 연한 파란색
+             ),
+             null,
+             Shader.TileMode.CLAMP
+         )
+         titleTextView.paint.shader = shader
          /* 관리자 버튼 초기화 */
          val adminButton = findViewById<Button>(R.id.btn_admin)
          // 로그인 액티비티에서 전달된 관리자 여부 확인
