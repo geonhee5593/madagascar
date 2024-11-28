@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.madagascar.API.Festival
 import com.example.madagascar.Main.MainActivity
 import com.example.madagascar.Mypage.inquiries.UserActivity
 import com.example.madagascar.R
@@ -63,6 +64,21 @@ class MypageActivity : AppCompatActivity() {
             val intent = Intent(this, Human::class.java)
             startActivity(intent)
         }
+
+        val homebtn = findViewById<ImageView>(R.id.homeIcon)
+
+        homebtn.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
+        val festivalbtn = findViewById<ImageView>(R.id.festivalIcon)
+
+        festivalbtn.setOnClickListener {
+            val intent = Intent(this, Festival::class.java)
+            startActivity(intent)
+        }
+
 
         val arrowbtn103 = findViewById<ImageView>(R.id.btn_arrow103)
 
