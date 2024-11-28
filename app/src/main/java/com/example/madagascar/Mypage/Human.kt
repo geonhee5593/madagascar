@@ -23,19 +23,19 @@ import com.google.firebase.storage.StorageReference
 @Suppress("DEPRECATION")
 class Human : AppCompatActivity() {
 
-    private lateinit var tvName: TextView //textview 및 imageview 선언
+    private lateinit var tvName: TextView
     private lateinit var tvEmail: TextView
     private lateinit var ivProfile: ImageView
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
+    private val storage = FirebaseStorage.getInstance()
+
+    private var selectedImageUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_human)
-        Log.d("DeleteAccount", "FirebaseAuth 초기화: ${auth != null}")
-        Log.d("DeleteAccount", "FirebaseFirestore 초기화: ${db != null}")
 
-        // UI 요소 초기화
         tvName = findViewById(R.id.tvName)
         tvEmail = findViewById(R.id.tvEmail)
         ivProfile = findViewById(R.id.ivProfile)
@@ -44,61 +44,38 @@ class Human : AppCompatActivity() {
         val btnDeleteAccount = findViewById<TextView>(R.id.btnDeleteAccount)
         val arrowBtn101 = findViewById<ImageView>(R.id.btn_arrow101)
 
-        // 사용자 데이터 로드
         loadUserInfo()
 
-        // 마이페이지 돌아가는 버튼
+        // 마이페이지로 돌아가는 버튼
         arrowBtn101.setOnClickListener {
-            val intent = Intent(this, MypageActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, MypageActivity::class.java))
         }
 
-        // 비밀번호 변경 버튼
         btnChangePassword.setOnClickListener {
             startActivity(Intent(this, ChangePasswordActivity::class.java))
         }
 
-        // 로그아웃 버튼
         btnLogout.setOnClickListener {
-            auth.signOut() // Firebase 로그아웃
-            // 사용자 데이터 초기화
+            auth.signOut()
             tvName.text = ""
             tvEmail.text = ""
-            // 로그인 화면으로 이동
             startActivity(Intent(this, Login::class.java))
-            finish() // 현재 Activity 종료
+            finish()
         }
 
-        // 계정 삭제 버튼
         btnDeleteAccount.setOnClickListener {
             deleteAccount()
         }
 
-        // 프로필 이미지 변경 가능 초기화
         initImageViewProfile()
     }
 
-    // 프로필 이미지 변경 시 갤러리 접근
     private fun initImageViewProfile() {
         ivProfile.setOnClickListener {
             when {
                 ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == android.content.pm.PackageManager.PERMISSION_GRANTED -> {
                     navigateGallery()
                 }
-
-                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
-                        ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == android.content.pm.PackageManager.PERMISSION_GRANTED -> {
-                    navigateGallery()
-                }
-
-                shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE) -> {
-                    showPermissionContextPopup()
-                }
-
-                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU -> {
-                    requestPermissions(arrayOf(Manifest.permission.READ_MEDIA_IMAGES), 1000)
-                }
-
                 else -> {
                     requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1000)
                 }
@@ -106,62 +83,62 @@ class Human : AppCompatActivity() {
         }
     }
 
-    // 권한 요청 결과 처리
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == 1000) {
-            if (grantResults.isNotEmpty() && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "권한이 허용되었습니다.", Toast.LENGTH_SHORT).show()
-                navigateGallery()
-            } else {
-                Toast.makeText(this, "권한을 거부하셨습니다.", Toast.LENGTH_SHORT).show()
-            }
+        if (requestCode == 1000 && grantResults.isNotEmpty() && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            navigateGallery()
         }
     }
 
-    // 갤러리로 이동
     private fun navigateGallery() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         startActivityForResult(intent, 2000)
     }
 
-    // 갤러리에서 선택한 이미지 처리
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         if (resultCode != Activity.RESULT_OK) return
 
-        when (requestCode) {
-            2000 -> {
-                val selectedImageUri: Uri? = data?.data
-                if (selectedImageUri != null) {
-                    ivProfile.setImageURI(selectedImageUri)
-                    saveProfileImageUrlToFirestore(selectedImageUri.toString()) // Firestore에 이미지 URL 저장
-                } else {
-                    Toast.makeText(this, "사진을 가져오지 못했습니다.", Toast.LENGTH_SHORT).show()
-                }
+        if (requestCode == 2000) {
+            selectedImageUri = data?.data
+            selectedImageUri?.let {
+                ivProfile.setImageURI(it)
+                uploadImageToFirebase(it)
             }
         }
     }
 
-    // Firestore에 프로필 이미지 URL 저장
+    private fun uploadImageToFirebase(uri: Uri) {
+        val user = auth.currentUser
+        user?.let {
+            val storageRef = storage.reference.child("profileImages/${user.uid}.jpg")
+            storageRef.putFile(uri)
+                .addOnSuccessListener {
+                    storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                        saveProfileImageUrlToFirestore(downloadUri.toString())
+                    }
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "이미지 업로드 실패", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+
     private fun saveProfileImageUrlToFirestore(imageUrl: String) {
         val user = auth.currentUser
         user?.let {
             db.collection("users").document(user.uid)
                 .update("profileImage", imageUrl)
                 .addOnSuccessListener {
-                    Log.d("Profile", "프로필 이미지 URL Firestore에 저장됨")
+                    Log.d("Profile", "프로필 이미지 URL 저장 성공")
                 }
-                .addOnFailureListener { exception ->
-                    Toast.makeText(this, "프로필 이미지 URL 저장 실패: ${exception.message}", Toast.LENGTH_SHORT).show()
+                .addOnFailureListener {
+                    Toast.makeText(this, "프로필 이미지 URL 저장 실패", Toast.LENGTH_SHORT).show()
                 }
         }
     }
 
-    // 사용자 정보 로드
     private fun loadUserInfo() {
         val user = auth.currentUser
         user?.let {
@@ -170,38 +147,22 @@ class Human : AppCompatActivity() {
                     if (document != null) {
                         val username = document.getString("username") ?: "이름 없음"
                         val phoneNumber = document.getString("phoneNumber") ?: "번호 없음"
-                        val formattedPhoneNumber = formatPhoneNumber(phoneNumber)
+                        val profileImage = document.getString("profileImage")
+
                         tvName.text = username
-                        tvEmail.text = formattedPhoneNumber
+                        tvEmail.text = phoneNumber
+
+                        // Glide를 사용해 프로필 이미지 로드
+                        if (profileImage != null) {
+                            Glide.with(this).load(profileImage).into(ivProfile)
+                        } else {
+                            ivProfile.setImageResource(R.drawable.default_profile)
+                        }
                     }
-                }
-                .addOnFailureListener {
-                    Toast.makeText(this, "사용자 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
                 }
         }
     }
 
-    // 전화번호 형식을 변경하는 메서드
-    private fun formatPhoneNumber(phoneNumber: String): String {
-        return if (phoneNumber.length == 11) {
-            "${phoneNumber.substring(0, 3)}-${phoneNumber.substring(3, 7)}-${phoneNumber.substring(7)}"
-        } else {
-            phoneNumber // 형식이 맞지 않으면 원래 값을 반환
-        }
-    }
-    private fun showPermissionContextPopup() {
-        AlertDialog.Builder(this)
-            .setTitle("권한이 필요합니다.")
-            .setMessage("프로필 이미지를 변경하려면 갤러리 접근 권한이 필요합니다. 설정에서 권한을 활성화해주세요.")
-            .setPositiveButton("설정으로 이동") { _, _ ->
-                val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                intent.data = Uri.parse("package:$packageName")
-                startActivity(intent)
-            }
-            .setNegativeButton("취소하기") { _, _ -> }
-            .create()
-            .show()
-    }
     private fun deleteAccount() {
         val user = auth.currentUser
         if (user == null) {
