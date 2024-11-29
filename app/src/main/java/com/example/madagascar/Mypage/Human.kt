@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.example.madagascar.Login
 import com.example.madagascar.R
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
@@ -249,61 +250,47 @@ class Human : AppCompatActivity() {
             return
         }
 
-        val idInput = EditText(this)
         val passwordInput = EditText(this)
         passwordInput.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
 
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            addView(idInput.apply { hint = "아이디를 입력하세요" })
             addView(passwordInput.apply { hint = "비밀번호를 입력하세요" })
         }
 
         AlertDialog.Builder(this)
             .setTitle("계정 삭제")
-            .setMessage("아이디와 비밀번호를 입력하세요.")
+            .setMessage("비밀번호를 입력하세요.")
             .setView(layout)
             .setPositiveButton("확인") { _, _ ->
-                val inputId = idInput.text.toString()
                 val inputPassword = passwordInput.text.toString()
 
-                if (inputId.isBlank() || inputPassword.isBlank()) {
-                    Toast.makeText(this, "아이디와 비밀번호를 모두 입력해주세요.", Toast.LENGTH_SHORT).show()
-                    Log.e("DeleteAccount", "아이디 또는 비밀번호가 비어 있습니다.")
+                if (inputPassword.isBlank()) {
+                    Toast.makeText(this, "비밀번호를 입력해주세요.", Toast.LENGTH_SHORT).show()
+                    Log.e("DeleteAccount", "비밀번호가 비어 있습니다.")
                     return@setPositiveButton
                 }
 
-                Log.d("DeleteAccount", "입력된 아이디: $inputId, 비밀번호: $inputPassword")
+                Log.d("DeleteAccount", "입력된 비밀번호: $inputPassword")
 
-                // Firestore에서 ID와 비밀번호 확인
-                db.collection("users")
-                    .whereEqualTo("id", inputId)
-                    .whereEqualTo("password", inputPassword)
-                    .get()
-                    .addOnSuccessListener { documents ->
-                        if (!documents.isEmpty) {
-                            val document = documents.documents[0]
-                            val uid = document.id // UID 가져오기
-                            Log.d("DeleteAccount", "Firestore 인증 성공, UID: $uid")
-
-                            // Firestore 문서와 서브컬렉션 삭제
-                            deleteDocumentWithSubcollections("users/$uid") { isDeleted ->
-                                if (isDeleted) {
-                                    // Firebase Authentication 계정 삭제
-                                    deleteAuthAccount(user)
-                                } else {
-                                    Toast.makeText(this, "계정 삭제 중 문제가 발생했습니다.", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        } else {
-                            Toast.makeText(this, "아이디 또는 비밀번호가 잘못되었습니다.", Toast.LENGTH_SHORT).show()
-                            Log.e("DeleteAccount", "Firestore에서 해당 아이디 또는 비밀번호를 찾을 수 없음.")
+                // FirebaseAuth 비밀번호 재인증
+                val userEmail = user.email
+                if (userEmail != null) {
+                    val credential = EmailAuthProvider.getCredential(userEmail, inputPassword)
+                    user.reauthenticate(credential)
+                        .addOnSuccessListener {
+                            Log.d("DeleteAccount", "재인증 성공")
+                            // Firestore 및 Firebase Authentication에서 계정 삭제
+                            deleteUserAccount(user)
                         }
-                    }
-                    .addOnFailureListener { e ->
-                        Log.e("DeleteAccount", "Firestore 조회 실패: ${e.message}")
-                        Toast.makeText(this, "계정 인증 중 오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "비밀번호가 잘못되었습니다.", Toast.LENGTH_SHORT).show()
+                            Log.e("DeleteAccount", "재인증 실패: ${e.message}")
+                        }
+                } else {
+                    Toast.makeText(this, "사용자 이메일을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    Log.e("DeleteAccount", "사용자 이메일을 찾을 수 없습니다.")
+                }
             }
             .setNegativeButton("취소") { dialog, _ ->
                 Log.d("DeleteAccount", "계정 삭제 취소됨")
@@ -312,61 +299,29 @@ class Human : AppCompatActivity() {
             .show()
     }
 
-    // 문서 및 서브컬렉션 삭제 함수
-    private fun deleteDocumentWithSubcollections(documentPath: String, callback: (Boolean) -> Unit) {
-        val docRef = db.document(documentPath)
-
-        // 서브컬렉션 조회 및 삭제
-        docRef.get()
-            .addOnSuccessListener { documentSnapshot ->
-                if (documentSnapshot.exists()) {
-                    // 서브컬렉션 목록 가져오기
-                    docRef.collection("interests").get()
-                        .addOnSuccessListener { subcollections ->
-                            // 서브컬렉션 내 모든 문서 삭제
-                            for (subDoc in subcollections.documents) {
-                                subDoc.reference.delete()
-                            }
-
-                            // 부모 문서 삭제
-                            docRef.delete()
-                                .addOnSuccessListener {
-                                    Log.d("DeleteAccount", "문서 및 서브컬렉션 삭제 성공")
-                                    callback(true)
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.e("DeleteAccount", "문서 삭제 실패: ${e.message}")
-                                    callback(false)
-                                }
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("DeleteAccount", "서브컬렉션 조회 실패: ${e.message}")
-                            callback(false)
-                        }
-                } else {
-                    Log.e("DeleteAccount", "삭제하려는 문서가 존재하지 않음")
-                    callback(false)
-                }
+    // Firestore 문서 및 Firebase Authentication 계정 삭제
+    private fun deleteUserAccount(user: FirebaseUser) {
+        val userId = user.uid
+        db.collection("users").document(userId)
+            .delete()
+            .addOnSuccessListener {
+                Log.d("DeleteAccount", "Firestore에서 사용자 데이터 삭제 완료")
+                user.delete()
+                    .addOnSuccessListener {
+                        Log.d("DeleteAccount", "Firebase 계정 삭제 성공")
+                        Toast.makeText(this, "계정 및 데이터가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this, Login::class.java))
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("DeleteAccount", "Firebase 계정 삭제 실패: ${e.message}")
+                        Toast.makeText(this, "Firebase 계정 삭제 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
             }
             .addOnFailureListener { e ->
-                Log.e("DeleteAccount", "문서 조회 실패: ${e.message}")
-                callback(false)
+                Log.e("DeleteAccount", "Firestore 사용자 데이터 삭제 실패: ${e.message}")
+                Toast.makeText(this, "계정 삭제 중 문제가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
-    // Firebase Authentication 계정 삭제
-    private fun deleteAuthAccount(user: FirebaseUser) {
-        Log.d("DeleteAccount", "Firebase Authentication 계정 삭제 시도")
-        user.delete()
-            .addOnSuccessListener {
-                Log.d("DeleteAccount", "Firebase 계정 삭제 성공")
-                Toast.makeText(this, "계정 및 데이터가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, Login::class.java))
-                finish()
-            }
-            .addOnFailureListener { authError ->
-                Log.e("DeleteAccount", "Firebase 계정 삭제 실패: ${authError.message}")
-                Toast.makeText(this, "Firebase 계정 삭제 실패: ${authError.message}", Toast.LENGTH_SHORT).show()
-            }
-    }
 }
