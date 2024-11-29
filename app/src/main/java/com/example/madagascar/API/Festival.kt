@@ -105,12 +105,20 @@ class Festival : AppCompatActivity() {
             }
         }
 
+        // MainActivity에서 검색어 전달받기
+        val searchQuery = intent.getStringExtra("searchQuery")
+        if (!searchQuery.isNullOrEmpty()) {
+            searchEditText.setText(searchQuery)
+            searchFestivals(searchQuery)
+        } else {
+            // 초기 축제 데이터 로드
+            fetchAllFestivals()
+        }
+
         // 여기서 무한 스크롤 리스너 추가
         setupRecyclerView()
-
-        // 초기 축제 데이터 로드
-        fetchAllFestivals()
     }
+
 
     private fun setupRecyclerView() {
         festivalRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
