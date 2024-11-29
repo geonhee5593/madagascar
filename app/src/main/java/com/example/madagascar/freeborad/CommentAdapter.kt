@@ -17,11 +17,14 @@ class CommentAdapter(private val comments: List<Comment>) : RecyclerView.Adapter
     override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
         val comment = comments[position]
         holder.commentTextView.text = comment.text
+        // 사용자 ID를 추가로 표시할 경우
+        holder.userIdTextView.text = "작성자: ${comment.userId}"
     }
 
     override fun getItemCount(): Int = comments.size
 
     class CommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val commentTextView: TextView = itemView.findViewById(R.id.commentTextView)
+        val userIdTextView: TextView = itemView.findViewById(R.id.userIdTextView)  // 사용자 ID 표시할 TextView
     }
 }

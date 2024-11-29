@@ -45,10 +45,25 @@ class ListtextmadeActivity : AppCompatActivity() {
                 "views" to 0,
                 "date" to currentDate
             )
+
+            // Firestore에서 현재 로그인한 사용자의 ID를 가져오기 (여기서는 예시로 "userId"를 사용)
+            val userId = "사용자ID"  // 실제 로그인한 사용자 ID로 바꾸세요.
+
+            // Firestore에 게시글 저장
             firestore.collection("FreeBoardItems")
                 .add(newPost)
-                .addOnSuccessListener {
-                    Toast.makeText(this, "게시글이 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                .addOnSuccessListener { documentReference ->
+                    // 게시글 저장 후 사용자 ID를 users 컬렉션에 추가
+                    val userRef = firestore.collection("users").document(userId)
+
+                    // ID 값 추가
+                    userRef.update("id", userId)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "사용자 ID가 추가되었습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "사용자 ID 추가 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
 
                     // FreeBoradActivity에 전달할 데이터 설정
                     val resultIntent = Intent()
@@ -62,6 +77,5 @@ class ListtextmadeActivity : AppCompatActivity() {
                     Toast.makeText(this, "게시글 저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         }
-
     }
 }

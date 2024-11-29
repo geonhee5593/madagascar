@@ -14,13 +14,13 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlin.math.min
 
-// 데이터 클래스: 자유게시판 아이템 정보 관리
 data class FreeBoardItem(
-    var id: String = "", // Firestore에서 사용할 문서 ID
-    var title: String = "", // 게시글 제목
-    var content: String = "", // 게시글 내용
-    var views: Int = 0, // 조회수
-    var date: String = "" // 작성 날짜
+    var id: String = "",       // Firestore 문서 ID
+    var title: String = "",    // 제목
+    var content: String = "",  // 내용
+    var views: Int = 0,        // 조회수
+    var date: String = "",     // 등록일
+    var userId: String = ""    // 작성자 ID
 )
 
 @Suppress("DEPRECATION")
@@ -116,7 +116,7 @@ class FreeBoradActivity : AppCompatActivity() {
                     item.id = document.id
                     fullDataList.add(0, item) // 리스트의 맨 앞에 추가
                 }
-                updatePage()
+                updatePage() // Firestore에서 데이터 불러온 후 페이지 갱신
             }
             .addOnFailureListener { e ->
                 Toast.makeText(this, "데이터 로드 실패: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -156,13 +156,23 @@ class FreeBoradActivity : AppCompatActivity() {
                 val content = data?.getStringExtra("newPostContent") ?: ""
                 val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(System.currentTimeMillis())
 
+                // 현재 로그인된 사용자의 ID 가져오기
+                val currentUser = auth.currentUser
+                val userId = currentUser?.uid ?: "알 수 없음" // 로그인하지 않은 경우 "알 수 없음"으로 설정
+
                 // Firestore에 새 글 추가
-                val newItem = FreeBoardItem(title = title, content = content, views = 0, date = currentDate)
+                val newItem = FreeBoardItem(
+                    title = title,
+                    content = content,
+                    views = 0,
+                    date = currentDate,
+                    userId = userId // 작성자 ID 추가
+                )
                 freeBoardCollection.add(newItem)
-                    .addOnSuccessListener {
-                        newItem.id = it.id // Firestore에서 ID 가져오기
+                    .addOnSuccessListener { documentReference ->
+                        newItem.id = documentReference.id // Firestore에서 ID 가져오기
                         fullDataList.add(0, newItem) // 리스트 맨 앞에 추가
-                        currentPage = 0
+                        currentPage = 0 // 페이지를 첫 번째 페이지로 초기화
                         updatePage() // UI 갱신
                     }
                     .addOnFailureListener { e ->

@@ -7,6 +7,17 @@
     android:background="@drawable/card_background"
     android:elevation="4dp">
 
+    <!-- 문의한 사용자 -->
+    <TextView
+        android:id="@+id/textUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="닉네임: "
+        android:textColor="#1E88E5"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp" />
+
+
     <!-- 문의 내용 -->
     <TextView
         android:id="@+id/textQuestion"
@@ -33,8 +44,7 @@
         android:layout_height="wrap_content"
         android:text="답변 상태"
         android:textStyle="bold"
-        android:layout_marginTop="4dp"
-         />
+        android:layout_marginTop="4dp" />
 
     <!-- 답변 입력 필드 -->
     <EditText

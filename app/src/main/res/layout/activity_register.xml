@@ -1,4 +1,5 @@
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,15 +11,15 @@
         android:id="@+id/app_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
         android:text="축모아"
-        android:textSize="32sp"
+        android:textSize="28sp"
         android:fontFamily="sans-serif-medium"
         android:gravity="center"
         android:textColor="@android:color/black"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp" />
 
     <!-- Username -->
     <EditText
@@ -27,26 +28,11 @@
         android:layout_height="wrap_content"
         android:hint="사용자 이름"
         android:background="@drawable/input_field_background"
-        android:padding="12dp"
+        android:padding="10dp"
         app:layout_constraintTop_toBottomOf="@id/app_title"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/buttonCheckUsername"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="60dp"
-    android:layout_marginBottom="24dp" />
-
-    <Button
-        android:id="@+id/buttonCheckUsername"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="중복 확인"
-        android:backgroundTint="#BBDEFB"
-        android:textColor="#FFFFFF"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:layout_marginBottom="24dp"
-        app:layout_constraintTop_toTopOf="@id/editTextUsername"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp" />
 
     <!-- ID -->
     <EditText
@@ -55,82 +41,53 @@
         android:layout_height="wrap_content"
         android:hint="아이디"
         android:background="@drawable/input_field_background"
-        android:padding="12dp"
+        android:padding="10dp"
         app:layout_constraintTop_toBottomOf="@id/editTextUsername"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/buttonCheckId"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="32dp"
-    android:layout_marginBottom="24dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
 
-    <Button
-        android:id="@+id/buttonCheckId"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="중복 확인"
-        android:backgroundTint="#BBDEFB"
-        android:textColor="#FFFFFF"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        app:layout_constraintTop_toTopOf="@id/editTextId"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- Phone -->
-
+    <!-- Email -->
     <EditText
-        android:id="@+id/editTextPhone"
+        android:id="@+id/editTextEmail"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
-        android:layout_marginEnd="8dp"
+        android:hint="이메일"
         android:background="@drawable/input_field_background"
-        android:hint="(-)없이 전화번호 입력"
-        android:inputType="phone"
-        android:padding="12dp"
-        app:layout_constraintEnd_toStartOf="@id/buttonSendCode"
-        app:layout_constraintHorizontal_bias="0.0"
+        android:padding="10dp"
+        android:inputType="textEmailAddress"
+        app:layout_constraintTop_toBottomOf="@id/editTextId"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/editTextId" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp" />
 
+    <!-- 인증 코드 전송 버튼 -->
     <Button
-        android:id="@+id/buttonSendCode"
-        android:layout_width="wrap_content"
+        android:id="@+id/buttonSendVerificationCode"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="인증 코드 전송"
-        android:backgroundTint="#BBDEFB"
+        android:backgroundTint="#42A5F5"
         android:textColor="#FFFFFF"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        app:layout_constraintTop_toTopOf="@id/editTextPhone"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- Verification Code -->
-    <EditText
-        android:id="@+id/editTextVerificationCode"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="인증 코드 입력"
-        android:background="@drawable/input_field_background"
         android:padding="12dp"
-        android:inputType="number"
-        app:layout_constraintTop_toBottomOf="@id/editTextPhone"
+        app:layout_constraintTop_toBottomOf="@id/editTextEmail"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/buttonVerifyCode"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="32dp"
-    android:layout_marginBottom="24dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
 
+    <!-- 인증 코드 확인 버튼 -->
     <Button
         android:id="@+id/buttonVerifyCode"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="인증 코드 확인"
-        android:backgroundTint="#BBDEFB"
+        android:text="코드 확인"
+        android:backgroundTint="#42A5F5"
         android:textColor="#FFFFFF"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        app:layout_constraintTop_toTopOf="@id/editTextVerificationCode"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:padding="12dp"
+        app:layout_constraintTop_toBottomOf="@id/buttonSendVerificationCode"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
 
     <!-- Password -->
     <EditText
@@ -139,12 +96,12 @@
         android:layout_height="wrap_content"
         android:hint="비밀번호"
         android:background="@drawable/input_field_background"
-        android:padding="12dp"
+        android:padding="10dp"
         android:inputType="textPassword"
-        app:layout_constraintTop_toBottomOf="@id/editTextVerificationCode"
+        app:layout_constraintTop_toBottomOf="@id/buttonVerifyCode"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="32dp" />
+        android:layout_marginTop="24dp" />
 
     <!-- Confirm Password -->
     <EditText
@@ -153,12 +110,12 @@
         android:layout_height="wrap_content"
         android:hint="비밀번호 재확인"
         android:background="@drawable/input_field_background"
-        android:padding="12dp"
+        android:padding="10dp"
         android:inputType="textPassword"
         app:layout_constraintTop_toBottomOf="@id/editTextPassword"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="32dp"  />
+        android:layout_marginTop="16dp" />
 
     <!-- Register Button -->
     <Button
@@ -168,10 +125,10 @@
         android:text="회원가입"
         android:backgroundTint="#42A5F5"
         android:textColor="#FFFFFF"
-        android:padding="16dp"
+        android:padding="12dp"
         app:layout_constraintTop_toBottomOf="@id/editTextConfirmPassword"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="40dp"  />
+        android:layout_marginTop="24dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
