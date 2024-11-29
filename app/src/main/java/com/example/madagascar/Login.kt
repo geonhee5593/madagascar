@@ -28,6 +28,7 @@ class Login : AppCompatActivity() {
         firestore = FirebaseFirestore.getInstance()
 
         val registerButton: Button = findViewById(R.id.registerbutton)
+        val findButton: Button = findViewById(R.id.findButton)
         // "축모아" 텍스트에 그라데이션 적용
         val titleTextView: TextView = findViewById(R.id.app_title)
         val paint = titleTextView.paint
@@ -51,6 +52,12 @@ class Login : AppCompatActivity() {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
+        findButton.setOnClickListener {
+            // FindAccountActivity로 이동
+            val intent = Intent(this, FindActivity::class.java)
+            startActivity(intent)
+        }
+
     }
 
     private fun loginUser() {
@@ -89,14 +96,13 @@ class Login : AppCompatActivity() {
                 val isFirstLogin = document.getBoolean("isFirstLogin") ?: true
 
                 if (isFirstLogin) {
-                    Toast.makeText(this, "첫 로그인: 관심 분야 설정으로 이동합니다.", Toast.LENGTH_SHORT).show()
+                    // 첫 로그인: 관심 분야 설정으로 이동
                     val intent = Intent(this, Hobby::class.java)
-                    intent.putExtra("uid", uid)
+                    intent.putExtra("isFirstLogin", true)
                     startActivity(intent)
                 } else {
-                    Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show()
+                    // 첫 로그인이 아님: 메인 화면으로 이동
                     val intent = Intent(this, MainActivity::class.java)
-                    intent.putExtra("uid", uid)
                     startActivity(intent)
                 }
                 finish()

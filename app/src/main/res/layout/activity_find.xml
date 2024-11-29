@@ -24,82 +24,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- 전화번호 입력 -->
+    <!-- 이메일 입력 -->
     <EditText
-        android:id="@+id/editTextPhone"
+        android:id="@+id/editTextEmail"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="(-)없이 전화번호 입력"
-        android:inputType="phone"
+        android:hint="이메일 입력"
+        android:inputType="textEmailAddress"
         android:padding="12dp"
         android:background="@drawable/input_field_background"
         app:layout_constraintTop_toBottomOf="@id/app_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintWidth_percent="0.8" />
-
-    <!-- 인증 코드 입력 -->
-    <EditText
-        android:id="@+id/editTextVerificationCode"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="인증 코드 입력"
-        android:padding="12dp"
-        android:background="@drawable/input_field_background"
-        app:layout_constraintTop_toBottomOf="@id/editTextPhone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintWidth_percent="0.8" />
-
-    <!-- 인증 코드 보내기 버튼 -->
-    <Button
-        android:id="@+id/buttonSendCode"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="인증 코드 보내기"
-        android:backgroundTint="#42A5F5"
-        android:textColor="#FFFFFF"
-        android:padding="12dp"
-        app:layout_constraintTop_toBottomOf="@id/editTextVerificationCode"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintWidth_percent="0.8" />
-
-    <!-- 인증 코드 확인 버튼 -->
-    <Button
-        android:id="@+id/buttonVerifyCode"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="인증 코드 확인"
-        android:backgroundTint="#42A5F5"
-        android:textColor="#FFFFFF"
-        android:padding="12dp"
-        app:layout_constraintTop_toBottomOf="@id/buttonSendCode"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintWidth_percent="0.8" />
-
-    <!-- 아이디 찾기 버튼 -->
-    <Button
-        android:id="@+id/buttonFindId"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="아이디 찾기"
-        android:backgroundTint="#90CAF9"
-        android:textColor="#FFFFFF"
-        android:padding="12dp"
-        app:layout_constraintTop_toBottomOf="@id/buttonVerifyCode"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintWidth_percent="0.8" />
 
@@ -112,7 +49,7 @@
         android:backgroundTint="#90CAF9"
         android:textColor="#FFFFFF"
         android:padding="12dp"
-        app:layout_constraintTop_toBottomOf="@id/buttonFindId"
+        app:layout_constraintTop_toBottomOf="@id/editTextEmail"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp"
