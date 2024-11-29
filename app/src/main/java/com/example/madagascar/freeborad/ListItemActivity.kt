@@ -15,7 +15,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 data class Comment(
     val text: String = "",
-    val timestamp: Long = 0
+    val timestamp: Long = 0,
+    val userId: String = ""  // 사용자 ID 추가
 )
 
 class ListItemActivity : AppCompatActivity() {
