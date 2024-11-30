@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.LinearGradient
 import android.graphics.Shader
 import android.os.Bundle
+import android.util.Patterns
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -21,6 +22,8 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var firestore: FirebaseFirestore
     private var isEmailVerified = false // 이메일 인증 여부
     private var temporaryPassword: String? = null // 임시 비밀번호 저장 변수
+    private var isUsernameAvailable = false // 사용자 이름 중복 확인 여부
+    private var isIdAvailable = false // 아이디 중복 확인 여부
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +59,18 @@ class RegisterActivity : AppCompatActivity() {
             checkEmailVerification()
         }
 
+        // 사용자 이름 중복 확인 버튼
+        val checkUsernameButton: Button = findViewById(R.id.buttonCheckUsername)
+        checkUsernameButton.setOnClickListener {
+            checkUsernameAvailability()
+        }
+
+        // 아이디 중복 확인 버튼
+        val checkIdButton: Button = findViewById(R.id.buttonCheckId)
+        checkIdButton.setOnClickListener {
+            checkIdAvailability()
+        }
+
         // 회원가입 버튼
         val registerButton: Button = findViewById(R.id.buttonRegister)
         registerButton.setOnClickListener {
@@ -63,11 +78,62 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
+    private fun checkUsernameAvailability() {
+        val username = findViewById<EditText>(R.id.editTextUsername).text.toString()
+
+        if (username.isBlank()) {
+            Toast.makeText(this, "사용자 이름을 입력하세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        firestore.collection("users").whereEqualTo("username", username).get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    isUsernameAvailable = true
+                    Toast.makeText(this, "사용자 이름을 사용할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    isUsernameAvailable = false
+                    Toast.makeText(this, "이미 사용 중인 사용자 이름입니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "사용자 이름 확인 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun checkIdAvailability() {
+        val id = findViewById<EditText>(R.id.editTextId).text.toString()
+
+        if (id.isBlank()) {
+            Toast.makeText(this, "아이디를 입력하세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        firestore.collection("users").whereEqualTo("id", id).get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    isIdAvailable = true
+                    Toast.makeText(this, "아이디를 사용할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    isIdAvailable = false
+                    Toast.makeText(this, "이미 사용 중인 아이디입니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "아이디 확인 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
     private fun sendEmailVerification() {
         val email = findViewById<EditText>(R.id.editTextEmail).text.toString()
 
         if (email.isBlank()) {
             Toast.makeText(this, "이메일을 입력하세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "올바른 이메일 주소를 입력하세요.", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -119,7 +185,6 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-
     private fun validateAndRegisterUser() {
         val username = findViewById<EditText>(R.id.editTextUsername).text.toString()
         val id = findViewById<EditText>(R.id.editTextId).text.toString()
@@ -132,6 +197,26 @@ class RegisterActivity : AppCompatActivity() {
             return
         }
 
+        if (username.length < 3) {
+            Toast.makeText(this, "사용자 이름은 3자리 이상이어야 합니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (id.length < 3) {
+            Toast.makeText(this, "아이디는 3자리 이상이어야 합니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "올바른 이메일 주소를 입력하세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (password.length < 6) {
+            Toast.makeText(this, "비밀번호는 6자리 이상이어야 합니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         if (password != confirmPassword) {
             Toast.makeText(this, "비밀번호와 비밀번호 재확인이 다릅니다.", Toast.LENGTH_SHORT).show()
             return
@@ -139,6 +224,16 @@ class RegisterActivity : AppCompatActivity() {
 
         if (!isEmailVerified) {
             Toast.makeText(this, "이메일 인증을 완료하세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!isUsernameAvailable) {
+            Toast.makeText(this, "사용자 이름 중복 확인을 완료하세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!isIdAvailable) {
+            Toast.makeText(this, "아이디 중복 확인을 완료하세요.", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -181,7 +276,6 @@ class RegisterActivity : AppCompatActivity() {
             }
         }
     }
-
 
     private fun navigateToLogin() {
         val intent = Intent(this, Login::class.java)
