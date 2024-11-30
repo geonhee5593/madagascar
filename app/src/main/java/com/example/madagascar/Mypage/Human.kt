@@ -198,12 +198,12 @@ class Human : AppCompatActivity() {
                 .addOnSuccessListener { document ->
                     if (document != null) {
                         val username = document.getString("username") ?: "이름 없음"
-                        val phoneNumber = document.getString("phoneNumber") ?: "번호 없음"
+                        val email = user.email ?: "이메일 없음" // Firestore에서 이메일 정보 가져오기
                         val profileImage = document.getString("profileImage") // Firestore에 저장된 프로필 이미지 URL
 
                         // TextView에 사용자 정보 설정
                         tvName.text = username
-                        tvEmail.text = formatPhoneNumber(phoneNumber)
+                        tvEmail.text = email
 
                         // Glide를 사용하여 프로필 이미지 로드
                         if (!profileImage.isNullOrEmpty()) {
@@ -218,14 +218,7 @@ class Human : AppCompatActivity() {
     }
 
 
-    // 전화번호 형식을 변경하는 메서드
-    private fun formatPhoneNumber(phoneNumber: String): String {
-        return if (phoneNumber.length == 11) {
-            "${phoneNumber.substring(0, 3)}-${phoneNumber.substring(3, 7)}-${phoneNumber.substring(7)}"
-        } else {
-            phoneNumber // 형식이 맞지 않으면 원래 값을 반환
-        }
-    }
+
     private fun showPermissionContextPopup() {
         AlertDialog.Builder(this)
             .setTitle("권한이 필요합니다.")

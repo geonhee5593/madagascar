@@ -222,8 +222,8 @@ class MainActivity : AppCompatActivity() {
             searchButton.setOnClickListener {
                 val query = searchView.query.toString().trim()
                 if (query.isNotEmpty()) {
-                    val intent = Intent(this, SearchResultsActivity::class.java)
-                    intent.putExtra("searchQuery", query)
+                    val intent = Intent(this, Festival::class.java)
+                    intent.putExtra("searchQuery", query) // 검색어 전달
                     startActivity(intent)
                 } else {
                     Toast.makeText(this, "검색어를 입력하세요", Toast.LENGTH_SHORT).show()
@@ -234,6 +234,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "검색 기능 설정 중 오류 발생", Toast.LENGTH_SHORT).show()
         }
     }
+
 
     private fun setupAutoSlide(itemCount: Int) {
         val runnable = object : Runnable {
