@@ -2,6 +2,7 @@ package com.example.madagascar.freeborad
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ListView
@@ -107,22 +108,36 @@ class FreeBoradActivity : AppCompatActivity() {
                     for (document in documents) {
                         val item = document.toObject(FreeBoardItem::class.java)
                         item.id = document.id
-                        fullDataList.add(0, item)
+                        // 삭제된 게시글 필터링
+                        if (item.id.isNotEmpty()) {
+                            fullDataList.add(0, item)
+                        }
                     }
                     updatePage()
                 }
                 .addOnFailureListener { e ->
+                    Log.e("FreeBoradActivity", "Failed to load notices: ${e.message}")
                     Toast.makeText(this, "데이터 로드 실패: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
+        } else {
+            Log.e("FreeBoradActivity", "User is not logged in.")
+            Toast.makeText(this, "로그인 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun updatePage() {
+        // 페이지 데이터 로드 시 범위 확인
         val start = currentPage * pageSize
         val end = min((currentPage + 1) * pageSize, fullDataList.size)
-        currentPageList.clear()
-        currentPageList.addAll(fullDataList.subList(start, end))
-        adapter.notifyDataSetChanged()
+
+        // 데이터가 비어 있을 경우 처리
+        if (fullDataList.isNotEmpty()) {
+            currentPageList.clear()
+            currentPageList.addAll(fullDataList.subList(start, end))
+            adapter.notifyDataSetChanged()
+        } else {
+            Log.w("FreeBoradActivity", "No data available to display.")
+        }
     }
 
     private fun filterAndDisplayData(query: String) {
@@ -141,6 +156,7 @@ class FreeBoradActivity : AppCompatActivity() {
         currentPageList.addAll(filteredList.take(pageSize))
         adapter.notifyDataSetChanged()
     }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

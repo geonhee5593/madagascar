@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.madagascar.R
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -38,38 +39,27 @@ class ListtextmadeActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@setOnClickListener
+
             // Firestore에 데이터 저장
             val newPost = hashMapOf(
                 "title" to title,
                 "content" to content,
-                "views" to 0,
-                "date" to currentDate
+                "timestamp" to currentDate,
+                "views" to 0
             )
 
-            // Firestore에서 현재 로그인한 사용자의 ID를 가져오기 (여기서는 예시로 "userId"를 사용)
-            val userId = "사용자ID"  // 실제 로그인한 사용자 ID로 바꾸세요.
-
             // Firestore에 게시글 저장
-            firestore.collection("FreeBoardItems")
+            firestore.collection("users")
+                .document(userId)
+                .collection("notices")
                 .add(newPost)
                 .addOnSuccessListener { documentReference ->
-                    // 게시글 저장 후 사용자 ID를 users 컬렉션에 추가
-                    val userRef = firestore.collection("users").document(userId)
-
-                    // ID 값 추가
-                    userRef.update("id", userId)
-                        .addOnSuccessListener {
-                            Toast.makeText(this, "사용자 ID가 추가되었습니다.", Toast.LENGTH_SHORT).show()
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(this, "사용자 ID 추가 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-                        }
-
-                    // FreeBoradActivity에 전달할 데이터 설정
+                    // 게시글 저장 후 FreeBoardActivity에 데이터 전달
                     val resultIntent = Intent()
                     resultIntent.putExtra("newPostTitle", title)
                     resultIntent.putExtra("newPostContent", content)
-                    setResult(RESULT_OK, resultIntent) // FreeBoradActivity에 데이터 전달
+                    setResult(RESULT_OK, resultIntent) // FreeBoardActivity에 데이터 전달
 
                     finish() // Activity 종료
                 }

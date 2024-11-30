@@ -20,6 +20,7 @@ data class Comment(
     val userId: String = "",
     val username: String = ""  // 사용자 이름 추가
 )
+
 class ListItemActivity : AppCompatActivity() {
 
     private lateinit var titleTextView: TextView
@@ -90,7 +91,10 @@ class ListItemActivity : AppCompatActivity() {
     }
 
     private fun deletePost() {
-        firestore.collection("FreeBoardItems")
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return // 로그인된 사용자 ID 가져오기
+        firestore.collection("users")
+            .document(userId)
+            .collection("notices")
             .document(documentId)
             .delete()
             .addOnSuccessListener {
@@ -105,9 +109,12 @@ class ListItemActivity : AppCompatActivity() {
                 Toast.makeText(this, "게시글 삭제 실패: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
     private fun updateViews() {
-        // Firestore에서 조회수를 가져와서 업데이트
-        firestore.collection("FreeBoardItems")
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return // 로그인된 사용자 ID 가져오기
+        firestore.collection("users")
+            .document(userId)
+            .collection("notices")
             .document(documentId)
             .get()
             .addOnSuccessListener { document ->
@@ -116,11 +123,12 @@ class ListItemActivity : AppCompatActivity() {
                     views = currentViews + 1
 
                     // 조회수 업데이트
-                    firestore.collection("FreeBoardItems")
+                    firestore.collection("users")
+                        .document(userId)
+                        .collection("notices")
                         .document(documentId)
                         .update("views", views)
                         .addOnSuccessListener {
-                            Log.d("ListItemActivity", "조회수 업데이트 성공: $views")
                             viewsTextView.text = "조회수: $views"
                             // 조회수 업데이트 후 FreeBoradActivity로 결과 전달
                             val resultIntent = Intent().apply {
@@ -144,13 +152,51 @@ class ListItemActivity : AppCompatActivity() {
             }
     }
 
+    private fun addComment(commentText: String) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId == null) {
+            Log.e("ListItemActivity", "User is not logged in.")
+            Toast.makeText(this, "로그인 후 댓글을 작성해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        Log.d("ListItemActivity", "Adding comment: $commentText")
+
+        firestore.collection("users")
+            .document(userId)
+            .collection("notices")
+            .document(documentId)
+            .collection("comments")
+            .add(Comment(commentText, System.currentTimeMillis(), userId, "Unknown"))
+            .addOnSuccessListener {
+                Log.d("ListItemActivity", "Comment added successfully.")
+                commentEditText.text.clear() // 댓글 작성 후 입력란을 비운다.
+                loadComments() // 댓글 목록을 다시 불러온다.
+                Toast.makeText(this, "댓글이 등록되었습니다.", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Log.e("ListItemActivity", "Failed to add comment: ${e.message}")
+                Toast.makeText(this, "댓글 등록 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
     private fun loadComments() {
-        firestore.collection("FreeBoardItems")
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: run {
+            Log.e("ListItemActivity", "User is not logged in.")
+            return
+        }
+
+        Log.d("ListItemActivity", "Loading comments for document: $documentId")
+
+        firestore.collection("users")
+            .document(userId)
+            .collection("notices")
             .document(documentId)
             .collection("comments")
             .orderBy("timestamp") // 댓글 시간 순 정렬
             .get()
             .addOnSuccessListener { result ->
+                Log.d("ListItemActivity", "Comments loaded successfully.")
                 comments.clear()
                 for (document in result) {
                     val comment = document.toObject(Comment::class.java)
@@ -159,44 +205,8 @@ class ListItemActivity : AppCompatActivity() {
                 commentAdapter.notifyDataSetChanged()
             }
             .addOnFailureListener { e ->
-                Log.e("ListItemActivity", "댓글 불러오기 실패: ${e.message}")
+                Log.e("ListItemActivity", "Failed to load comments: ${e.message}")
                 Toast.makeText(this, "댓글 불러오기 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-    }
-
-    private fun addComment(commentText: String) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return // 로그인된 사용자 ID 가져오기
-
-        // Firestore에서 사용자 정보를 가져오기
-        val firestore = FirebaseFirestore.getInstance()
-        firestore.collection("users").document(userId).get()
-            .addOnSuccessListener { document ->
-                val username = document.getString("username") ?: "Unknown"  // 사용자 이름을 가져옵니다
-                val comment = Comment(
-                    commentText,
-                    System.currentTimeMillis(),
-                    userId,
-                    username
-                )  // 댓글에 username 추가
-
-                // 댓글을 Firestore에 추가
-                firestore.collection("FreeBoardItems")
-                    .document(documentId)
-                    .collection("comments")
-                    .add(comment)
-                    .addOnSuccessListener {
-                        commentEditText.text.clear()
-                        loadComments()
-                        Toast.makeText(this, "댓글이 등록되었습니다.", Toast.LENGTH_SHORT).show()
-                    }
-                    .addOnFailureListener { e ->
-                        Log.e("ListItemActivity", "댓글 등록 실패: ${e.message}")
-                        Toast.makeText(this, "댓글 등록 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
-            }
-            .addOnFailureListener { e ->
-                Log.e("ListItemActivity", "사용자 정보 불러오기 실패: ${e.message}")
-                Toast.makeText(this, "사용자 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
     }
 }
