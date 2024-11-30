@@ -1,3 +1,4 @@
+
 package com.example.madagascar.freeborad
 
 import android.content.Context
@@ -10,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.madagascar.R
 import com.google.firebase.firestore.FirebaseFirestore
 
-class CommentAdapter(private val comments: List<Comment>, private val context: Context) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
+class CommentAdapter(private val comments: MutableList<com.example.madagascar.freeborad.Comment>, private val context: Context) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_comment, parent, false)
         return CommentViewHolder(view)
