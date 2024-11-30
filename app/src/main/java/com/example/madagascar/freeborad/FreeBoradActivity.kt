@@ -151,7 +151,6 @@ class FreeBoradActivity : AppCompatActivity() {
         adapter.notifyDataSetChanged() // ListView 갱신
     }
 
-    // 다른 액티비티에서 돌아왔을 때 처리
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
@@ -175,19 +174,30 @@ class FreeBoradActivity : AppCompatActivity() {
                     date = currentDate,
                     userId = userId // 작성자 ID 추가
                 )
-                freeBoardCollection.add(newItem)
-                    .addOnSuccessListener { documentReference ->
-                        newItem.id = documentReference.id // Firestore에서 ID 가져오기
-                        fullDataList.add(0, newItem) // 리스트 맨 앞에 추가
-                        currentPage = 0 // 페이지를 첫 번째 페이지로 초기화
-                        updatePage() // UI 갱신
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(this, "게시글 저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
-            }
 
-            2 -> if (resultCode == RESULT_OK) { // 게시글 조회수 업데이트 결과 처리
+                // 저장하기 전에 Firestore에서 이미 같은 ID의 데이터가 있는지 확인
+                val query = freeBoardCollection.whereEqualTo("id", newItem.id)
+                query.get().addOnSuccessListener { documents ->
+                    if (documents.isEmpty) {
+                        // 중복되지 않으면 새로 저장
+                        freeBoardCollection.add(newItem)
+                            .addOnSuccessListener { documentReference ->
+                                newItem.id = documentReference.id
+                                fullDataList.add(0, newItem) // 리스트의 맨 앞에 추가
+                                currentPage = 0 // 페이지를 첫 번째 페이지로 초기화
+                                updatePage() // UI 갱신
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(this, "게시글 저장 실패: ${e.message}", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                    } else {
+                        // 이미 데이터가 있을 경우, 중복 저장 방지
+                        Toast.makeText(this, "게시글이 이미 존재합니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+                2 -> if (resultCode == RESULT_OK) { // 게시글 조회수 업데이트 결과 처리
                 val updatedViews = data?.getIntExtra("updatedViews", 0) ?: 0
                 val documentId = data?.getStringExtra("documentId") ?: ""
 
@@ -206,7 +216,7 @@ class FreeBoradActivity : AppCompatActivity() {
                         }
                 }
             }
-            // 추가된 부분: 게시글 삭제 처리
+
             3 -> if (resultCode == RESULT_OK) {
                 val deletedDocumentId = data?.getStringExtra("deletedDocumentId")
                 if (deletedDocumentId != null) {

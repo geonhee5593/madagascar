@@ -11,12 +11,10 @@ import com.example.madagascar.R
 import com.google.firebase.firestore.FirebaseFirestore
 
 class CommentAdapter(private val comments: List<Comment>, private val context: Context) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_comment, parent, false)
         return CommentViewHolder(view)
     }
-
     override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
         val comment = comments[position]
         holder.commentTextView.text = comment.text
@@ -39,10 +37,10 @@ class CommentAdapter(private val comments: List<Comment>, private val context: C
                 holder.userIdTextView.text = "작성자: Unknown"
                 Log.e("CommentAdapter", "사용자 정보 불러오기 실패: ${e.message}")
             }
+
     }
 
     override fun getItemCount(): Int = comments.size
-
     class CommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val commentTextView: TextView = itemView.findViewById(R.id.commentTextView)
         val userIdTextView: TextView = itemView.findViewById(R.id.usernameTextView)  // 작성자 이름 표시할 TextView

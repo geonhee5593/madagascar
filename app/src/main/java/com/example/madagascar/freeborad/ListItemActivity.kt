@@ -20,8 +20,6 @@ data class Comment(
     val userId: String = "",
     val username: String = ""  // 사용자 이름 추가
 )
-
-
 class ListItemActivity : AppCompatActivity() {
 
     private lateinit var titleTextView: TextView
@@ -97,9 +95,9 @@ class ListItemActivity : AppCompatActivity() {
             .delete()
             .addOnSuccessListener {
                 Toast.makeText(this, "게시글이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
-                // 게시글 삭제 후 FreeBoradActivity로 돌아가기
-                val resultIntent = Intent()
-                resultIntent.putExtra("deletedDocumentId", documentId)
+                val resultIntent = Intent().apply {
+                    putExtra("deletedDocumentId", documentId)
+                }
                 setResult(RESULT_OK, resultIntent)
                 finish()
             }
@@ -107,8 +105,6 @@ class ListItemActivity : AppCompatActivity() {
                 Toast.makeText(this, "게시글 삭제 실패: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
-
     private fun updateViews() {
         // Firestore에서 조회수를 가져와서 업데이트
         firestore.collection("FreeBoardItems")
