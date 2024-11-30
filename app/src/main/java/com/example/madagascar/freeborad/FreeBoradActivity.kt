@@ -20,9 +20,9 @@ data class FreeBoardItem(
     var content: String = "",  // 내용
     var views: Int = 0,        // 조회수
     var date: String = "",     // 등록일
-    var userId: String = ""    // 작성자 ID
+    var userId: String = "",   // 작성자 ID
+    var username: String = ""  // 작성자 이름
 )
-
 @Suppress("DEPRECATION")
 class FreeBoradActivity : AppCompatActivity() {
 
@@ -107,6 +107,7 @@ class FreeBoradActivity : AppCompatActivity() {
         }
     }
 
+
     private fun loadFreeBoardItems() {
         freeBoardCollection.get()
             .addOnSuccessListener { documents ->
@@ -138,7 +139,10 @@ class FreeBoradActivity : AppCompatActivity() {
             fullDataList // 검색어가 없으면 전체 데이터 표시
         } else {
             fullDataList.filter {
-                it.title.contains(query, ignoreCase = true) || it.content.contains(query, ignoreCase = true)
+                it.title.contains(query, ignoreCase = true) || it.content.contains(
+                    query,
+                    ignoreCase = true
+                )
             }
         }
         currentPage = 0 // 첫 페이지로 이동
@@ -154,7 +158,10 @@ class FreeBoradActivity : AppCompatActivity() {
             1 -> if (resultCode == RESULT_OK) {
                 val title = data?.getStringExtra("newPostTitle") ?: ""
                 val content = data?.getStringExtra("newPostContent") ?: ""
-                val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(System.currentTimeMillis())
+                val currentDate = SimpleDateFormat(
+                    "yyyy-MM-dd",
+                    Locale.getDefault()
+                ).format(System.currentTimeMillis())
 
                 // 현재 로그인된 사용자의 ID 가져오기
                 val currentUser = auth.currentUser
@@ -179,6 +186,7 @@ class FreeBoradActivity : AppCompatActivity() {
                         Toast.makeText(this, "게시글 저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
             }
+
             2 -> if (resultCode == RESULT_OK) { // 게시글 조회수 업데이트 결과 처리
                 val updatedViews = data?.getIntExtra("updatedViews", 0) ?: 0
                 val documentId = data?.getStringExtra("documentId") ?: ""
@@ -193,8 +201,21 @@ class FreeBoradActivity : AppCompatActivity() {
                             updatePage() // UI 갱신
                         }
                         .addOnFailureListener { e ->
-                            Toast.makeText(this, "조회수 업데이트 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "조회수 업데이트 실패: ${e.message}", Toast.LENGTH_SHORT)
+                                .show()
                         }
+                }
+            }
+            // 추가된 부분: 게시글 삭제 처리
+            3 -> if (resultCode == RESULT_OK) {
+                val deletedDocumentId = data?.getStringExtra("deletedDocumentId")
+                if (deletedDocumentId != null) {
+                    // 삭제된 게시글을 리스트에서 제거
+                    val indexToRemove = fullDataList.indexOfFirst { it.id == deletedDocumentId }
+                    if (indexToRemove != -1) {
+                        fullDataList.removeAt(indexToRemove)
+                        updatePage() // 삭제된 후 페이지 업데이트
+                    }
                 }
             }
         }

@@ -24,7 +24,7 @@ class FreeBoardAdapter(
         val titleTextView = view.findViewById<TextView>(R.id.titleTextView)
         val viewsTextView = view.findViewById<TextView>(R.id.viewsTextView)
         val dateTextView = view.findViewById<TextView>(R.id.dateTextView) // 등록일 TextView 추가
-        val userIdTextView = view.findViewById<TextView>(R.id.userIdTextView) // 작성자 ID TextView
+        val userIdTextView = view.findViewById<TextView>(R.id.usernameTextView) // 작성자 ID TextView
 
         val item = items[position]
         titleTextView.text = item.title

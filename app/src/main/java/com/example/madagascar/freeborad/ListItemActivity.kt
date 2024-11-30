@@ -11,13 +11,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.madagascar.R
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 data class Comment(
     val text: String = "",
     val timestamp: Long = 0,
-    val userId: String = ""  // 사용자 ID 추가
+    val userId: String = "",
+    val username: String = ""  // 사용자 이름 추가
 )
+
 
 class ListItemActivity : AppCompatActivity() {
 
@@ -27,6 +30,7 @@ class ListItemActivity : AppCompatActivity() {
     private lateinit var commentEditText: EditText
     private lateinit var commentButton: Button
     private lateinit var commentsRecyclerView: RecyclerView
+    private lateinit var deleteButton: Button  // 삭제 버튼
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -46,6 +50,7 @@ class ListItemActivity : AppCompatActivity() {
         commentEditText = findViewById(R.id.commentEditText)
         commentButton = findViewById(R.id.commentButton)
         commentsRecyclerView = findViewById(R.id.commentsRecyclerView)
+        deleteButton = findViewById(R.id.deleteButton)  // 초기화
 
         val title = intent.getStringExtra("title") ?: "No Title"
         val content = intent.getStringExtra("content") ?: "No Content"
@@ -62,7 +67,7 @@ class ListItemActivity : AppCompatActivity() {
         contentTextView.text = content
         updateViews()
 
-        commentAdapter = CommentAdapter(comments)
+        commentAdapter = CommentAdapter(comments, this) // 수정된 부분
         commentsRecyclerView.layoutManager = LinearLayoutManager(this)
         commentsRecyclerView.adapter = commentAdapter
 
@@ -80,7 +85,29 @@ class ListItemActivity : AppCompatActivity() {
         findViewById<Button>(R.id.backButton).setOnClickListener {
             finish()
         }
+        // 삭제 버튼 클릭 시 동작
+        deleteButton.setOnClickListener {
+            deletePost()
+        }
     }
+
+    private fun deletePost() {
+        firestore.collection("FreeBoardItems")
+            .document(documentId)
+            .delete()
+            .addOnSuccessListener {
+                Toast.makeText(this, "게시글이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                // 게시글 삭제 후 FreeBoradActivity로 돌아가기
+                val resultIntent = Intent()
+                resultIntent.putExtra("deletedDocumentId", documentId)
+                setResult(RESULT_OK, resultIntent)
+                finish()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "게시글 삭제 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
 
     private fun updateViews() {
         // Firestore에서 조회수를 가져와서 업데이트
@@ -121,7 +148,6 @@ class ListItemActivity : AppCompatActivity() {
             }
     }
 
-
     private fun loadComments() {
         firestore.collection("FreeBoardItems")
             .document(documentId)
@@ -143,20 +169,38 @@ class ListItemActivity : AppCompatActivity() {
     }
 
     private fun addComment(commentText: String) {
-        val comment = Comment(commentText, System.currentTimeMillis())
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return // 로그인된 사용자 ID 가져오기
 
-        firestore.collection("FreeBoardItems")
-            .document(documentId)
-            .collection("comments")
-            .add(comment)
-            .addOnSuccessListener {
-                commentEditText.text.clear()
-                loadComments()
-                Toast.makeText(this, "댓글이 등록되었습니다.", Toast.LENGTH_SHORT).show()
+        // Firestore에서 사용자 정보를 가져오기
+        val firestore = FirebaseFirestore.getInstance()
+        firestore.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                val username = document.getString("username") ?: "Unknown"  // 사용자 이름을 가져옵니다
+                val comment = Comment(
+                    commentText,
+                    System.currentTimeMillis(),
+                    userId,
+                    username
+                )  // 댓글에 username 추가
+
+                // 댓글을 Firestore에 추가
+                firestore.collection("FreeBoardItems")
+                    .document(documentId)
+                    .collection("comments")
+                    .add(comment)
+                    .addOnSuccessListener {
+                        commentEditText.text.clear()
+                        loadComments()
+                        Toast.makeText(this, "댓글이 등록되었습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("ListItemActivity", "댓글 등록 실패: ${e.message}")
+                        Toast.makeText(this, "댓글 등록 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
             }
             .addOnFailureListener { e ->
-                Log.e("ListItemActivity", "댓글 등록 실패: ${e.message}")
-                Toast.makeText(this, "댓글 등록 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("ListItemActivity", "사용자 정보 불러오기 실패: ${e.message}")
+                Toast.makeText(this, "사용자 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
     }
 }
