@@ -133,6 +133,7 @@ class MainActivity : AppCompatActivity() {
         /* btn_imageView4 버튼 클릭 시 내 위치 기반 축제 화면으로 이동 */
         val MylocationBtn = findViewById<ImageView>(R.id.btn_imageView4)
         MylocationBtn.setOnClickListener {
+            Log.d("fragmentActivity", "onClick: Location button clicked")
             val intent = Intent(this, fragmentActivity::class.java)
             startActivity(intent)
         }

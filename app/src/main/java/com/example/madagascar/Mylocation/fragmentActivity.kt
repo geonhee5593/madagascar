@@ -58,9 +58,12 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.fragment_main)
 
+        Log.d("fragmentActivity", "onCreate: Activity initialized")
+
         val locationBtn = findViewById<ImageView>(R.id.btn_arrow103)
 
         locationBtn.setOnClickListener {
+            Log.d("fragmentActivity", "onClick: Location button clicked")
             val intent = Intent(this, MainActivity::class.java) // 'FavoritesActivity'로 수정
             startActivity(intent)
         }
@@ -81,15 +84,18 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
     private fun requestLocationPermission() {
+        Log.d("fragmentActivity", "requestLocationPermission: Checking location permissions")
         // 위치 권한이 허용되지 않았는지 확인
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
         ) {
+            Log.d("fragmentActivity", "requestLocationPermission: Permission not granted")
             if (ActivityCompat.shouldShowRequestPermissionRationale(
                     this,
                     Manifest.permission.ACCESS_FINE_LOCATION
                 )
             ) {
+                Log.d("fragmentActivity", "requestLocationPermission: Showing rationale for permission")
                 // 사용자가 이전에 권한을 거부한 경우 안내 메시지 표시
                 Toast.makeText(this, "위치 권한이 필요합니다. 설정에서 활성화해주세요.", Toast.LENGTH_SHORT).show()
             }
@@ -101,6 +107,7 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
                 LOCATION_PERMISSION_REQUEST_CODE
             )
         } else {
+            Log.d("fragmentActivity", "requestLocationPermission: Permission already granted")
             // 권한이 이미 허용된 경우 현재 위치 가져오기
             getCurrentLocation()
         }
@@ -115,9 +122,11 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d("fragmentActivity", "onRequestPermissionsResult: Permission granted")
                 // 위치 권한이 허용되었을 때 현재 위치 가져오기
                 getCurrentLocation()
             } else {
+                Log.d("fragmentActivity", "onRequestPermissionsResult: Permission denied")
                 if (!ActivityCompat.shouldShowRequestPermissionRationale(
                         this,
                         Manifest.permission.ACCESS_FINE_LOCATION
@@ -135,6 +144,7 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
     private fun goToAppSettings() {
+        Log.d("fragmentActivity", "goToAppSettings: Redirecting to app settings")
         val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
         val uri = Uri.fromParts("package", packageName, null)
         intent.data = uri
@@ -144,24 +154,28 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     private fun getCurrentLocation() {
+        Log.d("fragmentActivity", "getCurrentLocation: Attempting to get current location")
         if (!isLocationEnabled()) {
-            // 위치 서비스가 꺼져 있는 경우 안내
             Toast.makeText(this, "위치 서비스가 비활성화되어 있습니다. 활성화해주세요.", Toast.LENGTH_SHORT).show()
             promptEnableLocation()
             return
         }
-
 
         val fusedLocationProviderClient =
             com.google.android.gms.location.LocationServices.getFusedLocationProviderClient(this)
         fusedLocationProviderClient.lastLocation
             .addOnSuccessListener { location ->
                 if (location != null) {
+                    Log.d("fragmentActivity", "getCurrentLocation: Location obtained - Lat: ${location.latitude}, Lng: ${location.longitude}")
                     val currentLocation = LatLng(location.latitude, location.longitude)
-                    moveCameraToLocation(currentLocation)
+                    if (::naverMap.isInitialized) {
+                        moveCameraToLocation(currentLocation)
+                    } else {
+                        Log.e("fragmentActivity", "getCurrentLocation: naverMap is not initialized")
+                    }
                     fetchNearbyFestivals(location.latitude, location.longitude)
                 } else {
-                    // null일 때 기본 처리
+                    Log.d("fragmentActivity", "getCurrentLocation: Location is null")
                     Toast.makeText(this, "현재 위치를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -187,35 +201,42 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
     override fun onMapReady(naverMap: NaverMap) {
+        Log.d("fragmentActivity", "onMapReady: Map is ready")
+        try {
             this.naverMap = naverMap
+            Log.d("fragmentActivity", "NaverMap is initialized")
             naverMap.locationSource = locationSource
             naverMap.mapType = NaverMap.MapType.Navi
 
             val locationOverlay = naverMap.locationOverlay
             locationOverlay.isVisible = true
 
-            locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
-            naverMap.locationSource = locationSource
-
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED
             ) {
-                // 현재 위치 가져오기
                 getCurrentLocation()
             } else {
-                // 권한이 없으면 권한 요청
                 requestLocationPermission()
             }
 
             naverMap.addOnCameraIdleListener {
                 val currentCenter = naverMap.cameraPosition.target
+                Log.d("fragmentActivity", "Camera idle at Lat: ${currentCenter.latitude}, Lng: ${currentCenter.longitude}")
                 fetchNearbyFestivals(currentCenter.latitude, currentCenter.longitude)
             }
+        } catch (e: Exception) {
+            Log.e("fragmentActivity", "onMapReady: Error initializing map", e)
         }
+    }
 
 
 
     private fun moveCameraToLocation(location: LatLng) {
+        if (!::naverMap.isInitialized) {
+            Log.e("fragmentActivity", "moveCameraToLocation: naverMap is not initialized")
+            return
+        }
+        Log.d("fragmentActivity", "moveCameraToLocation: Moving camera to Lat: ${location.latitude}, Lng: ${location.longitude}")
         val cameraUpdate = CameraUpdate.scrollTo(location)
         naverMap.moveCamera(cameraUpdate)
     }
@@ -223,6 +244,7 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
     private fun fetchNearbyFestivals(latitude: Double, longitude: Double) {
+        Log.d("fragmentActivity", "fetchNearbyFestivals: Fetching festivals near Lat: $latitude, Lng: $longitude")
         // 기존 요청과 동일한 좌표 및 반경이면 요청하지 않음
         if (lastRequestLat == latitude && lastRequestLng == longitude) {
             Log.d("DEBUG", "이미 요청된 좌표로 추가 요청하지 않음")
@@ -354,4 +376,5 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
+
 }
