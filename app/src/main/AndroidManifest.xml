@@ -42,6 +42,8 @@
         <!--키보드가 나타나도 ui가 변하지 않게 adjustPan 설정 -->
         <activity android:name=".Main.MainActivity"
             android:windowSoftInputMode="adjustNothing"/>
+        <activity android:name=".Main.SearchResultsActivity"
+            android:windowSoftInputMode="adjustNothing"/>
         <activity android:name=".API.Festival" />
         <activity android:name=".API.DetailActivity"/>
         <activity android:name=".Hobby.Hobby_Activity"

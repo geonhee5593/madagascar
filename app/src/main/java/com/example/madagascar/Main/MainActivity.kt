@@ -222,7 +222,7 @@ class MainActivity : AppCompatActivity() {
             searchButton.setOnClickListener {
                 val query = searchView.query.toString().trim()
                 if (query.isNotEmpty()) {
-                    val intent = Intent(this, Festival::class.java)
+                    val intent = Intent(this, SearchResultsActivity::class.java)
                     intent.putExtra("searchQuery", query) // 검색어 전달
                     startActivity(intent)
                 } else {
