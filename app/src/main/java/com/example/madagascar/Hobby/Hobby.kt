@@ -43,8 +43,18 @@ class Hobby : AppCompatActivity() {
         // 건너뛰기 텍스트 표시
         val skipText = findViewById<TextView>(R.id.tv_skip)
         skipText.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+            val user = FirebaseAuth.getInstance().currentUser
+            user?.let {
+                val db = FirebaseFirestore.getInstance()
+                db.collection("users").document(user.uid).update("isFirstLogin", false)
+                    .addOnSuccessListener {
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(this, "건너뛰기 중 문제가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                    }
+            }
         }
     }
 
@@ -113,14 +123,33 @@ class Hobby : AppCompatActivity() {
                             userInterestsCollection.add(interest)
                         }
 
-                        Toast.makeText(this, "관심사가 업데이트되었습니다.", Toast.LENGTH_SHORT).show()
-                        startActivity(Intent(this, MainActivity::class.java))
-                        finish()
+                        // isFirstLogin 필드를 false로 업데이트
+                        db.collection("users").document(uid).update("isFirstLogin", false)
+                            .addOnSuccessListener {
+                                Toast.makeText(this, "관심사가 업데이트되었습니다.", Toast.LENGTH_SHORT).show()
+                                startActivity(Intent(this, MainActivity::class.java))
+                                finish()
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(this, "관심사 저장에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                            }
                     }
                     .addOnFailureListener {
                         Toast.makeText(this, "관심사 저장에 실패했습니다.", Toast.LENGTH_SHORT).show()
                     }
             }
         }
+    }
+
+    // 회원가입 시 isFirstLogin 필드를 true로 설정
+    fun setIsFirstLoginTrue(uid: String) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users").document(uid).set(mapOf("isFirstLogin" to true))
+            .addOnSuccessListener {
+                Toast.makeText(this, "isFirstLogin 필드가 설정되었습니다.", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "isFirstLogin 필드 설정 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 }

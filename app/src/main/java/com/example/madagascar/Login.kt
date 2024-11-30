@@ -28,6 +28,7 @@ class Login : AppCompatActivity() {
         firestore = FirebaseFirestore.getInstance()
 
         val registerButton: Button = findViewById(R.id.registerbutton)
+        val findButton: Button = findViewById(R.id.findButton)
         // "축모아" 텍스트에 그라데이션 적용
         val titleTextView: TextView = findViewById(R.id.app_title)
         val paint = titleTextView.paint
@@ -51,6 +52,12 @@ class Login : AppCompatActivity() {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
+        findButton.setOnClickListener {
+            // FindAccountActivity로 이동
+            val intent = Intent(this, FindActivity::class.java)
+            startActivity(intent)
+        }
+
     }
 
     private fun loginUser() {
@@ -66,33 +73,43 @@ class Login : AppCompatActivity() {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    val uid = auth.currentUser?.uid
-                    if (uid != null) {
-                        firestore.collection("users").document(uid).get()
-                            .addOnSuccessListener { document ->
-                                val isFirstLogin = document.getBoolean("isFirstLogin") ?: true
-
-                                if (isFirstLogin) {
-                                    Toast.makeText(this, "첫 로그인: 관심 분야 설정으로 이동합니다.", Toast.LENGTH_SHORT).show()
-                                    val intent = Intent(this, Hobby::class.java)
-                                    intent.putExtra("uid", uid)
-                                    startActivity(intent)
-                                } else {
-                                    Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show()
-                                    val intent = Intent(this, MainActivity::class.java)
-                                    intent.putExtra("uid", uid)
-                                    startActivity(intent)
-                                }
-                                finish()
-                            }
-                            .addOnFailureListener { e ->
-                                Toast.makeText(this, "Firestore 조회 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-                                Log.e("Login", "Firestore 조회 실패", e)
-                            }
+                    val user = auth.currentUser
+                    if (user != null) {
+                        if (!user.isEmailVerified) {
+                            // 이메일 인증 여부 확인
+                            Toast.makeText(this, "이메일 인증을 완료하세요.", Toast.LENGTH_SHORT).show()
+                            auth.signOut() // 인증되지 않은 사용자 로그아웃
+                        } else {
+                            // Firestore에서 추가 정보 확인
+                            checkUserFirstLogin(user.uid)
+                        }
                     }
                 } else {
                     Toast.makeText(this, "로그인 실패: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                 }
+            }
+    }
+
+    private fun checkUserFirstLogin(uid: String) {
+        firestore.collection("users").document(uid).get()
+            .addOnSuccessListener { document ->
+                val isFirstLogin = document.getBoolean("isFirstLogin") ?: true
+
+                if (isFirstLogin) {
+                    // 첫 로그인: 관심 분야 설정으로 이동
+                    val intent = Intent(this, Hobby::class.java)
+                    intent.putExtra("isFirstLogin", true)
+                    startActivity(intent)
+                } else {
+                    // 첫 로그인이 아님: 메인 화면으로 이동
+                    val intent = Intent(this, MainActivity::class.java)
+                    startActivity(intent)
+                }
+                finish()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Firestore 조회 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("Login", "Firestore 조회 실패", e)
             }
     }
 }

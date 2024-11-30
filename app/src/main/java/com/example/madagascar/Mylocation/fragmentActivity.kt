@@ -1,8 +1,10 @@
 package com.example.madagascar.Mylocation
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
+import androidx.core.location.LocationManagerCompat.getCurrentLocation
+import androidx.core.location.LocationManagerCompat.isLocationEnabled
 import com.example.madagascar.API.CommonResponse
 import com.example.madagascar.API.DetailActivity
 import com.example.madagascar.API.FestivalItem
@@ -77,58 +81,145 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
     private fun requestLocationPermission() {
+        // 위치 권한이 허용되지 않았는지 확인
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
         ) {
-            // 위치 권한이 없을 경우 요청
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+            ) {
+                // 사용자가 이전에 권한을 거부한 경우 안내 메시지 표시
+                Toast.makeText(this, "위치 권한이 필요합니다. 설정에서 활성화해주세요.", Toast.LENGTH_SHORT).show()
+            }
+
+            // 권한 요청
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 LOCATION_PERMISSION_REQUEST_CODE
             )
+        } else {
+            // 권한이 이미 허용된 경우 현재 위치 가져오기
+            getCurrentLocation()
         }
     }
+
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 위치 권한이 허용되었을 때 현재 위치 가져오기
+                getCurrentLocation()
+            } else {
+                if (!ActivityCompat.shouldShowRequestPermissionRationale(
+                        this,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    )
+                ) {
+                    // 사용자가 "다시 묻지 않음"을 선택한 경우 설정 화면으로 이동 안내
+                    Toast.makeText(this, "위치 권한을 허용하려면 설정에서 변경하세요.", Toast.LENGTH_LONG).show()
+                    goToAppSettings()
+                } else {
+                    Toast.makeText(this, "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+
+    private fun goToAppSettings() {
+        val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        val uri = Uri.fromParts("package", packageName, null)
+        intent.data = uri
+        startActivity(intent)
+    }
+
+
+    @SuppressLint("MissingPermission")
+    private fun getCurrentLocation() {
+        if (!isLocationEnabled()) {
+            // 위치 서비스가 꺼져 있는 경우 안내
+            Toast.makeText(this, "위치 서비스가 비활성화되어 있습니다. 활성화해주세요.", Toast.LENGTH_SHORT).show()
+            promptEnableLocation()
+            return
+        }
+
+
+        val fusedLocationProviderClient =
+            com.google.android.gms.location.LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationProviderClient.lastLocation
+            .addOnSuccessListener { location ->
+                if (location != null) {
+                    val currentLocation = LatLng(location.latitude, location.longitude)
+                    moveCameraToLocation(currentLocation)
+                    fetchNearbyFestivals(location.latitude, location.longitude)
+                } else {
+                    // null일 때 기본 처리
+                    Toast.makeText(this, "현재 위치를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("LocationError", "위치를 가져오는 중 오류 발생", e)
+                Toast.makeText(this, "위치를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+
+    private fun isLocationEnabled(): Boolean {
+        val locationManager =
+            getSystemService(LOCATION_SERVICE) as android.location.LocationManager
+        return locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)
+    }
+
+    private fun promptEnableLocation() {
+        val intent = Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+        startActivity(intent)
+    }
+
 
 
     override fun onMapReady(naverMap: NaverMap) {
-        this.naverMap = naverMap
-        naverMap.locationSource = locationSource
-        naverMap.mapType = NaverMap.MapType.Navi
+            this.naverMap = naverMap
+            naverMap.locationSource = locationSource
+            naverMap.mapType = NaverMap.MapType.Navi
 
-        // 현재 위치 오버레이 설정
-        val locationOverlay: LocationOverlay = naverMap.locationOverlay
-        locationOverlay.isVisible = true
+            val locationOverlay = naverMap.locationOverlay
+            locationOverlay.isVisible = true
 
-        // 위치 권한 확인 후 현재 위치로 이동
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            locationSource.lastLocation?.let { location ->
-                val currentLocation = LatLng(location.latitude, location.longitude)
-                moveCameraToLocation(currentLocation)
-                locationOverlay.position = currentLocation
+            locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
+            naverMap.locationSource = locationSource
 
-                // 주변 축제 데이터 가져오기
-                fetchNearbyFestivals(location.latitude, location.longitude)
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED
+            ) {
+                // 현재 위치 가져오기
+                getCurrentLocation()
+            } else {
+                // 권한이 없으면 권한 요청
+                requestLocationPermission()
             }
-        } else {
-            Toast.makeText(this, "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+
+            naverMap.addOnCameraIdleListener {
+                val currentCenter = naverMap.cameraPosition.target
+                fetchNearbyFestivals(currentCenter.latitude, currentCenter.longitude)
+            }
         }
 
-        // 카메라 이동 멈춤 이벤트
-        naverMap.addOnCameraIdleListener {
-            val currentCenter = naverMap.cameraPosition.target
-            fetchNearbyFestivals(currentCenter.latitude, currentCenter.longitude)
-        }
-    }
 
 
     private fun moveCameraToLocation(location: LatLng) {
         val cameraUpdate = CameraUpdate.scrollTo(location)
         naverMap.moveCamera(cameraUpdate)
     }
+
 
 
     private fun fetchNearbyFestivals(latitude: Double, longitude: Double) {
@@ -259,23 +350,6 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
         currentInfoWindow = infoWindow
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // 위치 권한이 허용되었을 때 지도 초기화
-                if (::naverMap.isInitialized) {
-                    onMapReady(naverMap)
-                }
-            } else {
-                // 위치 권한이 거부되었을 때 메인 화면으로 이동
-                Toast.makeText(this, "위치 권한이 필요합니다. 메인 화면으로 돌아갑니다.", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finish() // 현재 액티비티 종료
-            }
-        }
-    }
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000

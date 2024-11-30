@@ -29,12 +29,15 @@ class AdminActivity : AppCompatActivity() {
 
         firestore = FirebaseFirestore.getInstance()
 
-        // RecyclerView 초기화
         val recyclerView: RecyclerView = findViewById(R.id.recyclerViewInquiries)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        inquiryAdapter = InquiryAdapter { userId, inquiryId, newResponse ->
-            respondToInquiry(userId, inquiryId, newResponse)
-        }
+        inquiryAdapter = InquiryAdapter(
+            { userId, inquiryId, newResponse -> respondToInquiry(userId, inquiryId, newResponse) },
+            showUnanswered,
+            false // 관리자 화면 플래그
+        )
+        recyclerView.adapter = inquiryAdapter
+
         recyclerView.adapter = inquiryAdapter
 
         // 공지사항 작성 버튼
@@ -64,6 +67,7 @@ class AdminActivity : AppCompatActivity() {
 
                 for (user in users) {
                     val userId = user.id
+                    val username = user.getString("username") ?: "알 수 없음" // 사용자 이름 가져오기
                     val task = firestore.collection("users")
                         .document(userId)
                         .collection("inquiries")
@@ -76,6 +80,7 @@ class AdminActivity : AppCompatActivity() {
                             for (inquiry in inquiriesSnapshot) {
                                 val inquiryData = inquiry.toObject(InquiryItem::class.java).apply {
                                     this.userId = userId
+                                    this.username = username // 사용자 이름 설정
                                     this.inquiryId = inquiry.id
                                 }
                                 inquiries.add(inquiryData)

@@ -30,6 +30,8 @@ import com.example.madagascar.R
 import com.example.madagascar.freeborad.FreeBoradActivity
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -69,17 +71,34 @@ class MainActivity : AppCompatActivity() {
 
         /* 관리자 버튼 초기화 */
         val adminButton = findViewById<Button>(R.id.btn_admin)
-        // 로그인 액티비티에서 전달된 관리자 여부 확인
-        val isAdmin = intent.getBooleanExtra("isAdmin", false)
-        if (isAdmin) {
-            adminButton.visibility = View.VISIBLE
-            adminButton.setOnClickListener {
-                val intent = Intent(this, AdminActivity::class.java)
-                startActivity(intent)
-            }
+        adminButton.visibility = View.GONE // 기본값으로 숨김 처리
+
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            // Firestore에서 현재 사용자 정보를 가져옴
+            val uid = currentUser.uid
+            FirebaseFirestore.getInstance().collection("users").document(uid).get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        val isAdmin = document.getBoolean("isAdmin") ?: false
+                        if (isAdmin) {
+                            adminButton.visibility = View.VISIBLE
+                            adminButton.setOnClickListener {
+                                val intent = Intent(this, AdminActivity::class.java)
+                                startActivity(intent)
+                            }
+                        }
+                    } else {
+                        Log.e("MainActivity", "사용자 문서가 존재하지 않습니다.")
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("MainActivity", "Firestore에서 사용자 정보 가져오기 실패: ${e.message}")
+                }
         } else {
-            adminButton.visibility = View.GONE
+            Log.e("MainActivity", "사용자가 로그인되지 않았습니다.")
         }
+
 
         // 검색 버튼 동작 설정
         setupSearch()
@@ -204,7 +223,7 @@ class MainActivity : AppCompatActivity() {
                 val query = searchView.query.toString().trim()
                 if (query.isNotEmpty()) {
                     val intent = Intent(this, SearchResultsActivity::class.java)
-                    intent.putExtra("searchQuery", query)
+                    intent.putExtra("searchQuery", query) // 검색어 전달
                     startActivity(intent)
                 } else {
                     Toast.makeText(this, "검색어를 입력하세요", Toast.LENGTH_SHORT).show()
@@ -215,6 +234,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "검색 기능 설정 중 오류 발생", Toast.LENGTH_SHORT).show()
         }
     }
+
 
     private fun setupAutoSlide(itemCount: Int) {
         val runnable = object : Runnable {
