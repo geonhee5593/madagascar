@@ -33,6 +33,7 @@ class ListItemActivity : AppCompatActivity() {
     private lateinit var commentsRecyclerView: RecyclerView
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val comments = mutableListOf<Comment>()
     private lateinit var commentAdapter: CommentAdapter
     private lateinit var documentId: String
@@ -89,10 +90,18 @@ class ListItemActivity : AppCompatActivity() {
                     val title = document.getString("title") ?: "제목 없음"
                     val content = document.getString("content") ?: "내용 없음"
                     val views = document.getLong("views")?.toInt() ?: 0
+                    val userId = document.getString("userId") ?: ""
 
                     titleTextView.text = title
                     contentTextView.text = content
                     viewsTextView.text = "조회수: $views"
+
+                    // 삭제 버튼 표시 여부 결정
+                    if (auth.currentUser?.uid == userId) {
+                        deleteButton.visibility = Button.VISIBLE
+                    } else {
+                        deleteButton.visibility = Button.GONE
+                    }
 
                     // 조회수 업데이트
                     updateViews(views)
@@ -126,26 +135,22 @@ class ListItemActivity : AppCompatActivity() {
             return
         }
 
-        // 현재 로그인한 Firebase 사용자의 UID 가져오기
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: "Unknown"
-        val usersCollection = firestore.collection("users") // `users` 컬렉션 참조
+        val currentUserId = auth.currentUser?.uid ?: "Unknown"
+        val usersCollection = firestore.collection("users")
 
-        // `users` 컬렉션에서 `id` 필드 가져오기
         usersCollection.document(currentUserId).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
-                    val userIdField = document.getString("id") ?: "Unknown" // Firestore의 `id` 필드 값
-                    val username = document.getString("username") ?: "익명" // 사용자 이름 가져오기
+                    val userIdField = document.getString("id") ?: "Unknown"
+                    val username = document.getString("username") ?: "익명"
 
-                    // 댓글 데이터 생성
                     val newComment = Comment(
                         text = commentText,
                         timestamp = System.currentTimeMillis(),
-                        userId = userIdField, // 유저의 `id` 필드 저장
+                        userId = userIdField,
                         username = username
                     )
 
-                    // Firestore에 댓글 추가
                     firestore.collection("notices")
                         .document(documentId)
                         .collection("comments")
@@ -166,7 +171,6 @@ class ListItemActivity : AppCompatActivity() {
             }
     }
 
-
     private fun loadComments() {
         listenerRegistration = firestore.collection("notices")
             .document(documentId)
@@ -183,16 +187,6 @@ class ListItemActivity : AppCompatActivity() {
                     for (doc in snapshot.documents) {
                         val comment = doc.toObject(Comment::class.java)
                         if (comment != null) {
-                            // Firestore에서 작성자의 ID를 users 컬렉션의 id 필드 값으로 가져오기
-                            firestore.collection("users").document(comment.userId).get()
-                                .addOnSuccessListener { userDoc ->
-                                    val userFieldId = userDoc.getString("id") ?: "Unknown"
-                                    comment.userId = userFieldId // 댓글 작성자 ID 업데이트
-                                    commentAdapter.notifyDataSetChanged()
-                                }
-                                .addOnFailureListener {
-                                    comment.userId = "Unknown"
-                                }
                             comments.add(comment)
                         }
                     }
@@ -201,14 +195,13 @@ class ListItemActivity : AppCompatActivity() {
             }
     }
 
-
     private fun deletePost() {
         firestore.collection("notices")
             .document(documentId)
             .delete()
             .addOnSuccessListener {
                 Toast.makeText(this, "게시글이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
-                finish() // 삭제 후 화면 종료
+                finish()
             }
             .addOnFailureListener { e ->
                 Toast.makeText(this, "게시글 삭제 실패: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -217,6 +210,6 @@ class ListItemActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        listenerRegistration?.remove() // 실시간 업데이트 리스너 해제
+        listenerRegistration?.remove()
     }
 }
