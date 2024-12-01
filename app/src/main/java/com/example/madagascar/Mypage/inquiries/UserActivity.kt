@@ -1,12 +1,16 @@
 package com.example.madagascar.Mypage.inquiries
 
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.madagascar.Mypage.MypageActivity
 import com.example.madagascar.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -19,9 +23,18 @@ class UserActivity : AppCompatActivity() {
     private lateinit var inquiryAdapter: InquiryAdapter
     private var showUnanswered = true // 기본값: "답변 미확인" 보기
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user)
+
+        val arrowBtnuser = findViewById<ImageView>(R.id.btn_arrow_user)
+
+        // 마이페이지 돌아가는 버튼
+        arrowBtnuser.setOnClickListener {
+            val intent = Intent(this, MypageActivity::class.java)
+            startActivity(intent)
+        }
 
         firestore = FirebaseFirestore.getInstance()
 

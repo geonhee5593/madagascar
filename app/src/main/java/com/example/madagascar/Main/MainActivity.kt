@@ -8,12 +8,15 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.widget.Button
+import android.widget.ExpandableListView
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.viewpager2.widget.ViewPager2
 import com.example.madagascar.API.DetailActivity
 import com.example.madagascar.API.Festival
@@ -25,7 +28,10 @@ import com.example.madagascar.AdminActivity
 import com.example.madagascar.Hobby.Hobby_Activity
 import com.example.madagascar.Mylocation.fragmentActivity
 import com.example.madagascar.Mypage.Favorites
+import com.example.madagascar.Mypage.Human
 import com.example.madagascar.Mypage.MypageActivity
+import com.example.madagascar.Mypage.NoticeActivity
+import com.example.madagascar.Mypage.inquiries.UserActivity
 import com.example.madagascar.R
 import com.example.madagascar.freeborad.FreeBoradActivity
 import com.google.android.material.tabs.TabLayout
@@ -43,10 +49,12 @@ import java.util.Locale
 class MainActivity : AppCompatActivity() {
     private lateinit var viewPager2: ViewPager2
     private lateinit var tabLayout: TabLayout
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var expandableListView: ExpandableListView
     private val handler = Handler(Looper.getMainLooper())
 
     /* onCreate 메서드, 액티비티가 생성될 때 호출됨 */
-    @SuppressLint("MissingInflatedId")
+    @SuppressLint("MissingInflatedId", "WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("MainActivity", "MainActivity onCreate started")
@@ -67,6 +75,22 @@ class MainActivity : AppCompatActivity() {
             Shader.TileMode.CLAMP
         )
         titleTextView.paint.shader = shader
+
+        // DrawerLayout 및 ExpandableListView 초기화
+        drawerLayout = findViewById(R.id.drawer_layout)
+        expandableListView = findViewById(R.id.expandable_list_view)
+
+        // 메뉴 아이콘 클릭 리스너 설정
+        val menuIcon = findViewById<ImageView>(R.id.menu_icon)
+        menuIcon.setOnClickListener {
+            if (drawerLayout.isDrawerOpen(Gravity.END)) {
+                drawerLayout.closeDrawer(Gravity.END)
+            } else {
+                drawerLayout.openDrawer(Gravity.END)
+            }
+        }
+
+        setupNavigationMenu()
 
 
         /* 관리자 버튼 초기화 */
@@ -113,6 +137,50 @@ class MainActivity : AppCompatActivity() {
         // 축제 데이터 가져오기
         fetchFestivals()
     }
+
+    private fun setupNavigationMenu() {
+        // 메뉴 데이터
+        val groupList = listOf("축제", "마이페이지", "자유게시판")
+        val childList = mapOf(
+            "축제" to listOf("지역 별 축제", "위치 별 축제", "월 별 축제"),
+            "마이페이지" to listOf("내 정보", "즐겨찾기", "개인정보처리방침", "공지사항", "고객 센터"),
+            "자유게시판" to emptyList<String>()
+        )
+
+        // 어댑터 설정
+        val adapter = NavigationMenuAdapter(this, groupList, childList)
+        expandableListView.setAdapter(adapter)
+
+        // 그룹 클릭 리스너
+        expandableListView.setOnGroupClickListener { _, _, groupPosition, _ ->
+            val group = groupList[groupPosition]
+            if (childList[group].isNullOrEmpty()) { // 자식이 없는 경우 바로 이동
+                when (group) {
+                    "자유게시판" -> startActivity(Intent(this, FreeBoradActivity::class.java))
+                }
+            }
+            false
+        }
+
+        // 자식 클릭 리스너
+        expandableListView.setOnChildClickListener { _, _, groupPosition, childPosition, _ ->
+            val group = groupList[groupPosition]
+            val child = childList[group]?.get(childPosition)
+
+            when (child) {
+                "지역 별 축제" -> startActivity(Intent(this, RegionFestival::class.java))
+                "내 주변 축제" -> startActivity(Intent(this, fragmentActivity::class.java))
+                "월 별 축제" -> startActivity(Intent(this, MonthFestival::class.java))
+                "내 정보" -> startActivity(Intent(this, Human::class.java))
+                "즐겨찾기" -> startActivity(Intent(this, Favorites::class.java))
+                "공지사항" -> startActivity(Intent(this, NoticeActivity::class.java))
+                "고객 센터" -> startActivity(Intent(this, UserActivity::class.java))
+            }
+            true
+        }
+    }
+
+
     private fun setupButtons() {
         findViewById<ImageView>(R.id.star1).setOnClickListener {
             Toast.makeText(this, "즐겨찾기 버튼 클릭됨", Toast.LENGTH_SHORT).show()
