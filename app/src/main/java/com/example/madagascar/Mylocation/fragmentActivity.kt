@@ -168,8 +168,13 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
                 if (location != null) {
                     Log.d("fragmentActivity", "getCurrentLocation: Location obtained - Lat: ${location.latitude}, Lng: ${location.longitude}")
                     val currentLocation = LatLng(location.latitude, location.longitude)
+
                     if (::naverMap.isInitialized) {
                         moveCameraToLocation(currentLocation)
+
+                        // LocationOverlay에 현재 위치 표시
+                        val locationOverlay = naverMap.locationOverlay
+                        locationOverlay.position = currentLocation
                     } else {
                         Log.e("fragmentActivity", "getCurrentLocation: naverMap is not initialized")
                     }
@@ -210,6 +215,8 @@ class fragmentActivity : AppCompatActivity(), OnMapReadyCallback {
 
             val locationOverlay = naverMap.locationOverlay
             locationOverlay.isVisible = true
+            locationOverlay.circleRadius = 500 // 반경 설정 (단위: 미터)
+            locationOverlay.circleOutlineWidth = 3 // 테두리 두께 설정 (선택 사항)
 
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED
