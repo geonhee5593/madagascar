@@ -1,5 +1,6 @@
 package com.example.madagascar
 
+import android.content.Intent
 import android.graphics.LinearGradient
 import android.graphics.Shader
 import android.os.Bundle
@@ -28,7 +29,7 @@ class FindActivity : AppCompatActivity() {
         val titleTextView: TextView = findViewById(R.id.app_title)
         val paint = titleTextView.paint
         val width = paint.measureText(titleTextView.text.toString())
-
+        val buttonGoToLogin: Button = findViewById(R.id.buttonGoToLogin)
         val shader = LinearGradient(
             0f, 0f, width, 0f,
             intArrayOf(
@@ -55,6 +56,11 @@ class FindActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             sendPasswordResetEmail(email)
+        }
+        buttonGoToLogin.setOnClickListener {
+            // Login으로 이동
+            val intent = Intent(this, Login::class.java)
+            startActivity(intent)
         }
     }
 
