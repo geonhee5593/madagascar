@@ -35,6 +35,7 @@ class CreateNoticeActivity : AppCompatActivity() {
     }
 
     private fun sendNoticeToAllUsers(message: String) {
+        Log.d(TAG, "sendNoticeToAllUsers 호출됨. 공지 메시지: $message")
         val noticeId = UUID.randomUUID().toString()
 
         // 서버 타임스탬프 사용

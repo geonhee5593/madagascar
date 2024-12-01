@@ -14,6 +14,7 @@ import com.example.madagascar.Hobby.Hobby
 import com.example.madagascar.Main.MainActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 
 class Login : AppCompatActivity() {
 
@@ -81,6 +82,7 @@ class Login : AppCompatActivity() {
                             auth.signOut() // 인증되지 않은 사용자 로그아웃
                         } else {
                             // Firestore에서 추가 정보 확인
+                            saveFcmTokenToFirestore(user.uid) // FCM 토큰 저장
                             checkUserFirstLogin(user.uid)
                         }
                     }
@@ -89,7 +91,23 @@ class Login : AppCompatActivity() {
                 }
             }
     }
-
+    private fun saveFcmTokenToFirestore(uid: String) {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val fcmToken = task.result
+                firestore.collection("users").document(uid)
+                    .update("fcmToken", fcmToken)
+                    .addOnSuccessListener {
+                        Log.d("Login", "FCM 토큰 저장 성공: $fcmToken")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("Login", "FCM 토큰 저장 실패", e)
+                    }
+            } else {
+                Log.e("Login", "FCM 토큰 가져오기 실패", task.exception)
+            }
+        }
+    }
     private fun checkUserFirstLogin(uid: String) {
         firestore.collection("users").document(uid).get()
             .addOnSuccessListener { document ->

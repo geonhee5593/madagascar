@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.firebase.database.ktx)
     implementation(libs.generativeai)
     implementation(libs.androidx.foundation.android)
+    implementation(libs.firebase.messaging.ktx)
     annotationProcessor ("com.github.bumptech.glide:compiler:4.13.0")
 
     implementation(libs.androidx.core.ktx)
@@ -93,6 +94,9 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation ("com.google.firebase:firebase-firestore-ktx:24.6.1")
+    implementation ("com.google.firebase:firebase-messaging:23.2.0")
+    implementation ("com.android.volley:volley:1.2.1")
+    implementation ("androidx.core:core-ktx:1.10.1")
     //구글플레이
 
 
