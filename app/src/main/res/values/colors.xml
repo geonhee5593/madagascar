@@ -11,4 +11,7 @@
     <color name="light_blue">#BBDEFB</color> <!-- 연한 파란색 -->
     <color name="blue">#0000FF</color>
     <color name="green">#4CAF50</color>
+    <color name="colorPrimary">#BBDEFB</color> <!-- 연한 파란색 -->
+    <color name="colorPrimaryVariant">#90CAF9</color> <!-- 약간 어두운 연한 파란색 -->
+    <color name="colorSecondary">#64B5F6</color> <!-- 보조 색상 -->
 </resources>

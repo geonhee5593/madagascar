@@ -100,6 +100,17 @@ class FreeBoradActivity : AppCompatActivity() {
                     val item = document.toObject(FreeBoardItem::class.java).apply {
                         id = document.id
                     }
+                    // 추가: users 컬렉션에서 id 필드 가져오기
+                    val userId = document.getString("userId") ?: "Unknown"
+                    firestore.collection("users").document(userId).get()
+                        .addOnSuccessListener { userDoc ->
+                            val userFieldId = userDoc.getString("id") ?: "Unknown"
+                            item.userId = userFieldId // 작성자 ID를 users 컬렉션의 id 값으로 업데이트
+                            adapter.notifyDataSetChanged()
+                        }
+                        .addOnFailureListener {
+                            item.userId = "Unknown"
+                        }
                     fullDataList.add(item)
                 }
                 updatePage()
@@ -109,6 +120,7 @@ class FreeBoradActivity : AppCompatActivity() {
                 Toast.makeText(this, "게시글 로드 실패: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     private fun updatePage() {
         val start = currentPage * pageSize

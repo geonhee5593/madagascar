@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.madagascar.R
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 
@@ -16,7 +17,7 @@ data class Comment(
     val id: String = "",       // Firestore 문서 ID
     val text: String = "",
     val timestamp: Long = 0,
-    val userId: String = "",
+    var userId: String = "",
     val username: String = ""
 )
 
@@ -125,25 +126,46 @@ class ListItemActivity : AppCompatActivity() {
             return
         }
 
-        val newComment = Comment(
-            text = commentText,
-            timestamp = System.currentTimeMillis(),
-            userId = "익명 ID",
-            username = "익명 사용자"
-        )
+        // 현재 로그인한 Firebase 사용자의 UID 가져오기
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: "Unknown"
+        val usersCollection = firestore.collection("users") // `users` 컬렉션 참조
 
-        firestore.collection("notices")
-            .document(documentId)
-            .collection("comments")
-            .add(newComment)
-            .addOnSuccessListener {
-                commentEditText.text.clear()
-                Toast.makeText(this, "댓글이 추가되었습니다.", Toast.LENGTH_SHORT).show()
+        // `users` 컬렉션에서 `id` 필드 가져오기
+        usersCollection.document(currentUserId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val userIdField = document.getString("id") ?: "Unknown" // Firestore의 `id` 필드 값
+                    val username = document.getString("username") ?: "익명" // 사용자 이름 가져오기
+
+                    // 댓글 데이터 생성
+                    val newComment = Comment(
+                        text = commentText,
+                        timestamp = System.currentTimeMillis(),
+                        userId = userIdField, // 유저의 `id` 필드 저장
+                        username = username
+                    )
+
+                    // Firestore에 댓글 추가
+                    firestore.collection("notices")
+                        .document(documentId)
+                        .collection("comments")
+                        .add(newComment)
+                        .addOnSuccessListener {
+                            commentEditText.text.clear()
+                            Toast.makeText(this, "댓글이 추가되었습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "댓글 추가 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    Toast.makeText(this, "사용자 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "댓글 추가 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "사용자 정보를 가져오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     private fun loadComments() {
         listenerRegistration = firestore.collection("notices")
@@ -161,6 +183,16 @@ class ListItemActivity : AppCompatActivity() {
                     for (doc in snapshot.documents) {
                         val comment = doc.toObject(Comment::class.java)
                         if (comment != null) {
+                            // Firestore에서 작성자의 ID를 users 컬렉션의 id 필드 값으로 가져오기
+                            firestore.collection("users").document(comment.userId).get()
+                                .addOnSuccessListener { userDoc ->
+                                    val userFieldId = userDoc.getString("id") ?: "Unknown"
+                                    comment.userId = userFieldId // 댓글 작성자 ID 업데이트
+                                    commentAdapter.notifyDataSetChanged()
+                                }
+                                .addOnFailureListener {
+                                    comment.userId = "Unknown"
+                                }
                             comments.add(comment)
                         }
                     }
@@ -168,6 +200,7 @@ class ListItemActivity : AppCompatActivity() {
                 }
             }
     }
+
 
     private fun deletePost() {
         firestore.collection("notices")

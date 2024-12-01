@@ -23,8 +23,9 @@ class CommentAdapter(
         val comment = comments[position]
         holder.commentTextView.text = comment.text
         holder.timestampTextView.text = android.text.format.DateFormat.format("yyyy-MM-dd HH:mm", comment.timestamp)
-        holder.usernameTextView.text = comment.username
+        holder.usernameTextView.text = comment.userId // Firestore에서 가져온 id 값 표시
     }
+
 
     override fun getItemCount(): Int = comments.size
 

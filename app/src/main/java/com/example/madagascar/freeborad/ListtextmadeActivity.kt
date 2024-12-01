@@ -31,36 +31,53 @@ class ListtextmadeActivity : AppCompatActivity() {
         saveButton.setOnClickListener {
             val title = titleEditText.text.toString().trim()
             val content = contentEditText.text.toString().trim()
-            val userId = auth.currentUser?.uid ?: "Unknown"
-            val username = auth.currentUser?.displayName ?: "익명"
 
             if (title.isEmpty() || content.isEmpty()) {
                 Toast.makeText(this, "제목과 내용을 입력해주세요.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val newPost = hashMapOf(
-                "title" to title,
-                "content" to content,
-                "views" to 0,
-                "date" to SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(System.currentTimeMillis()),
-                "userId" to userId,
-                "username" to username,
-                "timestamp" to System.currentTimeMillis()
-            )
+            // 현재 로그인한 Firebase 사용자의 UID 가져오기
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: "Unknown"
+            val usersCollection = firestore.collection("users") // `users` 컬렉션 참조
 
-            firestore.collection("notices")
-                .add(newPost)
-                .addOnSuccessListener { documentReference ->
-                    val intent = Intent()
-                    intent.putExtra("newPostId", documentReference.id)
-                    setResult(RESULT_OK, intent)
-                    Toast.makeText(this, "게시글이 저장되었습니다.", Toast.LENGTH_SHORT).show()
-                    finish()
+            // `users` 컬렉션에서 `id` 필드 가져오기
+            usersCollection.document(currentUserId).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val userIdField = document.getString("id") ?: "Unknown" // Firestore의 `id` 필드 값
+                        val username = document.getString("username") ?: "익명" // 사용자 이름 가져오기
+
+                        // 게시글 데이터 생성
+                        val newPost = hashMapOf(
+                            "title" to title,
+                            "content" to content,
+                            "views" to 0,
+                            "date" to SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(System.currentTimeMillis()),
+                            "userId" to userIdField, // 유저의 `id` 필드 저장
+                            "username" to username,
+                            "timestamp" to System.currentTimeMillis()
+                        )
+
+                        // Firestore에 데이터 추가
+                        firestore.collection("notices")
+                            .add(newPost)
+                            .addOnSuccessListener {
+                                Toast.makeText(this, "게시글이 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                                finish()
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(this, "게시글 저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                    } else {
+                        Toast.makeText(this, "사용자 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
                 }
                 .addOnFailureListener { e ->
-                    Toast.makeText(this, "게시글 저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "사용자 정보를 가져오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         }
+
     }
+
 }

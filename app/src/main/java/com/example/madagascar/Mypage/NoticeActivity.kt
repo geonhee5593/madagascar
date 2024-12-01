@@ -12,6 +12,8 @@ import com.example.madagascar.NoticeAdapter
 import com.example.madagascar.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class NoticeActivity : AppCompatActivity() {
 
@@ -43,11 +45,10 @@ class NoticeActivity : AppCompatActivity() {
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
         if (currentUserId != null) {
-            // 먼저 Auth UID가 문서 ID로 사용되는 경우 시도
             firestore.collection("users")
                 .document(currentUserId)
                 .collection("notices")
-                .orderBy("timestamp")
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING) // 최신순 정렬
                 .addSnapshotListener { snapshots, e ->
                     if (e != null) {
                         Log.e("NoticeActivity", "공지사항 불러오기 실패", e)
@@ -58,7 +59,9 @@ class NoticeActivity : AppCompatActivity() {
                         noticeList.clear()
                         for (document in snapshots) {
                             val message = document.getString("message") ?: continue
-                            val timestamp = document.getTimestamp("timestamp")?.toDate()?.toString() ?: "타임스탬프 없음"
+                            val timestamp = document.getTimestamp("timestamp")?.toDate()?.let { date ->
+                                SimpleDateFormat("yyyy년 MM월 dd일 HH:mm:ss", Locale.KOREAN).format(date)
+                            } ?: "타임스탬프 없음"
                             noticeList.add(Notice(message, timestamp))
                         }
                         noticeAdapter.notifyDataSetChanged()
