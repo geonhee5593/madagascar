@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.madagascar.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import kotlin.math.min
 
@@ -25,6 +26,7 @@ data class FreeBoardItem(
     var timestamp: Long = 0L
 )
 
+@Suppress("DEPRECATION")
 class FreeBoradActivity : AppCompatActivity() {
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -41,6 +43,7 @@ class FreeBoradActivity : AppCompatActivity() {
     private var currentPage = 0
 
     private lateinit var adapter: FreeBoardAdapter
+    private var listenerRegistration: ListenerRegistration? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,10 +59,11 @@ class FreeBoradActivity : AppCompatActivity() {
         listView.adapter = adapter
 
         findViewById<Button>(R.id.button11).setOnClickListener {
-            startActivityForResult(Intent(this, ListtextmadeActivity::class.java), 1)
+            startActivity(Intent(this, ListtextmadeActivity::class.java))
         }
 
-        loadFreeBoardItems()
+        // 실시간 데이터 감지 설정
+        listenToFreeBoardItems()
 
         prevButton.setOnClickListener {
             if (currentPage > 0) {
@@ -86,41 +90,33 @@ class FreeBoradActivity : AppCompatActivity() {
             val intent = Intent(this, ListItemActivity::class.java).apply {
                 putExtra("documentId", item.id)
             }
-            startActivityForResult(intent, 2)
+            startActivity(intent)
         }
     }
 
-    private fun loadFreeBoardItems() {
-        firestore.collection("notices")
+    private fun listenToFreeBoardItems() {
+        listenerRegistration = firestore.collection("notices")
             .orderBy("timestamp", Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { documents ->
-                fullDataList.clear()
-                for (document in documents) {
-                    val item = document.toObject(FreeBoardItem::class.java).apply {
-                        id = document.id
-                    }
-                    // 추가: users 컬렉션에서 id 필드 가져오기
-                    val userId = document.getString("userId") ?: "Unknown"
-                    firestore.collection("users").document(userId).get()
-                        .addOnSuccessListener { userDoc ->
-                            val userFieldId = userDoc.getString("id") ?: "Unknown"
-                            item.userId = userFieldId // 작성자 ID를 users 컬렉션의 id 값으로 업데이트
-                            adapter.notifyDataSetChanged()
-                        }
-                        .addOnFailureListener {
-                            item.userId = "Unknown"
-                        }
-                    fullDataList.add(item)
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Log.e("FreeBoradActivity", "실시간 데이터 로드 실패: ${e.message}")
+                    return@addSnapshotListener
                 }
-                updatePage()
-            }
-            .addOnFailureListener { e ->
-                Log.e("FreeBoradActivity", "게시글 로드 실패: ${e.message}")
-                Toast.makeText(this, "게시글 로드 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+
+                if (snapshots != null) {
+                    fullDataList.clear()
+                    for (document in snapshots.documents) {
+                        val item = document.toObject(FreeBoardItem::class.java)?.apply {
+                            id = document.id
+                        }
+                        if (item != null) {
+                            fullDataList.add(item)
+                        }
+                    }
+                    updatePage()
+                }
             }
     }
-
 
     private fun updatePage() {
         val start = currentPage * pageSize
@@ -144,11 +140,8 @@ class FreeBoradActivity : AppCompatActivity() {
         adapter.notifyDataSetChanged()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1 && resultCode == RESULT_OK) {
-            val newPostId = data?.getStringExtra("newPostId") ?: return
-            loadFreeBoardItems()
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        listenerRegistration?.remove() // Listener 해제
     }
 }
