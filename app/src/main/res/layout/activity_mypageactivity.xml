@@ -219,7 +219,7 @@
             android:padding="8dp">
 
             <ImageView
-                android:id="@+id/btn_privacy_policy"
+                android:id="@+id/btn_privacy"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@drawable/privacy_policy" />

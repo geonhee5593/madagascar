@@ -32,6 +32,7 @@ import com.example.madagascar.Mypage.Human
 import com.example.madagascar.Mypage.MypageActivity
 import com.example.madagascar.Mypage.NoticeActivity
 import com.example.madagascar.Mypage.inquiries.UserActivity
+import com.example.madagascar.Mypage.privacy
 import com.example.madagascar.R
 import com.example.madagascar.freeborad.FreeBoradActivity
 import com.google.android.material.tabs.TabLayout
@@ -173,6 +174,7 @@ class MainActivity : AppCompatActivity() {
                 "월 별 축제" -> startActivity(Intent(this, MonthFestival::class.java))
                 "내 정보" -> startActivity(Intent(this, Human::class.java))
                 "즐겨찾기" -> startActivity(Intent(this, Favorites::class.java))
+                "개인정보처리방침" -> startActivity(Intent(this, privacy::class.java))
                 "공지사항" -> startActivity(Intent(this, NoticeActivity::class.java))
                 "고객 센터" -> startActivity(Intent(this, UserActivity::class.java))
             }

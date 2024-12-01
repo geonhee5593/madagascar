@@ -1,5 +1,6 @@
 package com.example.madagascar.Mypage
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
@@ -17,6 +18,7 @@ class MypageActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mypageactivity)
@@ -55,6 +57,14 @@ class MypageActivity : AppCompatActivity() {
             val intent = Intent(this, Favorites::class.java)
             startActivity(intent)
         }
+
+        val privacyBtn = findViewById<ImageView>(R.id.btn_privacy)
+
+        privacyBtn.setOnClickListener {
+            val intent = Intent(this, privacy::class.java)
+            startActivity(intent)
+        }
+
 
         /* 개인 정보로 화면 전환 코드 */
 
