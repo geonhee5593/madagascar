@@ -11,22 +11,20 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.madagascar.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import java.text.SimpleDateFormat
-import java.util.Locale
+import com.google.firebase.firestore.Query
 import kotlin.math.min
 
 data class FreeBoardItem(
-    var id: String = "",       // Firestore 문서 ID
-    var title: String = "",    // 제목
-    var content: String = "",  // 내용
-    var views: Int = 0,        // 조회수
-    var date: String = "",     // 등록일
-    var userId: String = "",   // 작성자 ID
-    var username: String = "", // 작성자 이름
-    var timestamp: Long = 0L   // 게시글 작성 시간 (Unix Timestamp)
+    var id: String = "",
+    var title: String = "",
+    var content: String = "",
+    var views: Int = 0,
+    var date: String = "",
+    var userId: String = "",
+    var username: String = "",
+    var timestamp: Long = 0L
 )
 
-@Suppress("DEPRECATION")
 class FreeBoradActivity : AppCompatActivity() {
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -86,9 +84,6 @@ class FreeBoradActivity : AppCompatActivity() {
         listView.setOnItemClickListener { _, _, position, _ ->
             val item = currentPageList[position]
             val intent = Intent(this, ListItemActivity::class.java).apply {
-                putExtra("title", item.title)
-                putExtra("content", item.content)
-                putExtra("views", item.views)
                 putExtra("documentId", item.id)
             }
             startActivityForResult(intent, 2)
@@ -96,48 +91,43 @@ class FreeBoradActivity : AppCompatActivity() {
     }
 
     private fun loadFreeBoardItems() {
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            val userNoticesCollection = firestore.collection("users")
-                .document(currentUser.uid)
-                .collection("notices")
-
-            userNoticesCollection.get()
-                .addOnSuccessListener { documents ->
-                    fullDataList.clear()
-                    for (document in documents) {
-                        val item = document.toObject(FreeBoardItem::class.java)
-                        item.id = document.id
-                        // 삭제된 게시글 필터링
-                        if (item.id.isNotEmpty()) {
-                            fullDataList.add(0, item)
-                        }
+        firestore.collection("notices")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { documents ->
+                fullDataList.clear()
+                for (document in documents) {
+                    val item = document.toObject(FreeBoardItem::class.java).apply {
+                        id = document.id
                     }
-                    updatePage()
+                    // 추가: users 컬렉션에서 id 필드 가져오기
+                    val userId = document.getString("userId") ?: "Unknown"
+                    firestore.collection("users").document(userId).get()
+                        .addOnSuccessListener { userDoc ->
+                            val userFieldId = userDoc.getString("id") ?: "Unknown"
+                            item.userId = userFieldId // 작성자 ID를 users 컬렉션의 id 값으로 업데이트
+                            adapter.notifyDataSetChanged()
+                        }
+                        .addOnFailureListener {
+                            item.userId = "Unknown"
+                        }
+                    fullDataList.add(item)
                 }
-                .addOnFailureListener { e ->
-                    Log.e("FreeBoradActivity", "Failed to load notices: ${e.message}")
-                    Toast.makeText(this, "데이터 로드 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-        } else {
-            Log.e("FreeBoradActivity", "User is not logged in.")
-            Toast.makeText(this, "로그인 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
-        }
+                updatePage()
+            }
+            .addOnFailureListener { e ->
+                Log.e("FreeBoradActivity", "게시글 로드 실패: ${e.message}")
+                Toast.makeText(this, "게시글 로드 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
+
     private fun updatePage() {
-        // 페이지 데이터 로드 시 범위 확인
         val start = currentPage * pageSize
         val end = min((currentPage + 1) * pageSize, fullDataList.size)
-
-        // 데이터가 비어 있을 경우 처리
-        if (fullDataList.isNotEmpty()) {
-            currentPageList.clear()
-            currentPageList.addAll(fullDataList.subList(start, end))
-            adapter.notifyDataSetChanged()
-        } else {
-            Log.w("FreeBoradActivity", "No data available to display.")
-        }
+        currentPageList.clear()
+        currentPageList.addAll(fullDataList.subList(start, end))
+        adapter.notifyDataSetChanged()
     }
 
     private fun filterAndDisplayData(query: String) {
@@ -145,10 +135,7 @@ class FreeBoradActivity : AppCompatActivity() {
             fullDataList
         } else {
             fullDataList.filter {
-                it.title.contains(query, ignoreCase = true) || it.content.contains(
-                    query,
-                    ignoreCase = true
-                )
+                it.title.contains(query, ignoreCase = true) || it.content.contains(query, ignoreCase = true)
             }
         }
         currentPage = 0
@@ -157,42 +144,11 @@ class FreeBoradActivity : AppCompatActivity() {
         adapter.notifyDataSetChanged()
     }
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            val title = data?.getStringExtra("newPostTitle") ?: ""
-            val content = data?.getStringExtra("newPostContent") ?: ""
-            val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(System.currentTimeMillis())
-
-            val currentUser = auth.currentUser
-            if (currentUser != null) {
-                val userId = currentUser.uid
-                val timestamp = System.currentTimeMillis()
-                val newItem = FreeBoardItem(
-                    title = title,
-                    content = content,
-                    views = 0,
-                    date = currentDate,
-                    userId = userId,
-                    username = currentUser.displayName ?: "익명",
-                    timestamp = timestamp
-                )
-
-                firestore.collection("users")
-                    .document(userId)
-                    .collection("notices")
-                    .add(newItem)
-                    .addOnSuccessListener { documentReference ->
-                        newItem.id = documentReference.id
-                        fullDataList.add(0, newItem)
-                        currentPage = 0
-                        updatePage()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(this, "게시글 저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
-            }
+            val newPostId = data?.getStringExtra("newPostId") ?: return
+            loadFreeBoardItems()
         }
     }
 }

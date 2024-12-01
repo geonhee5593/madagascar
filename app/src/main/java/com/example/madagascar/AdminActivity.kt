@@ -90,6 +90,7 @@ class AdminActivity : AppCompatActivity() {
                 }
 
                 Tasks.whenAllComplete(tasks).addOnCompleteListener {
+                    inquiries.sortByDescending { it.timestamp } // 최신순으로 정렬
                     Log.d("AdminActivity", "All inquiries loaded, count: ${inquiries.size}")
                     inquiryAdapter.submitList(inquiries)
                 }

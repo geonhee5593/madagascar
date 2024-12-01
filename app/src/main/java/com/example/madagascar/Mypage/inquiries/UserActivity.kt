@@ -72,7 +72,7 @@ class UserActivity : AppCompatActivity() {
 
     private fun sendInquiry(question: String) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+        val timestamp = SimpleDateFormat("문의 보낸 시간 : "+"yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
 
         val inquiryData = hashMapOf(
             "question" to question,
@@ -93,7 +93,6 @@ class UserActivity : AppCompatActivity() {
                 Toast.makeText(this, "문의 전송 실패: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
     private fun fetchUserInquiries() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         // 유저 정보 가져오기

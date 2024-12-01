@@ -3,6 +3,9 @@
     <style name="Base.Theme.Madagascar" parent="Theme.Material3.Light.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
+        <item name="colorSurface">@color/colorSecondary</item>
     </style>
 
     <style name="Theme.Madagascar" parent="Base.Theme.Madagascar" />
