@@ -1,6 +1,7 @@
 package com.example.madagascar.freeborad
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -14,7 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 
 data class Comment(
-    val id: String = "",       // Firestore 문서 ID
+    val id: String = "",
     val text: String = "",
     val timestamp: Long = 0,
     var userId: String = "",
@@ -90,18 +91,29 @@ class ListItemActivity : AppCompatActivity() {
                     val title = document.getString("title") ?: "제목 없음"
                     val content = document.getString("content") ?: "내용 없음"
                     val views = document.getLong("views")?.toInt() ?: 0
-                    val userId = document.getString("userId") ?: ""
+                    val userid = document.getString("userId") ?: ""
 
                     titleTextView.text = title
                     contentTextView.text = content
                     viewsTextView.text = "조회수: $views"
 
-                    // 삭제 버튼 표시 여부 결정
-                    if (auth.currentUser?.uid == userId) {
-                        deleteButton.visibility = Button.VISIBLE
-                    } else {
-                        deleteButton.visibility = Button.GONE
-                    }
+                    val currentUserId = auth.currentUser?.uid ?: ""
+                    firestore.collection("users").document(currentUserId).get()
+                        .addOnSuccessListener { userDoc ->
+                            val loggedInUserId = userDoc.getString("id") ?: "" // 현재 로그인 사용자의 `id`
+
+                            if (loggedInUserId == userid) {
+                                deleteButton.visibility = Button.VISIBLE // 삭제 버튼 보이기
+                                Log.d("ListItemActivity", "삭제 버튼 표시 - 로그인된 ID: $loggedInUserId")
+                            } else {
+                                deleteButton.visibility = Button.GONE // 삭제 버튼 숨기기
+                                Log.d("ListItemActivity", "삭제 버튼 숨김 - 로그인된 ID: $loggedInUserId")
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("ListItemActivity", "현재 사용자 정보를 가져오지 못했습니다: ${e.message}")
+                            deleteButton.visibility = Button.GONE
+                        }
 
                     // 조회수 업데이트
                     updateViews(views)
