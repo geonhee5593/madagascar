@@ -211,10 +211,18 @@ class Festival : AppCompatActivity() {
                 override fun onResponse(call: Call<FestivalResponse>, response: Response<FestivalResponse>) {
                     if (response.isSuccessful) {
                         val festivals = response.body()?.response?.body?.items?.item ?: emptyList()
+
                         if (festivals.isEmpty()) {
                             Toast.makeText(this@Festival, "검색 결과가 없습니다.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            // 기본 날짜 값을 설정하고 상세 날짜 정보를 업데이트
+                            festivals.forEach { festival ->
+                                festival.eventStartDate = festival.eventStartDate ?: "00000000"
+                                festival.eventEndDate = festival.eventEndDate ?: "00000000"
+                            }
+                            // 상세 정보로 날짜를 보완
+                            fetchFestivalDetailsWithDates(festivals)
                         }
-                        festivalAdapter.setFestivals(festivals)
                     } else {
                         Toast.makeText(this@Festival, "검색에 실패했습니다.", Toast.LENGTH_SHORT).show()
                     }
