@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Mypage.privacy">
+
+    <TextView
+        android:id="@+id/app1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="right"
+        android:text="축모아 개인정보 처리방침"
+        android:textSize="30dp"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="40dp" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="match_parent"
+        android:layout_height="680dp"
+        android:text="축모아는 개인정보 보호법 제30조에 따라 정보주체(고객)의
+개인정보를 보호하고 이와 관련한 고충을 신속하고 원활하게 처리
+할 수 있도록 하기 위하여 다음과 같이 개인정보 처리지침을 수립 · 공개합니다"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.385" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="610dp"
+        android:text="1. 개인정보의 처리목적 축모아는 다음의 목적을 위하여 개인정보를
+    처리하고 있으면, 당음의 목적 이외의 용도로는 이용하지 않습니다
+    - 고객 가입의사 확인, 고객에 대한 서비스 제공"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/app1"
+        app:layout_constraintVertical_bias="0.567" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="540dp"
+        android:text="2. 개인정보의 처리 및 보유기기간 ① 축모아는 정보주체로부터 개인정보를
+수집할 때 동의받은 개인정보 보유 · 이용기간 또는 법령에 따른 개인정보 보유 · 이용기간
+내에서 개인정보를 처리 · 보유합니다
+② 구체적인 개인정보 처리 및 보유 기간은 다음과 같습니다.
+- 고객 가입 및 관리 : 서비스 이용계약 또는 회원가입 해지시까지"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.689" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="430dp"
+        android:text="3. 개인정보의 제3자 제공 축모아는 정보주체의 별도 동의, 법률의 특별한 규정
+등 개인정보 보호법 제17조에 해당하는 경우 외에는 개인정보를 제3자에게
+제공하지 않습니다."
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/app1"
+        app:layout_constraintVertical_bias="0.771" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="363dp"
+        android:text="4. 정보주체와 법정대리인의 권리 · 의무 및 행사방법 정보주체는
+축모아에 대해 언제든지 다음 각 호의 개인정보 보호 관련 권리를 행사할
+수 있습니다.
+1. 개인정보 열람요구
+2. 개인정보에 오류 등이 있을 경우 정정 요구
+3. 삭제 요구
+4. 처리정지 요구"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/app1"
+        app:layout_constraintVertical_bias="0.803" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="match_parent"
+        android:layout_height="280dp"
+        android:text="5. 처리하는 개인정보 항목 축모아는 다음의 개인정보 항목을
+처리하고 있습니다.
+- 이메일주소"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/app1"
+        app:layout_constraintVertical_bias="0.832" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="230dp"
+        android:text="
+6. 개인정보의 파기 ① 축모아는 개인정보 보유기간의 경과,
+처리목적 달성 등 개인정보가 불필요하게 되었을 때에는 지체없이
+해당 개인정보를 파기합니다.
+② 축모아는 다음의 방법으로 개인정보를 파기합니다
+- 전자적 파일 : 파일 삭제 및 디스크 등 저장매체 포맷"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/app1"
+        app:layout_constraintVertical_bias="0.834" />
+
+    <!-- 뒤로가기 버튼 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:text="
+7. 개인정보 처리방침 변경 이 개인정보 처리방침은 20xx,x,x부터 적용됩니
+다"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/app1"
+        app:layout_constraintVertical_bias="0.854" />
+
+    <ImageView
+        android:id="@+id/btn_arrow_privacy"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/arrow"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
