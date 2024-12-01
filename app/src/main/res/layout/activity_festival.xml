@@ -7,49 +7,42 @@
     android:layout_height="match_parent"
     tools:context=".API.Festival">
 
-    <!-- 상단 제목 및 뒤로가기 버튼 -->
-    <LinearLayout
-        android:id="@+id/headerLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="8dp"
-        app:layout_constraintTop_toTopOf="parent"
+
+    <!-- 상단 뒤로가기 버튼 -->
+    <ImageView
+        android:id="@+id/btn_arrow110"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/arrow"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- 뒤로가기 화살표 -->
-        <ImageView
-            android:id="@+id/btn_arrow110"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/arrow"
-            android:layout_marginEnd="16dp" />
+    <!-- 제목 텍스트 중앙 배치 -->
 
-        <!-- 제목 -->
-        <TextView
-            android:id="@+id/titleTextView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="축제 정보"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-
-    </LinearLayout>
 
     <!-- 검색 바 -->
+    <TextView
+        android:id="@+id/titleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="축제 정보"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_arrow110"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.388"
+        app:layout_constraintStart_toEndOf="@+id/btn_arrow110"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <LinearLayout
         android:id="@+id/searchBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/headerLayout"
+        app:layout_constraintTop_toBottomOf="@+id/titleTextView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
