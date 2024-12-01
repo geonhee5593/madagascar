@@ -1,7 +1,9 @@
 package com.example.madagascar.Hobby
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -24,6 +26,10 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Completable
+
 
 class Hobby_Activity : AppCompatActivity() {
 
@@ -42,9 +48,16 @@ class Hobby_Activity : AppCompatActivity() {
         // 버튼 클릭 이벤트 설정
         val selectInterestsButton = findViewById<Button>(R.id.btn_select_interests)
         selectInterestsButton.setOnClickListener {
-            // Hobby 액티비티로 이동
-            val intent = Intent(this, Hobby::class.java)
-            startActivity(intent)
+            try {
+                // Hobby 액티비티로 이동
+                val intent = Intent(this, Hobby::class.java)
+                intent.putExtra("isFirstLogin", true)
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Hobby 화면으로 이동할 수 없습니다. ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("Hobby_Activity", "Hobby 이동 중 오류 발생", e)
+            }
+
         }
 
         tvSelectedInterests = findViewById(R.id.tv_selected_interests)
@@ -116,43 +129,48 @@ class Hobby_Activity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("CheckResult")
     private fun fetchFestivalsByInterests(interests: List<String>) {
         if (isLoading || interests.isEmpty()) return
         isLoading = true
 
+        // 비동기 요청 병합
+        val festivals = mutableListOf<FestivalItem>()
         val requests = interests.map { interest ->
             RetrofitClient.instance.searchFestivals(
                 keyword = interest,
-                page = 1, // 첫 페이지만 가져옴
-                pageSize = 10 // 필요한 만큼만 가져옴
+                page = 1,
+                pageSize = 100
             )
         }
 
-        // Retrofit 비동기 요청 병합
-        val festivals = mutableListOf<FestivalItem>()
-        var completedRequests = 0
+        // Retrofit 요청을 비동기로 처리
+        Completable.merge(
+            requests.map { request ->
+                Completable.create { emitter ->
+                    request.enqueue(object : Callback<FestivalResponse> {
+                        override fun onResponse(call: Call<FestivalResponse>, response: Response<FestivalResponse>) {
+                            response.body()?.response?.body?.items?.item?.let {
+                                festivals.addAll(it)
+                            }
+                            emitter.onComplete()
+                        }
 
-        for (request in requests) {
-            request.enqueue(object : Callback<FestivalResponse> {
-                override fun onResponse(call: Call<FestivalResponse>, response: Response<FestivalResponse>) {
-                    val fetchedFestivals = response.body()?.response?.body?.items?.item ?: emptyList()
-                    festivals.addAll(fetchedFestivals)
-                    completedRequests++
-
-                    if (completedRequests == requests.size) {
-                        fetchFestivalDetailsWithDates(festivals)
-                    }
+                        override fun onFailure(call: Call<FestivalResponse>, t: Throwable) {
+                            emitter.onError(t)
+                        }
+                    })
                 }
-
-                override fun onFailure(call: Call<FestivalResponse>, t: Throwable) {
-                    completedRequests++
-                    if (completedRequests == requests.size) {
-                        displaySortedFestivals(festivals)
-                        isLoading = false
-                    }
-                }
+            }
+        ).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                fetchFestivalDetailsWithDates(festivals)
+                isLoading = false
+            }, {
+                Toast.makeText(this, "API 호출 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+                isLoading = false
             })
-        }
     }
 
     private fun fetchFestivalDetailsWithDates(festivals: List<FestivalItem>) {

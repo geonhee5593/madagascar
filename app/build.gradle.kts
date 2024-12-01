@@ -77,6 +77,16 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    //api 병렬 처리
+    // Retrofit RxJava3 어댑터
+    implementation ("com.squareup.retrofit2:adapter-rxjava3:2.9.0")
+
+    // RxJava3
+    implementation ("io.reactivex.rxjava3:rxjava:3.1.6")
+
+    // RxAndroid3
+    implementation ("io.reactivex.rxjava3:rxandroid:3.0.2")
+
 
     // 위치 서비스를 위한 의존성 추가
     implementation ("com.google.android.gms:play-services-maps:18.1.0")

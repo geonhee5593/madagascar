@@ -7,6 +7,17 @@
     android:padding="16dp"
     android:background="#F9F9F9">
 
+    <!-- 뒤로 가기 이미지 -->
+    <ImageView
+        android:id="@+id/btn_arrow_user"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="16dp"
+        android:contentDescription="뒤로가기"
+        android:src="@drawable/arrow"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <!-- 상단 텍스트 -->
     <TextView
         android:id="@+id/app_title"
