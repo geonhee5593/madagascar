@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.madagascar.Main.MainActivity
 import com.example.madagascar.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -90,6 +92,11 @@ class FreeBoradActivity : AppCompatActivity() {
             val intent = Intent(this, ListItemActivity::class.java).apply {
                 putExtra("documentId", item.id)
             }
+            startActivity(intent)
+        }
+        val imageViewToMain: ImageView = findViewById(R.id.btn_back)
+        imageViewToMain.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
     }

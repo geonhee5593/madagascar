@@ -4,8 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.madagascar.Main.MainActivity
 import com.example.madagascar.R
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
@@ -36,7 +38,6 @@ class ListtextmadeActivity : AppCompatActivity() {
                 Toast.makeText(this, "제목과 내용을 입력해주세요.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-
             // 현재 로그인한 Firebase 사용자의 UID 가져오기
             val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: "Unknown"
             val usersCollection = firestore.collection("users") // `users` 컬렉션 참조
@@ -77,7 +78,11 @@ class ListtextmadeActivity : AppCompatActivity() {
                     Toast.makeText(this, "사용자 정보를 가져오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         }
-
+        val imageViewToFreeBoard: ImageView = findViewById(R.id.btn_back2)
+        imageViewToFreeBoard.setOnClickListener {
+            val intent = Intent(this, FreeBoradActivity::class.java)
+            startActivity(intent)
+        }
     }
 
 }
