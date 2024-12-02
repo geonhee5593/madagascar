@@ -91,7 +91,7 @@ class ListItemActivity : AppCompatActivity() {
                     val title = document.getString("title") ?: "제목 없음"
                     val content = document.getString("content") ?: "내용 없음"
                     val views = document.getLong("views")?.toInt() ?: 0
-                    val userid = document.getString("userId") ?: ""
+                    val UserId = document.getString("userId") ?: ""
 
                     titleTextView.text = title
                     contentTextView.text = content
@@ -100,22 +100,30 @@ class ListItemActivity : AppCompatActivity() {
                     val currentUserId = auth.currentUser?.uid ?: ""
                     firestore.collection("users").document(currentUserId).get()
                         .addOnSuccessListener { userDoc ->
-                            val loggedInUserId = userDoc.getString("id") ?: "" // 현재 로그인 사용자의 `id`
+                            if (userDoc.exists()) {
+                                val loggedInUserId = userDoc.getString("id") ?: ""
+                                val isAdmin = userDoc.getBoolean("isAdmin") ?: false
 
-                            if (loggedInUserId == userid) {
-                                deleteButton.visibility = Button.VISIBLE // 삭제 버튼 보이기
-                                Log.d("ListItemActivity", "삭제 버튼 표시 - 로그인된 ID: $loggedInUserId")
+                                if (isAdmin || loggedInUserId == UserId) {
+                                    // Show the delete button for admin or post owner
+                                    deleteButton.visibility = Button.VISIBLE
+                                    Log.d("ListItemActivity", "삭제 버튼 표시 - 관리자 또는 게시글 작성자")
+                                } else {
+                                    // Hide the delete button for others
+                                    deleteButton.visibility = Button.GONE
+                                    Log.d("ListItemActivity", "삭제 버튼 숨김 - 관리자 아님 또는 본인 게시글 아님")
+                                }
                             } else {
-                                deleteButton.visibility = Button.GONE // 삭제 버튼 숨기기
-                                Log.d("ListItemActivity", "삭제 버튼 숨김 - 로그인된 ID: $loggedInUserId")
+                                deleteButton.visibility = Button.GONE
+                                Log.d("ListItemActivity", "사용자 문서가 존재하지 않음")
                             }
                         }
                         .addOnFailureListener { e ->
-                            Log.e("ListItemActivity", "현재 사용자 정보를 가져오지 못했습니다: ${e.message}")
+                            Log.e("ListItemActivity", "사용자 정보를 가져오는 데 실패: ${e.message}")
                             deleteButton.visibility = Button.GONE
                         }
 
-                    // 조회수 업데이트
+                    // Update views
                     updateViews(views)
                 } else {
                     Toast.makeText(this, "게시글을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
@@ -127,6 +135,7 @@ class ListItemActivity : AppCompatActivity() {
                 finish()
             }
     }
+
 
     private fun updateViews(currentViews: Int) {
         firestore.collection("notices")
