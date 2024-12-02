@@ -1,4 +1,3 @@
-
 package com.example.madagascar.freeborad
 
 import android.content.Context
@@ -24,11 +23,11 @@ class CommentAdapter(
         holder.commentTextView.text = comment.text
         holder.timestampTextView.text = android.text.format.DateFormat.format("yyyy-MM-dd HH:mm", comment.timestamp)
         holder.usernameTextView.text = comment.userId // Firestore에서 가져온 id 값 표시
+        holder.itemView.layoutParams.height = RecyclerView.LayoutParams.WRAP_CONTENT
     }
 
 
     override fun getItemCount(): Int = comments.size
-
     class CommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val commentTextView: TextView = itemView.findViewById(R.id.commentTextView)
         val timestampTextView: TextView = itemView.findViewById(R.id.timestampTextView)
